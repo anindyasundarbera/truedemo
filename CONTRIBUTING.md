@@ -1,6 +1,6 @@
-# Contributing to vidkit
+# Contributing to truedemo
 
-Thanks for contributing. vidkit's whole reason for existing is an unusually
+Thanks for contributing. truedemo's whole reason for existing is an unusually
 strict correctness discipline — "a declaration is not a measurement" — and the
 contribution process below exists to protect that. It is short, but it is not
 negotiable.
@@ -38,7 +38,7 @@ python3 -m pytest tests -q       # the lean suite — what CI actually runs
 If you changed the pipeline, also:
 
 ```bash
-vidkit build examples/hello-world/video.yaml
+truedemo build examples/hello-world/video.yaml
 # must produce an .mp4, a narration.srt, and a verify.json with every check passing
 ```
 

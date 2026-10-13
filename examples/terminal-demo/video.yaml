@@ -1,10 +1,10 @@
-# vidkit spec — terminal-demo (filming real commands, for real)
+# truedemo spec — terminal-demo (filming real commands, for real)
 #
 # This example is the *evidence* that the exec stage works end to end: a command
 # declared in the spec, run inside a bubblewrap sandbox with no network, recorded
 # through a real PTY, and rendered from the recording rather than drawn.
 #
-#   vidkit build examples/terminal-demo/video.yaml
+#   truedemo build examples/terminal-demo/video.yaml
 #
 # Unlike capture-kit this needs no browser and no server — only `bwrap(1)` and
 # ffmpeg — so it is wired into CI as a probe that asserts the report.
@@ -13,7 +13,7 @@
 # wrote. Nothing here is an animation of a command that did not run.
 
 project:
-  title: "vidkit terminal-demo — filming a real command"
+  title: "truedemo terminal-demo — filming a real command"
   slug: terminal-demo
   output: terminal-demo.mp4
   size: [1280, 720]

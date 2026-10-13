@@ -15,7 +15,7 @@ scenes:
 ```
 
 ```bash
-vidkit build video.yaml
+truedemo build video.yaml
 ```
 
 ## 2. Show a running product and prove it is live
@@ -45,7 +45,7 @@ If the app is not in live mode, the build **stops** — no wrong frame is writte
 ```python
 # provider.py
 import json, urllib.request
-from vidkit import panels as panel_lib
+from truedemo import panels as panel_lib
 
 def datasets(ctx):
     with urllib.request.urlopen("http://127.0.0.1:8000/api/trend", timeout=30) as r:
@@ -74,7 +74,7 @@ Render two panels in one scene so each gets its own y-axis:
 
 ```python
 def _water_health(data, options, doc):
-    from vidkit.svg import rect, polyline, text, THEME as t
+    from truedemo.svg import rect, polyline, text, THEME as t
     water, health = data["water"], data["health"]
     for (y0, y1), pts, colour in (((250, 500), water, t.accent),
                                   ((600, 850), health, t.accent2)):
@@ -115,10 +115,10 @@ def panels():
 ## 7. Re-render only the charts (fast loop)
 
 ```bash
-vidkit build SPEC --only data,panels
+truedemo build SPEC --only data,panels
 rsvg-convert -w 1440 -h 810 -o /tmp/peek.png OUT/_build/panels/trend.svg
 # when happy, push it into the video:
-vidkit build SPEC --only clips,concat,render,verify
+truedemo build SPEC --only clips,concat,render,verify
 ```
 
 ## 8. Change the narration pace
@@ -128,7 +128,7 @@ voice: {engine: piper, model: voice.onnx, length_scale: 1.15}   # slower
 ```
 
 ```bash
-vidkit build SPEC --only narration,clips,concat,render
+truedemo build SPEC --only narration,clips,concat,render
 ```
 
 Timing follows automatically because audio is measured.
@@ -141,13 +141,13 @@ guard:
   banned: ["caused the", "proves", "legal limit"]
 ```
 
-`vidkit verify SPEC` will fail the build (exit 2) if either is violated.
+`truedemo verify SPEC` will fail the build (exit 2) if either is violated.
 
 ## 10. Add a custom panel kind and use it
 
 ```python
-from vidkit import panels as panel_lib
-from vidkit.svg import PanelDoc, text, THEME
+from truedemo import panels as panel_lib
+from truedemo.svg import PanelDoc, text, THEME
 
 def badge(data, options, doc: PanelDoc):
     colour = options.get("color", THEME.accent)
@@ -173,7 +173,7 @@ produced. Useful for drafting a spec before audio is set up.
 ## 12. Render into a different directory
 
 ```bash
-vidkit build SPEC --out ./dist
+truedemo build SPEC --out ./dist
 ```
 
 Useful to keep a scratch render (`--out ./.out`) separate from a committed one.
@@ -181,16 +181,16 @@ Useful to keep a scratch render (`--out ./.out`) separate from a committed one.
 ## 13. Verify without re-rendering
 
 ```bash
-vidkit verify SPEC --out ./dist   # exit 2 if any check fails
+truedemo verify SPEC --out ./dist   # exit 2 if any check fails
 ```
 
 ## 14. Gate a build in CI
 
 ```bash
 set -e
-vidkit doctor SPEC
-vidkit build SPEC --out ./dist
-vidkit verify SPEC --out ./dist
+truedemo doctor SPEC
+truedemo build SPEC --out ./dist
+truedemo verify SPEC --out ./dist
 ```
 
 Any non-zero exit fails the job.
@@ -202,7 +202,7 @@ cp -r examples/hello-world my-video
 # then edit my-video/video.yaml, narration.md, provider.py
 ```
 
-Keep `provider.py` aliasing the panels import (`from vidkit import panels as panel_lib`).
+Keep `provider.py` aliasing the panels import (`from truedemo import panels as panel_lib`).
 `examples/hello-world` is host-free and self-contained, so it is the safest starting point:
 it declares no `captures[]` and needs no browser, network, or TTS model.
 
@@ -230,7 +230,7 @@ scenes:
     shots: [{capture: pdf_page}]
 ```
 
-`vidkit plan` refuses the spec if `csv_page` names a file no `download` produces. The build
+`truedemo plan` refuses the spec if `csv_page` names a file no `download` produces. The build
 refuses if the bytes are not recognisable as the kind claimed. `verify` reports
 `filmed artifacts are real files`.
 
@@ -239,7 +239,7 @@ refuses if the bytes are not recognisable as the kind claimed. `verify` reports
 Never put a password in a spec. Record the browser session by hand:
 
 ```bash
-vidkit auth https://staging.example.com/login --spec video.yaml
+truedemo auth https://staging.example.com/login --spec video.yaml
 # sign in the window that opens, then close it
 ```
 
@@ -251,5 +251,5 @@ captures:
     actions: [{type: wait_for, selector: "[data-ready]", timeout: 20}]
 ```
 
-`vidkit init` already gitignores `.auth/`. If filming the login form *is* the scene, say so
+`truedemo init` already gitignores `.auth/`. If filming the login form *is* the scene, say so
 with `allow_login: true` instead — a capture that fills a password field is refused otherwise.

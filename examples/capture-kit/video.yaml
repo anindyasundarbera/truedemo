@@ -1,4 +1,4 @@
-# vidkit spec — capture-kit (filming a real product, for real)
+# truedemo spec — capture-kit (filming a real product, for real)
 #
 # This example is the *evidence* that capture v2 works end to end: a page whose
 # table is empty at first paint and fills in after a beat, an action script that
@@ -7,14 +7,14 @@
 #
 # The site is part of the repo and needs no network:
 #   python3 examples/capture-kit/server.py --port 8765 &
-#   vidkit build examples/capture-kit/video.yaml
+#   truedemo build examples/capture-kit/video.yaml
 #
 # It is deliberately *not* wired into the CI build step that must stay offline —
 # see .github/workflows/ci.yml, which runs this kit only in the capture probe,
 # after installing Playwright.
 
 project:
-  title: "vidkit capture-kit — filming a real download"
+  title: "truedemo capture-kit — filming a real download"
   slug: capture-kit
   output: capture-kit.mp4
   size: [1280, 720]

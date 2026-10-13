@@ -16,8 +16,8 @@ from pathlib import Path
 import pytest
 from conftest import arun
 
-from vidkit import provenance as pv
-from vidkit.job import run_job
+from truedemo import provenance as pv
+from truedemo.job import run_job
 
 REPO = Path(__file__).resolve().parents[1]
 EXAMPLE = REPO / "examples" / "hello-world"
@@ -41,7 +41,7 @@ def test_the_record_names_what_it_was_built_from_and_with():
     assert d["action"] == "build"
     assert d["spec_sha256"] == "deadbeef"
     assert d["timeframe"] == {"kind": "days", "days": 7}
-    assert d["vidkit"] and d["runtime"]["python"] and d["runtime"]["machine"]
+    assert d["truedemo"] and d["runtime"]["python"] and d["runtime"]["machine"]
     assert isinstance(d["tools"], list) and isinstance(d["stages"], list)
 
 
@@ -97,7 +97,7 @@ def test_reading_a_missing_record_is_none_not_an_exception(tmp_path):
 
 
 def test_a_truncated_record_is_none(tmp_path):
-    (tmp_path / pv.PROVENANCE_FILE).write_text('{"schema": 1, "vidkit"', encoding="utf-8")
+    (tmp_path / pv.PROVENANCE_FILE).write_text('{"schema": 1, "truedemo"', encoding="utf-8")
     assert pv.Provenance.read(tmp_path) is None
 
 
@@ -204,7 +204,7 @@ def test_the_verb_and_the_json_and_the_tool_all_name_the_same_build(tmp_path):
     it printed the help screen and exited `0`, which is a success code for doing
     nothing. This test drives all three so they cannot drift apart again.
     """
-    from vidkit import cli, mcp_server
+    from truedemo import cli, mcp_server
 
     built = run_job("build", story=str(EXAMPLE), out=str(tmp_path))
     assert built["ok"] is True
@@ -216,7 +216,7 @@ def test_the_verb_and_the_json_and_the_tool_all_name_the_same_build(tmp_path):
     # coroutine to a dict — a test that cannot fail.
     tool = arun(
         mcp_server.tool_provenance, str(EXAMPLE / "video.yaml"), str(tmp_path))
-    from vidkit.reports import format_provenance
+    from truedemo.reports import format_provenance
 
     text = format_provenance(manifest["provenance"])
 

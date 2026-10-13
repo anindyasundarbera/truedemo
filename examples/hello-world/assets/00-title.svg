@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img"
-     aria-label="Title card: vidkit hello world. The smallest complete build.">
+     aria-label="Title card: truedemo hello world. The smallest complete build.">
   <defs>
     <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="#1F6FB2"/>
@@ -16,7 +16,7 @@
   <rect width="1920" height="1080" fill="#F7F5F0"/>
   <rect x="0" y="0" width="1920" height="6" fill="url(#accent)"/>
 
-  <text class="eyebrow" x="210" y="369" font-size="30" font-weight="700">VIDKIT</text>
+  <text class="eyebrow" x="210" y="369" font-size="30" font-weight="700">TRUEDEMO</text>
 
   <text class="ink" x="210" y="510" font-size="114" font-weight="800">hello world</text>
 

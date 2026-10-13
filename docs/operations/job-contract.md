@@ -8,8 +8,8 @@ wants done (`action`), which story, which window, and where the output goes, and
 back the same document whatever happened.
 
 ```
-vidkit run ACTION --story DIR [--out DIR] [--timeframe W] [--refresh]
-vidkit --json VERB ARGS…          # the same document, from any command
+truedemo run ACTION --story DIR [--out DIR] [--timeframe W] [--refresh]
+truedemo --json VERB ARGS…          # the same document, from any command
 ```
 
 ## The call
@@ -43,7 +43,7 @@ the job worked:
 | `timeline` | list | measured per-scene spans (start, end, seconds, words) |
 | `failure` | obj? | see below |
 | `progress` | obj | `{steps: [...], seconds}` — the run's own account of itself |
-| `vidkit` | str | the version that produced this manifest |
+| `truedemo` | str | the version that produced this manifest |
 
 An action adds its own keys on top — `plan` grows `plan`, `doctor` grows `doctor`, `init`
 grows `created` — but never removes or renames a base key.
@@ -60,8 +60,8 @@ Two details are deliberate:
 
 Nothing raises for an expected refusal. "You gave me no story", "that folder has no
 `video.yaml`", "there is a snapshot but it answers a different window" — all come back as
-`ok: false` plus a `failure` block, because an agent should never have to tell *vidkit said
-no* apart from *vidkit crashed*.
+`ok: false` plus a `failure` block, because an agent should never have to tell *truedemo said
+no* apart from *truedemo crashed*.
 
 ```json
 "failure": {
@@ -77,7 +77,7 @@ no* apart from *vidkit crashed*.
 |---|---|---|
 | `tool` | the call is wrong, or a required tool is missing | fix the call, or `doctor` |
 | `spec` | the story's `video.yaml` is wrong | `doctor`, then the spec reference |
-| `vidkit` | an engine-level refusal (an unknown stage, a stale snapshot) | read `message`; `progress` has the run's own account |
+| `truedemo` | an engine-level refusal (an unknown stage, a stale snapshot) | read `message`; `progress` has the run's own account |
 | `missing` | there is genuinely nothing to work on (no render to verify) | build first, or point `out` at a previous run |
 | `verification` | it built, and the acceptance checks said no | read `report.checks` |
 | `usage` | a command that is not a job was handed `--json` | use the action vocabulary, or the command's own output |
@@ -85,7 +85,7 @@ no* apart from *vidkit crashed*.
 `hint` is advice, not a stack trace: it names the next command worth running. Read it before
 reading `message` if you are an agent — it is written for exactly that.
 
-## Exit codes (`--json` and `vidkit run`)
+## Exit codes (`--json` and `truedemo run`)
 
 | Code | Meaning |
 |---|---|
@@ -103,14 +103,14 @@ exit code exists so a shell pipeline can notice without parsing JSON.
 `seconds`. It is recorded whether or not anybody was watching.
 
 - **CLI.** `--progress` streams the same lines to **stderr**, leaving stdout pure JSON, so
-  `vidkit --json build video.yaml --progress | jq .ok` works. Without `--progress` nothing
+  `truedemo --json build video.yaml --progress | jq .ok` works. Without `--progress` nothing
   is streamed and the manifest keeps the record — a pipe stays clean either way.
-- **MCP.** `vidkit_run(…, progress=true)` streams to the server's stderr. A stdio transport
+- **MCP.** `truedemo_run(…, progress=true)` streams to the server's stderr. A stdio transport
   has one stdout channel and it belongs to the protocol, so a tool never prints there.
 
 A caller cannot subscribe to a job in a *different* process, and `progress` is not a poll
 endpoint: it describes the run you are waiting for. Closing the client (stdio) or
-disconnecting ends a build; over MCP, `vidkit_run(timeout=…)` bounds the call so a long
+disconnecting ends a build; over MCP, `truedemo_run(timeout=…)` bounds the call so a long
 render comes back as a refusal instead of hanging the client.
 
 ## See also

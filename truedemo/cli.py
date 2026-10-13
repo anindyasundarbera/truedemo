@@ -1,23 +1,23 @@
 """Command-line interface.
 
-    vidkit doctor [SPEC]     check the environment and every dependency
-    vidkit plan   SPEC       show the scene plan and estimated runtime
-    vidkit build  SPEC [--only a,b] [--out DIR]
-    vidkit tts    SPEC       (re)synthesize narration only
-    vidkit capture SPEC      (re)capture screen recordings only
-    vidkit verify SPEC       re-run the acceptance checks on the last render
-    vidkit provenance SPEC   show what made the last build, and when
-    vidkit init   DIR        scaffold a runnable story (spec + narration + provider)
-    vidkit run    ACTION     run a job and print its artifact manifest
-    vidkit docs   [NAME]     print the docs router, or a named document
-    vidkit auth   URL        sign in once by hand; captures reuse the session
+    truedemo doctor [SPEC]     check the environment and every dependency
+    truedemo plan   SPEC       show the scene plan and estimated runtime
+    truedemo build  SPEC [--only a,b] [--out DIR]
+    truedemo tts    SPEC       (re)synthesize narration only
+    truedemo capture SPEC      (re)capture screen recordings only
+    truedemo verify SPEC       re-run the acceptance checks on the last render
+    truedemo provenance SPEC   show what made the last build, and when
+    truedemo init   DIR        scaffold a runnable story (spec + narration + provider)
+    truedemo run    ACTION     run a job and print its artifact manifest
+    truedemo docs   [NAME]     print the docs router, or a named document
+    truedemo auth   URL        sign in once by hand; captures reuse the session
 
 ``--timeframe``/``--days``/``--as-of`` override the window declared by the spec or its
 ``story.yaml``, for every command that loads a spec. ``--days`` is a shorthand for
 ``--timeframe "Nd"`` ending at ``--as-of`` (today, if omitted).
 
 ``--json`` turns any command into a machine-readable call: one JSON manifest on stdout,
-the same document ``vidkit run`` returns. ``--progress`` streams the run's own log to
+the same document ``truedemo run`` returns. ``--progress`` streams the run's own log to
 stderr, so stdout stays parseable.
 """
 
@@ -30,12 +30,12 @@ from pathlib import Path
 
 from . import __version__
 from .assembler import Assets, make_context, run
-from .errors import VidkitError
+from .errors import TruedemoError
 from .job import ACTION_HELP, ACTIONS, run_job
 from .timeframe import Timeframe, parse_timeframe
 
 _JSON_HELP = ("print one JSON manifest on stdout instead of prose (the same document "
-              "`vidkit run` returns)")
+              "`truedemo run` returns)")
 _PROGRESS_HELP = "let the run's own log through to stderr as it happens (needs --json)"
 
 
@@ -47,11 +47,11 @@ def _override(args) -> Timeframe | None:
     as_of = getattr(args, "as_of", None)
     if days is not None:
         if raw:
-            raise VidkitError("use either --timeframe or --days, not both")
+            raise TruedemoError("use either --timeframe or --days, not both")
         raw = f"{days}d"
     if raw is None:
         if as_of is not None:
-            raise VidkitError("--as-of only makes sense with --timeframe or --days")
+            raise TruedemoError("--as-of only makes sense with --timeframe or --days")
         return None
     return parse_timeframe(raw, where="--timeframe", source="override", default_as_of=as_of)
 
@@ -95,7 +95,7 @@ def _provenance(spec_path: Path, out: Path | None,
     record = manifest.get("provenance")
     if not manifest.get("ok") or record is None:
         failure = manifest.get("failure") or {}
-        print(f"vidkit: error: {failure.get('message') or 'no readable provenance'}"
+        print(f"truedemo: error: {failure.get('message') or 'no readable provenance'}"
               + (f"\nhint: {failure['hint']}" if failure.get("hint") else ""),
               file=sys.stderr)
         return 1
@@ -113,8 +113,8 @@ def _init(target: Path, *, title: str | None, slug: str | None,
     for path in written:
         print(f"  + {path.relative_to(target)}")
     print("\nnext:")
-    print(f"  vidkit plan  {target / 'video.yaml'}")
-    print(f"  vidkit build {target / 'video.yaml'}")
+    print(f"  truedemo plan  {target / 'video.yaml'}")
+    print(f"  truedemo build {target / 'video.yaml'}")
     return 0
 
 
@@ -128,13 +128,13 @@ def _auth(url: str, *, save: str | None, wait: float, spec: Path | None) -> int:
 
     A headed browser is opened *for the human*, not for the video: they sign in
     however the product requires — SSO, MFA, a magic link — and the resulting
-    cookies are written to a storage state the captures reuse. vidkit never sees
+    cookies are written to a storage state the captures reuse. truedemo never sees
     the password, and the recording never contains one.
     """
     from .capture import _find_chrome, _playwright_available
 
     if not _playwright_available():
-        raise VidkitError(
+        raise TruedemoError(
             "recording a session needs Playwright — install it with "
             "`pip install playwright && playwright install chromium`")
 
@@ -145,7 +145,7 @@ def _auth(url: str, *, save: str | None, wait: float, spec: Path | None) -> int:
     from playwright.sync_api import sync_playwright
 
     print(f"opening {url}")
-    print("sign in in the window that opens; vidkit writes nothing until you finish.")
+    print("sign in in the window that opens; truedemo writes nothing until you finish.")
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False, executable_path=_find_chrome(),
                                     args=["--no-sandbox"])
@@ -162,7 +162,7 @@ def _auth(url: str, *, save: str | None, wait: float, spec: Path | None) -> int:
         browser.close()
 
     if not dest.exists():
-        raise VidkitError(f"no session was written to {dest}")
+        raise TruedemoError(f"no session was written to {dest}")
     _warn_if_secret(dest)
     print(f"wrote {dest}")
     print(f"  capture it without filming a login:  storage_state: {_relative_hint(dest, spec)}")
@@ -172,7 +172,7 @@ def _auth(url: str, *, save: str | None, wait: float, spec: Path | None) -> int:
 def _warn_if_secret(path: Path) -> None:
     """A storage state is a credential; say so out loud, every single time."""
     print("NOTE: this file holds live session cookies — treat it as a password.")
-    print("      Keep it out of git (`vidkit init` already ignores .auth/).")
+    print("      Keep it out of git (`truedemo init` already ignores .auth/).")
 
 
 def _relative_hint(dest: Path, spec: Path | None) -> str:
@@ -195,7 +195,7 @@ def _assets_to_json(assets: Assets) -> dict:
 # --------------------------------------------------------------------------- #
 # --json  (R-G2): every command answers with the same manifest
 # --------------------------------------------------------------------------- #
-#: Which job answers which command, so ``--json`` and ``vidkit run`` agree by
+#: Which job answers which command, so ``--json`` and ``truedemo run`` agree by
 #: construction rather than by two lists kept in step by hand.
 _COMMAND_ACTION = {
     "doctor": "doctor", "plan": "plan", "build": "build", "tts": "tts",
@@ -252,7 +252,7 @@ def _stderr_progress(line: str) -> None:
 
 
 def _json_main(args) -> int:
-    """``--json``: the manifest ``vidkit run`` prints, for any command that is a job.
+    """``--json``: the manifest ``truedemo run`` prints, for any command that is a job.
 
     ``docs`` prints documentation and ``auth`` opens a browser for a human, so
     neither is a job; they answer in their own shape rather than pretending.
@@ -266,7 +266,7 @@ def _json_main(args) -> int:
     if action is None:
         print(json.dumps({"ok": False, "failure": {
             "kind": "usage",
-            "message": f"{args.cmd or 'vidkit'} is not a job and has no JSON form",
+            "message": f"{args.cmd or 'truedemo'} is not a job and has no JSON form",
             "hint": f"one of: {', '.join(ACTIONS)}",
         }}, indent=1))
         return 1
@@ -283,9 +283,9 @@ def _exit_code(manifest: dict) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="vidkit", description=__doc__,
+    parser = argparse.ArgumentParser(prog="truedemo", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--version", action="version", version=f"vidkit {__version__}")
+    parser.add_argument("--version", action="version", version=f"truedemo {__version__}")
     parser.add_argument("--json", action="store_true", help=_JSON_HELP)
     parser.add_argument("--progress", action="store_true", help=_PROGRESS_HELP)
     # The same two flags are also accepted *after* the verb, which is where a user
@@ -375,7 +375,7 @@ def main(argv: list[str] | None = None) -> int:
         return _json_main(args)
     if getattr(args, "progress", False):
         # the flag belongs to --json; without it, say so rather than silently ignore it
-        print("vidkit: error: --progress needs --json (otherwise the log already "
+        print("truedemo: error: --progress needs --json (otherwise the log already "
               "reaches your terminal)", file=sys.stderr)
         return 1
 
@@ -405,7 +405,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.cmd == "build":
             only = [s.strip() for s in args.only.split(",")] if args.only else None
             if args.only and args.from_stage:
-                raise VidkitError("--only and --from select stages two different ways; "
+                raise TruedemoError("--only and --from select stages two different ways; "
                                   "use one of them")
             assets = run(Path(args.spec).resolve(), only=only,
                          from_stage=args.from_stage,
@@ -442,8 +442,8 @@ def main(argv: list[str] | None = None) -> int:
             return _provenance(Path(args.spec).resolve(),
                                Path(args.out) if args.out else None,
                                _override(args))
-    except VidkitError as exc:
-        print(f"vidkit: error: {exc}", file=sys.stderr)
+    except TruedemoError as exc:
+        print(f"truedemo: error: {exc}", file=sys.stderr)
         return 1
 
     parser.print_help()

@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
-from .errors import VidkitError
+from .errors import TruedemoError
 from .narration import parse_scene_script, word_count
 from .panels import kinds as panel_kinds
 from .spec import load_spec
@@ -49,7 +49,7 @@ def doctor_report(spec_path: Path | None = None, *,
     # Reported because it is the one tool an agent needs *before* it can reach any
     # other: if `mcp` is absent, the server cannot start and no tool is reachable —
     # yet nothing else on this list would say so. Not `required`, because a machine
-    # used only for `vidkit build` is perfectly healthy without it.
+    # used only for `truedemo build` is perfectly healthy without it.
     add("mcp", importlib.util.find_spec("mcp") is not None,
         "the MCP server and its tools", False)
 
@@ -71,7 +71,7 @@ def doctor_report(spec_path: Path | None = None, *,
     if spec_path:
         try:
             spec = load_spec(spec_path, timeframe=_override(timeframe, as_of), as_of=as_of)
-        except VidkitError as exc:
+        except TruedemoError as exc:
             report["spec_error"] = str(exc)
             report["ok"] = False
             return report
@@ -227,7 +227,7 @@ def _image_list(spec) -> str:
 def _secret_needs(spec) -> tuple[list[dict[str, Any]], list[str]]:
     """What a provider declares it needs, and which of those are missing.
 
-    Never a value: :class:`~vidkit.secrets.Secrets` renders a length and a label,
+    Never a value: :class:`~truedemo.secrets.Secrets` renders a length and a label,
     which is enough to tell a wrong token from an absent one (R-B4).
     """
     if spec.provider is None:
@@ -239,7 +239,7 @@ def _secret_needs(spec) -> tuple[list[dict[str, Any]], list[str]]:
     try:
         module, _ = load_provider(spec.provider.module, spec.root)
         declared.update(collect_secrets(module))
-    except VidkitError:
+    except TruedemoError:
         # an unloadable provider is already reported by whichever check loaded it
         return [{"name": n, "required": r, "why": why, "present": False}
                 for n, (r, why) in sorted(declared.items())], []
@@ -256,7 +256,7 @@ def _secret_needs(spec) -> tuple[list[dict[str, Any]], list[str]]:
 
 
 def format_doctor(report: dict[str, Any]) -> str:
-    lines = [f"vidkit {report['version']}  (python {report['python']})"]
+    lines = [f"truedemo {report['version']}  (python {report['python']})"]
     for t in report["tools"]:
         status = "yes" if t["present"] else ("NO " if t["required"] else "no ")
         detail = t["detail"] or t["note"]
@@ -327,7 +327,7 @@ def _timeframe_line(tf: dict[str, Any] | None) -> str:
 def format_provenance(record: dict[str, Any]) -> str:
     """The build record as a person reads it. The JSON is the same document."""
     lines = [
-        f"vidkit {record.get('vidkit', '?')} built {record.get('action', '?')} "
+        f"truedemo {record.get('truedemo', '?')} built {record.get('action', '?')} "
         f"at {record.get('built_at', '?')}  ({record.get('seconds', 0):.1f}s)",
         f"  spec      {record.get('spec')}",
         f"  spec hash {record.get('spec_sha256')}",
@@ -382,7 +382,7 @@ def plan_report(spec_path: Path, *, timeframe: Any = None,
     # What will *actually* be rendered. `est_seconds` above is the narration estimate
     # and stays because it is the number the runtime window is about; this is the
     # take-by-take length, which is a different number the moment a spec declares a
-    # `seconds:` or a `motion:`. Reporting only the estimate let `vidkit plan` promise
+    # `seconds:` or a `motion:`. Reporting only the estimate let `truedemo plan` promise
     # a 24.7s film that built as 16.0s.
     from .assembler import plan_audio, plan_shots, plan_transitions
     planned = plan_shots(spec, plan_audio(spec))
@@ -404,7 +404,7 @@ def plan_report(spec_path: Path, *, timeframe: Any = None,
     # by `transition_seconds` and `concat_with_transitions` then overlaps the same
     # amount, so the two cancel exactly and the picture track stays the length of the
     # narration it has to cover (I5). Subtracting the overlap again here was a
-    # double-count: `vidkit plan` promised 4.8s for a film that builds as 6.0s on
+    # double-count: `truedemo plan` promised 4.8s for a film that builds as 6.0s on
     # every spec with a transition declared — the same "reported length the build
     # does not make" failure that made the plan lie in M9, one layer further in.
     planned_runtime = round(planned_total, 3)

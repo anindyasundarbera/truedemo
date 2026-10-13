@@ -387,7 +387,7 @@ def artifact_page(path: Path, *, kind: str, title: str) -> str:
 </style></head><body>
 <header><h1>{label}</h1>
 <div class="meta">{_html_escape(path.name)} &middot; {_html_escape(kind)}</div></header>
-<main id="vidkit-artifact">{_body_for(kind, body)}</main>
+<main id="truedemo-artifact">{_body_for(kind, body)}</main>
 </body></html>
 """
 
@@ -478,7 +478,7 @@ def shoot_artifact(ctx: Context, cap: Capture, page, out: Path | None = None) ->
     kind = sniff(src)
     if kind is None:
         raise ArtifactRefused(
-            f"capture {cap.name!r} films {src.name!r}, and vidkit does not know how "
+            f"capture {cap.name!r} films {src.name!r}, and truedemo does not know how "
             "to show that file type — a blank frame with a filename on it would be a "
             "lie about the evidence. Capture it from the product's own viewer instead, "
             "or download a PDF, image, CSV or text file.")

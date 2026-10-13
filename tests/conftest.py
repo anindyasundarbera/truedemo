@@ -19,7 +19,7 @@ Six capability markers live here, and they are independent on purpose:
 ``needs_sandbox``
     a command declared ``backend: bubblewrap`` will actually run confined. This
     is *probed*, not looked up, because an installed ``bwrap`` that the kernel
-    refuses is not a sandbox — see ``vidkit.exec.bwrap_available``.
+    refuses is not a sandbox — see ``truedemo.exec.bwrap_available``.
 
 ``needs_docker``
     a container can actually *run* here, which is a stricter question than
@@ -76,7 +76,7 @@ def arun(awaitable_or_fn, *args, **kwargs):
     what makes the test a test (defect 57 / D57).
 
     ``anyio`` would do this too, but it is not a declared dependency of anything
-    vidkit installs: it arrives with ``mcp``, and the lean core installs neither.
+    truedemo installs: it arrives with ``mcp``, and the lean core installs neither.
     The suite therefore cannot import it, and four modules did, so the ``pytest``
     CI jobs died at *collection* on a missing module rather than on an assertion —
     the tests were green locally purely because ``mcp`` happened to be present.
@@ -100,7 +100,7 @@ def mcp_sdk():
     ``FastMCP`` in 1.x, ``MCPServer`` in 2.x. Imported lazily so a lean install
     without ``mcp`` can still import this module.
     """
-    from vidkit.mcp_server import _server_class
+    from truedemo.mcp_server import _server_class
 
     return _server_class()
 
@@ -225,7 +225,7 @@ _HAVE_RENDER = all(shutil.which(t) for t in RENDER_TOOLS)
 #: to be genuinely usable, not merely present on ``PATH``.
 def _probe_sandbox() -> bool:
     try:
-        from vidkit.exec import bwrap_available
+        from truedemo.exec import bwrap_available
     except Exception:  # pragma: no cover - an unimportable engine is its own failure
         return False
     ok, _ = bwrap_available()
@@ -241,7 +241,7 @@ _HAVE_SANDBOX = _probe_sandbox()
 #: rewritten to stop telling.
 def _probe_docker() -> bool:
     try:
-        from vidkit.exec import docker_available
+        from truedemo.exec import docker_available
     except Exception:  # pragma: no cover
         return False
     ok, _ = docker_available()

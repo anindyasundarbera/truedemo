@@ -22,11 +22,11 @@ from pathlib import Path
 
 import pytest
 
-from vidkit import overlay as ov
-from vidkit.errors import SpecError
-from vidkit.panels import axis_positions, parse_x
-from vidkit.reports import format_plan
-from vidkit.spec import load_spec
+from truedemo import overlay as ov
+from truedemo.errors import SpecError
+from truedemo.panels import axis_positions, parse_x
+from truedemo.reports import format_plan
+from truedemo.spec import load_spec
 
 
 # --------------------------------------------------------------------------- #
@@ -86,8 +86,8 @@ def test_axis_positions_shrugs_at_a_single_day():
 
 
 def test_line_series_draws_the_gap():
-    from vidkit import panels
-    from vidkit.svg import PanelDoc
+    from truedemo import panels
+    from truedemo.svg import PanelDoc
 
     doc = PanelDoc(1920, 1080)
     panels.render("line_series", {"series": [
@@ -104,8 +104,8 @@ def test_line_series_draws_the_gap():
 
 
 def test_x_axis_index_opts_out_of_the_time_axis():
-    from vidkit import panels
-    from vidkit.svg import PanelDoc
+    from truedemo import panels
+    from truedemo.svg import PanelDoc
 
     doc = PanelDoc(1920, 1080)
     panels.render("line_series", {"series": [
@@ -281,9 +281,9 @@ def test_svg_size_is_none_when_the_file_does_not_say(tmp_path):
 def test_declared_size_check_probes_the_frames(tmp_path):
     """A geometry claim must be read back from the produced film, not inferred
     from the filter string — the filter can look right and still be wrong."""
-    from vidkit.assembler import make_context
-    from vidkit.ffmpeg import Ffmpeg
-    from vidkit.verify import verify_output
+    from truedemo.assembler import make_context
+    from truedemo.ffmpeg import Ffmpeg
+    from truedemo.verify import verify_output
 
     spec_path = _spec(tmp_path, lambda r: r["project"].update(size=[640, 360]))
     ctx = make_context(spec_path, tmp_path / "out")
@@ -299,7 +299,7 @@ def test_declared_size_check_probes_the_frames(tmp_path):
         check=True, capture_output=True)
     ff.still_to_clip(ctx.stills / "a.png", track, 1.0, size=(640, 360), fps=10)
 
-    from vidkit.assembler import Assets
+    from truedemo.assembler import Assets
     assets = Assets(video_track=track)
     rep = verify_output(ctx, assets, {0: "hello"})
     check = next(c for c in rep.checks if c.name == "frames are the declared size")
@@ -326,8 +326,8 @@ def test_declared_size_check_probes_the_frames(tmp_path):
     ("quote", {"text": "Measure, then draw.", "who": "the owner"}, "the owner"),
 ])
 def test_new_panel_kinds_draw_their_data(kind, data, needle):
-    from vidkit import panels
-    from vidkit.svg import PanelDoc
+    from truedemo import panels
+    from truedemo.svg import PanelDoc
 
     doc = PanelDoc(1920, 1080).head("T", "k")
     panels.render(kind, data, {}, doc)
@@ -335,8 +335,8 @@ def test_new_panel_kinds_draw_their_data(kind, data, needle):
 
 
 def test_progress_refuses_an_empty_row():
-    from vidkit import panels
-    from vidkit.svg import PanelDoc
+    from truedemo import panels
+    from truedemo.svg import PanelDoc
 
     with pytest.raises(SpecError, match="progress: no steps"):
         panels.render("progress", {"steps": []}, {}, PanelDoc(1920, 1080))
@@ -345,8 +345,8 @@ def test_progress_refuses_an_empty_row():
 def test_comparison_draws_both_sides_at_the_same_size():
     """The two columns differ in content only — never in geometry or type, or
     the layout would be making the argument instead of the data."""
-    from vidkit import panels
-    from vidkit.svg import PanelDoc
+    from truedemo import panels
+    from truedemo.svg import PanelDoc
 
     doc = PanelDoc(1920, 1080)
     panels.render("comparison", {"left": {"title": "before", "items": ["a"]},
@@ -364,8 +364,8 @@ def test_comparison_draws_both_sides_at_the_same_size():
 
 
 def test_quote_needs_something_to_quote():
-    from vidkit import panels
-    from vidkit.svg import PanelDoc
+    from truedemo import panels
+    from truedemo.svg import PanelDoc
 
     with pytest.raises(SpecError, match="quote: nothing to quote"):
         panels.render("quote", {}, {}, PanelDoc(1920, 1080))
@@ -450,8 +450,8 @@ def test_a_transition_never_changes_the_runtime(tmp_path, transition):
     """Narration is the master clock. A dissolve *overlaps* two takes, so the
     time it overlaps must be taken back — otherwise every transition silently
     desynchronises the pictures from the voice."""
-    from vidkit.assembler import run
-    from vidkit.ffmpeg import Ffmpeg
+    from truedemo.assembler import run
+    from truedemo.ffmpeg import Ffmpeg
 
     ff = Ffmpeg()
     if not ff.available:
@@ -468,8 +468,8 @@ def test_a_wipe_is_a_boundary_and_not_a_blend(tmp_path):
     """`wipe` is the honest alternative to `fade`: it says "this replaced that"
     at a definite instant. A blend where a boundary was promised would be a
     different claim, so the seam is read back off the pixels."""
-    from vidkit.assembler import run
-    from vidkit.ffmpeg import Ffmpeg
+    from truedemo.assembler import run
+    from truedemo.ffmpeg import Ffmpeg
 
     ff = Ffmpeg()
     if not ff.available:
@@ -495,8 +495,8 @@ def test_a_cut_before_a_dissolve_still_renders(tmp_path):
     so any mix of junctions is renderable — and all of them still net to zero change
     in runtime, which is what keeps the pictures on the narration's clock.
     """
-    from vidkit.assembler import run
-    from vidkit.ffmpeg import Ffmpeg
+    from truedemo.assembler import run
+    from truedemo.ffmpeg import Ffmpeg
 
     ff = Ffmpeg()
     if not ff.available:
@@ -512,8 +512,8 @@ def test_every_mix_of_cut_and_dissolve_renders(tmp_path):
     """All eight ways three junctions can be cut or dissolved."""
     from itertools import product
 
-    from vidkit.assembler import run
-    from vidkit.ffmpeg import Ffmpeg
+    from truedemo.assembler import run
+    from truedemo.ffmpeg import Ffmpeg
 
     ff = Ffmpeg()
     if not ff.available:
@@ -529,8 +529,8 @@ def test_every_mix_of_cut_and_dissolve_renders(tmp_path):
 def test_a_hard_cut_leaves_no_seam_at_all(tmp_path):
     """The control for the test above: with no transition the very same moment
     is one picture or the other, never two."""
-    from vidkit.assembler import run
-    from vidkit.ffmpeg import Ffmpeg
+    from truedemo.assembler import run
+    from truedemo.ffmpeg import Ffmpeg
 
     ff = Ffmpeg()
     if not ff.available:
@@ -547,8 +547,8 @@ def test_overlays_and_transitions_survive_a_resumed_concat(tmp_path):
     in `clips/base/`, so a resumed run must still find exactly the finished ones
     — and the overlay must still be on the outgoing clip when the dissolve
     starts, because the extra time the dissolve needs is added to *that* clip."""
-    from vidkit.assembler import run
-    from vidkit.ffmpeg import Ffmpeg
+    from truedemo.assembler import run
+    from truedemo.ffmpeg import Ffmpeg
 
     ff = Ffmpeg()
     if not ff.available:
@@ -610,8 +610,8 @@ def test_transition_of_is_the_one_spelling_of_nothing(tmp_path):
     """The project default and a per-shot override have to collapse to one
     value before anything compares them, or "no transition" gets two spellings
     and the renderer and the planner can disagree about it."""
-    from vidkit.assembler import plan_shots, plan_transitions
-    from vidkit.spec import transition_of
+    from truedemo.assembler import plan_shots, plan_transitions
+    from truedemo.spec import transition_of
 
     spec = load_spec(_junction_spec(tmp_path, ["", "cut", ""]))
     assert transition_of(spec.scenes[0].shots[0], spec.project) == "fade"
@@ -629,11 +629,11 @@ def test_transition_of_is_the_one_spelling_of_nothing(tmp_path):
 
 
 def test_the_plan_names_the_junction_the_renderer_uses(tmp_path):
-    """`vidkit plan` and the renderer must count the same junctions. Before the
+    """`truedemo plan` and the renderer must count the same junctions. Before the
     rule was shared, one shot saying ``cut`` in a ``fade`` project was still
     planned as if it dissolved — a promise the build did not keep."""
-    from vidkit.assembler import plan_transitions
-    from vidkit.reports import plan_report
+    from truedemo.assembler import plan_transitions
+    from truedemo.reports import plan_report
 
     spec = load_spec(_junction_spec(tmp_path, ["", "cut", ""]))
     plan = [(sc, i, sc.shots[i], 1.0) for sc in spec.scenes
@@ -656,8 +656,8 @@ def test_a_per_shot_cut_really_cuts_the_render(tmp_path):
     """The other half of the plan's promise: the junction the report names is the
     junction the pixels show. Two specs differing in one field — one shot saying
     ``cut`` inside a ``fade`` project — must differ at that seam and nowhere else."""
-    from vidkit.assembler import run
-    from vidkit.ffmpeg import Ffmpeg
+    from truedemo.assembler import run
+    from truedemo.ffmpeg import Ffmpeg
 
     ff = Ffmpeg()
     if not ff.available:
@@ -693,9 +693,9 @@ def test_plan_and_build_agree_on_a_per_shot_cut(tmp_path):
     """The end of the honesty chain: the length `plan` promises is the length
     the file has. A dissolve costs 0.6s of narration clock, so cutting it back
     must lengthen the film by exactly that."""
-    from vidkit.assembler import run
-    from vidkit.ffmpeg import Ffmpeg
-    from vidkit.reports import plan_report
+    from truedemo.assembler import run
+    from truedemo.ffmpeg import Ffmpeg
+    from truedemo.reports import plan_report
 
     ff = Ffmpeg()
     if not ff.available:

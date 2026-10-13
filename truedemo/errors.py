@@ -1,19 +1,19 @@
-"""Typed exceptions for vidkit."""
+"""Typed exceptions for truedemo."""
 
 from __future__ import annotations
 
 
-class VidkitError(Exception):
-    """Base class for all vidkit errors."""
+class TruedemoError(Exception):
+    """Base class for all truedemo errors."""
 
 
-class SpecError(VidkitError):
+class SpecError(TruedemoError):
     """The video spec is malformed or references something that does not exist."""
 
 
-class ToolError(VidkitError):
+class ToolError(TruedemoError):
     """An external tool (ffmpeg, rsvg-convert, a browser, a TTS engine) failed."""
 
 
-class ProviderError(VidkitError):
+class ProviderError(TruedemoError):
     """The data provider could not supply the values the spec asked for."""

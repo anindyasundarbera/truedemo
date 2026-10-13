@@ -1,4 +1,4 @@
-# Keep declared dependency ranges honest. vidkit pins lower/upper bounds in
+# Keep declared dependency ranges honest. truedemo pins lower/upper bounds in
 # pyproject.toml rather than exact versions (it must run on 3.10–3.14, and the
 # optional extras must stay optional), so dependabot's job is to surface drift in
 # the *ranges* — a new major, a removed upper bound — not to churn a lockfile.
@@ -10,11 +10,11 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
-    # Only the declared deps are versioned; vidkit itself is the package under
+    # Only the declared deps are versioned; truedemo itself is the package under
     # test and must not be updated as a dependency of itself.
     ignore:
-      - dependency-name: "vidkit"
-      # vidkit deliberately supports the MCP SDK across 1.x and 2.x (M10), and
+      - dependency-name: "truedemo"
+      # truedemo deliberately supports the MCP SDK across 1.x and 2.x (M10), and
       # the declared range is mcp>=1.20,<3. Dependabot keeps proposing a bump of
       # the *floor* to 2.3.0, which would silently drop 1.x — so ignore version
       # bumps within the 2.x line; the <3 upper bound is still watched.

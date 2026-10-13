@@ -1,6 +1,6 @@
 # Capture guide
 
-Captures are how vidkit shows a **real** product. A capture is a scripted Playwright visit
+Captures are how truedemo shows a **real** product. A capture is a scripted Playwright visit
 that produces one PNG. Two properties define it:
 
 * a capture can **assert the on-screen state before it screenshots**, so a build can never
@@ -98,7 +98,7 @@ is **not** accepted.
 message names the selector and the state, which is the whole diagnosis:
 
 ```
-vidkit: error: capture 'usage' failed: waited 15s for '#usage tbody tr' to be visible,
+truedemo: error: capture 'usage' failed: waited 15s for '#usage tbody tr' to be visible,
 and it was not (Page.wait_for_selector: Timeout 15000ms exceeded…)
 ```
 
@@ -168,11 +168,11 @@ Some scenes need an authenticated product, and a login form is almost never the 
 a session once, by hand:
 
 ```bash
-vidkit auth http://127.0.0.1:8090/ --spec video.yaml --save .auth/session.json
+truedemo auth http://127.0.0.1:8090/ --spec video.yaml --save .auth/session.json
 ```
 
 This opens a **headed** browser for a human to sign in however the product requires — SSO,
-MFA, a magic link. vidkit never sees the password. The cookies are written to the storage
+MFA, a magic link. truedemo never sees the password. The cookies are written to the storage
 state, which captures then reuse:
 
 ```yaml
@@ -183,7 +183,7 @@ state, which captures then reuse:
 
 Two rules follow from this:
 
-- A storage state is **a credential**. `vidkit auth` says so on every run, and `vidkit init`
+- A storage state is **a credential**. `truedemo auth` says so on every run, and `truedemo init`
   writes `.auth/` into the story's `.gitignore` so it cannot be committed by accident.
 - A capture that **types into a password-shaped field** without a `storage_state:` is refused
   at load time, because it would film a login form. If signing in genuinely *is* the scene,
@@ -232,7 +232,7 @@ pre-rendered stills and reference them with `still:` instead.
 
 Wide desktop layouts need a **fixed viewport**. Some host browser panes clamp their width,
 producing a narrow layout that hides the UI you want to show. Always drive a *standalone*
-headless browser (which vidkit does) with `viewport: [1920, 1080]`.
+headless browser (which truedemo does) with `viewport: [1920, 1080]`.
 
 ## Resolution
 
@@ -255,7 +255,7 @@ clips are scaled to `project.size`, so capture 2× for crispness and let the pip
 The error names the failing step:
 
 ```
-vidkit: error: capture 'drawer' failed: Page.click: Timeout 30000ms exceeded.
+truedemo: error: capture 'drawer' failed: Page.click: Timeout 30000ms exceeded.
 ```
 
 - **selector not found / click timeout** — wrong selector. Inspect the page's real markup; do
@@ -268,12 +268,12 @@ vidkit: error: capture 'drawer' failed: Page.click: Timeout 30000ms exceeded.
   not run. Artifact captures are ordered last; check the producer's own assertions.
 - **no PDF rasteriser is installed** — `apt-get install poppler-utils` (or `ghostscript`).
 - **no browser found** — set up Playwright (`playwright install chromium`) or a system Chrome.
-- **playwright not installed** — `pip install "vidkit[capture]"`.
+- **playwright not installed** — `pip install "truedemo[capture]"`.
 
 Re-run just captures while iterating:
 
 ```bash
-vidkit build SPEC --only capture
+truedemo build SPEC --only capture
 ```
 
 ## A worked example in this repo

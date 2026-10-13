@@ -1,11 +1,11 @@
-# vidkit spec — docker-demo (a service, filmed as it is used)
+# truedemo spec — docker-demo (a service, filmed as it is used)
 #
 # This example is the *evidence* that the environment lab works end to end: a
 # real service is started from a real image, the commands declared in the spec run
 # *inside* that same container, its logs are captured as measured fact, and the
 # container is removed again on every exit path.
 #
-#   vidkit build examples/docker-demo/video.yaml
+#   truedemo build examples/docker-demo/video.yaml
 #
 # The point of the example is the causal story, not the picture. `write` puts a
 # row into the database and `read` reads it back out. Both run in the *same*
@@ -16,7 +16,7 @@
 # `image_digest` in verify.json is what the video was actually filmed against.
 
 project:
-  title: "vidkit docker-demo — a real service, really used"
+  title: "truedemo docker-demo — a real service, really used"
   slug: docker-demo
   output: docker-demo.mp4
   size: [1280, 720]

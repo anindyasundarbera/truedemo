@@ -317,7 +317,7 @@ class Chart:
 
 #: Backends a spec may name. Each is a claim about how a command is confined,
 #: so naming one the host cannot honour is a refusal at load time rather than a
-#: quiet downgrade — see ``vidkit.exec.resolve_backend``.
+#: quiet downgrade — see ``truedemo.exec.resolve_backend``.
 EXEC_BACKENDS = {"local", "bubblewrap", "docker"}
 
 
@@ -325,7 +325,7 @@ EXEC_BACKENDS = {"local", "bubblewrap", "docker"}
 class Exec:
     """One declared command, and the boundary it runs inside (R-E1).
 
-    This is the *spec's* half of ``vidkit.exec.ExecRequest``: it says what to run
+    This is the *spec's* half of ``truedemo.exec.ExecRequest``: it says what to run
     and what it is allowed to touch, in the same declarative form as everything
     else. Nothing in it executes at load time.
 
@@ -1247,7 +1247,7 @@ def _validate(spec: Spec) -> None:
     """Cross-reference checks that catch typos before any expensive rendering."""
     if spec.provider is not None and spec.provider.write_back:
         raise SpecError(
-            "the spec declares `provider.write_back: true`, but vidkit is read-only "
+            "the spec declares `provider.write_back: true`, but truedemo is read-only "
             "by contract — a provider may read from its source system and report on "
             "it, and nothing else")
     cap_names = {c.name for c in spec.captures}
@@ -1320,7 +1320,7 @@ def _validate_exec(spec: Spec) -> None:
     Every reason a declared command cannot run as written is available at load
     time: the working directory is on disk or it is not, the backend is installed
     or it is not, the policy permits the network or it does not. Checking here
-    means ``vidkit plan`` already tells the truth about what a build will do.
+    means ``truedemo plan`` already tells the truth about what a build will do.
     """
     from .exec import check_policy
 
@@ -1393,7 +1393,7 @@ def _validate_captures(spec: Spec) -> None:
         if cap.storage_state and not (spec.root / cap.storage_state).exists():
             raise SpecError(
                 f"{where}: storage_state {cap.storage_state!r} not found — capture "
-                "it once with `vidkit auth` and commit nothing (see the capture guide)")
+                "it once with `truedemo auth` and commit nothing (see the capture guide)")
         for a in cap.actions:
             if a.kind == "download" and a.save_as:
                 if "/" in a.save_as or "\\" in a.save_as or a.save_as in {".", ".."}:
@@ -1405,7 +1405,7 @@ def _validate_captures(spec: Spec) -> None:
                 f"{where}: this capture types into a password field but declares no "
                 "`storage_state:`, so it would film a login form — and a login form "
                 "is only part of the story when you say it is. Reuse a session "
-                "(record one with `vidkit auth`), or set `allow_login: true` to "
+                "(record one with `truedemo auth`), or set `allow_login: true` to "
                 "declare that signing in *is* this scene.")
 
 

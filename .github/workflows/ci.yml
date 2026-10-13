@@ -33,7 +33,7 @@ jobs:
           python -m pip install -e ".[dev]"
 
       - name: Unit tests
-        run: python -m pytest tests -q --cov=vidkit --cov-fail-under=40 --cov-report=term-missing
+        run: python -m pytest tests -q --cov=truedemo --cov-fail-under=40 --cov-report=term-missing
 
   lint:
     name: lint and type (advisory)
@@ -53,7 +53,7 @@ jobs:
 
       # ruff is the gate: a curated ruleset that must be clean (see ruff.toml).
       - name: Lint
-        run: ruff check vidkit tests
+        run: ruff check truedemo tests
 
       # mypy is advisory to start — it surfaces drift without failing the build.
       # The real contract is the test suite; the type annotations are 93%
@@ -61,7 +61,7 @@ jobs:
       - name: Type check (advisory)
         run: |
           python -m pip install mypy
-          mypy vidkit || echo "::warning::mypy found issues (advisory — not blocking)"
+          mypy truedemo || echo "::warning::mypy found issues (advisory — not blocking)"
 
   build-example:
     # The claim this repo makes is that a fresh clone can build a video with
@@ -83,21 +83,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ffmpeg librsvg2-bin
 
-      - name: Install vidkit
+      - name: Install truedemo
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e .
 
       - name: Doctor
-        run: vidkit doctor examples/hello-world/video.yaml
+        run: truedemo doctor examples/hello-world/video.yaml
 
       - name: Plan
-        run: vidkit plan examples/hello-world/video.yaml
+        run: truedemo plan examples/hello-world/video.yaml
 
       - name: Build
-        run: vidkit build examples/hello-world/video.yaml
+        run: truedemo build examples/hello-world/video.yaml
 
-      # `vidkit build` already runs verify and exits non-zero on any failing
+      # `truedemo build` already runs verify and exits non-zero on any failing
       # check, so this is a belt-and-braces assertion on the written report.
       # D17 / D15: a window that floats cannot be honestly described with dates,
       # and half a range is not a one-day window. Both are load-time refusals, so
@@ -125,7 +125,7 @@ jobs:
                           os.symlink(child.resolve(), d / child.name)
                   (d / "video.yaml").write_text(text, encoding="utf-8")
                   cp = subprocess.run(
-                      [sys.executable, "-m", "vidkit", "plan", str(d / "video.yaml")],
+                      [sys.executable, "-m", "truedemo", "plan", str(d / "video.yaml")],
                       capture_output=True, text=True)
                   if cp.returncode == 0:
                       sys.exit(f"{label}: expected a refusal, got exit 0")
@@ -152,7 +152,7 @@ jobs:
           set -eu
           # (a) `plan` resolves the override and prints it, so an agent can see
           #     what it is about to build before paying for a render.
-          vidkit plan examples/hello-world/video.yaml \
+          truedemo plan examples/hello-world/video.yaml \
             --timeframe 2026-08-01..2026-09-30 | grep -q "2026-08-01 to 2026-09-30"
 
           # (b) Building against that window FAILS verify, and the ONLY failing
@@ -160,7 +160,7 @@ jobs:
           #     job: the narration still states 2026-09-07..2026-10-06, so the cut
           #     would be a lie. The window really is threaded, and it really is
           #     checked — the two halves of M1 are the same mechanism.
-          if vidkit build examples/hello-world/video.yaml \
+          if truedemo build examples/hello-world/video.yaml \
                --timeframe 2026-08-01..2026-09-30 --out _alt; then
             echo "expected the timeframe check to fail" >&2
             exit 1
@@ -176,7 +176,7 @@ jobs:
 
           # The same window re-verified standalone must reach the same verdict,
           # not a milder one — a render may not have two truths.
-          if vidkit verify examples/hello-world/video.yaml \
+          if truedemo verify examples/hello-world/video.yaml \
                --timeframe 2026-08-01..2026-09-30 --out _alt; then
             echo "standalone verify disagreed with the build" >&2
             exit 1
@@ -195,7 +195,7 @@ jobs:
                               "2026-08-01 to 2026-09-30")
           p.write_text(text, encoding="utf-8")
           PY
-          vidkit build examples/hello-world/video.yaml \
+          truedemo build examples/hello-world/video.yaml \
             --timeframe 2026-08-01..2026-09-30 --out _alt
           test -s _alt/hello-world.mp4
 
@@ -221,9 +221,9 @@ jobs:
       # R-A2: a scaffolded story is runnable, and its own window check passes.
       - name: Scaffold a story and verify it
         run: |
-          vidkit init _scaffold --title "CI scaffold" --days 14 --as-of 2026-10-06
-          vidkit plan _scaffold/video.yaml | tee /dev/stderr | grep -q "2026-09-23 to 2026-10-06"
-          vidkit build _scaffold/video.yaml
+          truedemo init _scaffold --title "CI scaffold" --days 14 --as-of 2026-10-06
+          truedemo plan _scaffold/video.yaml | tee /dev/stderr | grep -q "2026-09-23 to 2026-10-06"
+          truedemo build _scaffold/video.yaml
 
       # R-G1/R-G2/R-G3 — the M5 exit criterion, walked the way an agent would
       # walk it. `--json run init` is checked *by its own action* (it once ran a
@@ -236,22 +236,22 @@ jobs:
           probe="_agent_probe"
           rm -rf "$probe"; mkdir -p "$probe"
 
-          vidkit --json doctor > "$probe/doctor.json"
+          truedemo --json doctor > "$probe/doctor.json"
           python -c "import json,sys; d=json.load(open('$probe/doctor.json')); assert d['ok'] and d['spec'] is None, d"
 
-          vidkit --json run init --story "$probe/story" --title "Agent probe" \
+          truedemo --json run init --story "$probe/story" --title "Agent probe" \
             --days 14 --as-of 2026-10-06 > "$probe/init.json"
           python -c "import json,sys; d=json.load(open('$probe/init.json')); assert d['action']=='init' and d['ok'], d; assert len(d['created'])==4, d"
 
-          vidkit --json plan "$probe/story/video.yaml" > "$probe/plan.json"
+          truedemo --json plan "$probe/story/video.yaml" > "$probe/plan.json"
           python -c "import json,sys; d=json.load(open('$probe/plan.json')); assert d['ok'] and d['plan']['scenes'], d"
 
-          vidkit --json --progress run build --story "$probe/story" --out "$probe/out" \
+          truedemo --json --progress run build --story "$probe/story" --out "$probe/out" \
             > "$probe/build.json" 2> "$probe/build.log"
           python -c "import json,sys; d=json.load(open('$probe/build.json')); assert d['ok'] and d['report']['ok'], d"
           test -s "$probe/build.log"   # the run's own log really did reach stderr
 
-          vidkit --json run verify --story "$probe/story" --out "$probe/out" > "$probe/verify.json"
+          truedemo --json run verify --story "$probe/story" --out "$probe/out" > "$probe/verify.json"
           python -c "
           import json
           d = json.load(open('$probe/verify.json'))
@@ -271,7 +271,7 @@ jobs:
           assert v['provenance']['spec_sha256'] == b['provenance']['spec_sha256']
           assert v['report']['facts']['provenance']['spec_sha256'], v.get('report')
           "
-          vidkit --json provenance "$probe/story/video.yaml" --out "$probe/out" > "$probe/provenance.json"
+          truedemo --json provenance "$probe/story/video.yaml" --out "$probe/out" > "$probe/provenance.json"
           python -c "
           import json
           m = json.load(open('$probe/provenance.json'))
@@ -287,7 +287,7 @@ jobs:
           "
 
           # a refusal is data, and it still names the window that was asked for
-          vidkit --json run plan --story "$probe/story" --timeframe 3d \
+          truedemo --json run plan --story "$probe/story" --timeframe 3d \
             > "$probe/refused.json" || true
           python -c "
           import json
@@ -349,12 +349,12 @@ jobs:
           YAML
           : > "$probe/story/canary.txt"          # empty
 
-          vidkit build "$probe/story/video.yaml" --only data
+          truedemo build "$probe/story/video.yaml" --only data
           first=$(cat "$probe/story/canary.txt")
           test "$first" = "." || { echo "the data stage did not reach the provider" >&2; exit 1; }
 
           # (a) the exit criterion: panels render from disk, offline
-          vidkit build "$probe/story/video.yaml" --only panels 2>&1 | tee "$probe/b.log"
+          truedemo build "$probe/story/video.yaml" --only panels 2>&1 | tee "$probe/b.log"
           grep -q "reusing snapshot" "$probe/b.log"
           test -s "$probe/story/_build/stills/n.png"
           test "$(cat "$probe/story/canary.txt")" = "$first" \
@@ -363,7 +363,7 @@ jobs:
 
           # (b) a snapshot taken for another window must be refused, by name —
           #     and the refusal must happen before the source is touched
-          if vidkit build "$probe/story/video.yaml" --only panels \
+          if truedemo build "$probe/story/video.yaml" --only panels \
                --timeframe 2026-02-01..2026-02-28 > "$probe/c.log" 2>&1; then
             echo "expected a stale snapshot to be refused" >&2
             exit 1
@@ -375,14 +375,14 @@ jobs:
           echo "STALE SNAPSHOT REFUSED — with the recorded window named"
 
           # (c) --refresh is the documented way out
-          vidkit build "$probe/story/video.yaml" --only panels --refresh
+          truedemo build "$probe/story/video.yaml" --only panels --refresh
           test "$(cat "$probe/story/canary.txt")" = ".." \
             || { echo "--refresh did not re-ask the source" >&2; exit 1; }
           echo "REFRESH OK — the source was asked again"
 
           # (d) a missing snapshot is refused by path, never silently refetched
           rm -rf "$probe/story/_build/data"
-          if vidkit build "$probe/story/video.yaml" --only panels > "$probe/d.log" 2>&1; then
+          if truedemo build "$probe/story/video.yaml" --only panels > "$probe/d.log" 2>&1; then
             echo "expected a missing snapshot to be refused" >&2
             exit 1
           fi
@@ -403,7 +403,7 @@ jobs:
           #     `doctor` on a real spec exits non-zero naming the variable
           ACME_TOKEN= python - <<'PY'
           import sys
-          from vidkit.secrets import Secrets
+          from truedemo.secrets import Secrets
           s = Secrets()
           s.declare({"ACME_TOKEN": "used to reach the ACME API"})
           s.resolve()
@@ -419,7 +419,7 @@ jobs:
           #     actually matters: a 401 that echoes the token it sent)
           ACME_TOKEN="$secret" python - <<'PY'
           import sys
-          from vidkit.secrets import Secrets
+          from truedemo.secrets import Secrets
           s = Secrets()
           s.declare({"ACME_TOKEN": "used to reach the ACME API"})
           s.resolve()
@@ -456,7 +456,7 @@ jobs:
           test -s examples/hello-world/narration.srt
 
   capture-probe:
-    # Capture v2's whole claim is "vidkit films a real product, including bytes it
+    # Capture v2's whole claim is "truedemo films a real product, including bytes it
     # downloads". That cannot be demonstrated by unit tests against a fake page, so
     # this job drives a real headless Chromium against a real local product page and
     # then asserts the artifact PNG is a PNG. The page is examples/capture-kit, which
@@ -477,7 +477,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ffmpeg librsvg2-bin poppler-utils
 
-      - name: Install vidkit with the capture extra
+      - name: Install truedemo with the capture extra
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e ".[capture]"
@@ -497,7 +497,7 @@ jobs:
           exit 1
 
       - name: Film it
-        run: vidkit build examples/capture-kit/video.yaml
+        run: truedemo build examples/capture-kit/video.yaml
 
       # The refusals matter as much as the success: a capture whose assertion is
       # false must fail the build rather than quietly photograph the wrong state.
@@ -516,7 +516,7 @@ jobs:
           pathlib.Path("_capture_refusal/narration.md").write_text(
               pathlib.Path("examples/capture-kit/narration.md").read_text())
           PY
-          if vidkit build _capture_refusal/video.yaml >/dev/null 2>&1; then
+          if truedemo build _capture_refusal/video.yaml >/dev/null 2>&1; then
             echo "a false assertion did not fail the build" >&2
             exit 1
           fi
@@ -567,7 +567,7 @@ jobs:
           grep -q "filmed artifacts are real files" examples/capture-kit/_build/verify.json
 
   exec-probe:
-    # M7's whole claim is "vidkit films a real command, run in a real sandbox". A
+    # M7's whole claim is "truedemo films a real command, run in a real sandbox". A
     # unit test can assert that a PTY was opened and that argv was assembled; it
     # cannot assert that the finished film is a replay of the bytes the command
     # wrote. This job runs the command for real and then reads the report back.
@@ -609,7 +609,7 @@ jobs:
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
           echo "after:  $(cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns)"
 
-      - name: Install vidkit
+      - name: Install truedemo
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e .
@@ -620,7 +620,7 @@ jobs:
           python - <<'PY'
           import sys
           sys.path.insert(0, ".")
-          from vidkit import exec as ex
+          from truedemo import exec as ex
           ok, detail = ex.bwrap_available(refresh=True)
           if not ok:
               sys.exit(
@@ -630,7 +630,7 @@ jobs:
           PY
 
       - name: Build the terminal demo
-        run: vidkit build examples/terminal-demo/video.yaml
+        run: truedemo build examples/terminal-demo/video.yaml
 
       - name: The film is a replay of the recording, and the report says so
         run: |
@@ -679,7 +679,7 @@ jobs:
           test -s examples/terminal-demo/narration.srt
 
   docker-probe:
-    # M8's claim is "vidkit starts a real service from a real image, runs the
+    # M8's claim is "truedemo starts a real service from a real image, runs the
     # declared commands *inside* that one container, and removes it again".
     # A unit test can assert that argv was assembled and that a container name
     # was generated; it cannot assert that a database really held a row across
@@ -688,9 +688,9 @@ jobs:
     # This job has to *build* the capability, not merely find it: the runner's
     # docker group membership is not a given and the daemon may need starting.
     # The ladder below attempts each, prints what it measured either way, and
-    # then the gate asks vidkit the same question and fails if vidkit disagrees.
+    # then the gate asks truedemo the same question and fails if truedemo disagrees.
     # That is deliberate — a gate that only proved the runner could run docker
-    # would not prove that vidkit's own probe can see it.
+    # would not prove that truedemo's own probe can see it.
     #
     # No browser and no network *from the film*: the image is pulled, and no
     # step declares `network`, so every command runs with the network off.
@@ -733,7 +733,7 @@ jobs:
                                        || echo "rung 2: the daemon still does not answer"
 
           # The runner's user is not in the docker group, which the probes below
-          # would otherwise attribute to vidkit. `sudo docker` is not a fix: the
+          # would otherwise attribute to truedemo. `sudo docker` is not a fix: the
           # engine calls the client as the current user.
           if ! docker info >/dev/null 2>&1; then
             echo "rung 3: granting $(id -un) access to the docker socket"
@@ -745,18 +745,18 @@ jobs:
           docker info --format '{{.ServerVersion}} {{.Driver}}' 2>&1 || true
           exit 0
 
-      - name: Install vidkit
+      - name: Install truedemo
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e .
 
-      - name: The container really runs, and vidkit's own probe agrees
+      - name: The container really runs, and truedemo's own probe agrees
         run: |
           set -eu
           python - <<'PY'
           import sys
           sys.path.insert(0, ".")
-          from vidkit import exec as ex
+          from truedemo import exec as ex
 
           rungs = ex.docker_rungs()
           for name in ("client", "daemon", "container"):
@@ -774,7 +774,7 @@ jobs:
           PY
 
       - name: Build the docker demo
-        run: vidkit build examples/docker-demo/video.yaml
+        run: truedemo build examples/docker-demo/video.yaml
 
       - name: The service was really used, and really removed
         run: |
@@ -853,13 +853,13 @@ jobs:
       - name: Nothing was left running on the runner
         run: |
           set -eu
-          left=$(docker ps -a --filter name=vidkit- --format '{{.Names}}')
+          left=$(docker ps -a --filter name=truedemo- --format '{{.Names}}')
           if [ -n "$left" ]; then
             echo "the build leaked containers: $left"
-            docker ps -a --filter name=vidkit-
+            docker ps -a --filter name=truedemo-
             exit 1
           fi
-          echo "no vidkit container remains"
+          echo "no truedemo container remains"
 
       - name: Assert artifacts exist
         run: |
@@ -889,7 +889,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ffmpeg librsvg2-bin
 
-      - name: Install vidkit
+      - name: Install truedemo
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e .
@@ -897,8 +897,8 @@ jobs:
       - name: The spec is well formed before anything is rendered
         run: |
           set -eu
-          python -m vidkit doctor examples/movie-demo/video.yaml
-          python -m vidkit plan examples/movie-demo/video.yaml
+          python -m truedemo doctor examples/movie-demo/video.yaml
+          python -m truedemo plan examples/movie-demo/video.yaml
 
       - name: The plan is not allowed to disagree with the build
         # `plan` printed narration-derived estimates for a film whose every length is
@@ -912,7 +912,7 @@ jobs:
           from pathlib import Path
 
           plan = json.loads(subprocess.run(
-              [sys.executable, "-m", "vidkit", "plan", "examples/movie-demo/video.yaml",
+              [sys.executable, "-m", "truedemo", "plan", "examples/movie-demo/video.yaml",
                "--json"], capture_output=True, text=True, check=True).stdout)["plan"]
           if plan["timing_source"] != "spec":
               sys.exit("the fixture's lengths are all declared, so timing must come "
@@ -925,7 +925,7 @@ jobs:
           PY
 
       - name: Build the film
-        run: python -m vidkit build examples/movie-demo/video.yaml
+        run: python -m truedemo build examples/movie-demo/video.yaml
 
       - name: Every picture came from a declared asset, and the camera moved
         run: |
@@ -1040,7 +1040,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ffmpeg librsvg2-bin
 
-      - name: Install vidkit
+      - name: Install truedemo
         # `[mcp]` is not optional here, because this job's whole point is to drive the
         # server over its own transport: the two tests it runs and the probe below both
         # `import mcp`. Installing only `[dev]` made them fail at *import* — a green
@@ -1056,19 +1056,19 @@ jobs:
         # "playwright is broken" rather than "a library is missing".
         run: python -m playwright install --with-deps chromium
 
-      - name: vidkit can see the browser it is about to drive
+      - name: truedemo can see the browser it is about to drive
         run: |
           set -eu
           python - <<'PY'
           import json, subprocess, sys
-          from vidkit import capture
+          from truedemo import capture
 
           assert capture._playwright_available(), "playwright is not importable"
 
-          # The probe must be vidkit's own, not this script's. `doctor` is the surface
+          # The probe must be truedemo's own, not this script's. `doctor` is the surface
           # an agent reads before spending a minute on a build, so if it cannot see the
           # browser then every browser tool is unreachable over MCP.
-          out = subprocess.run([sys.executable, "-m", "vidkit", "doctor", "--json"],
+          out = subprocess.run([sys.executable, "-m", "truedemo", "doctor", "--json"],
                                capture_output=True, text=True, check=True)
           rows = {t["name"]: t for t in json.loads(out.stdout)["doctor"]["tools"]}
           assert rows["playwright"]["present"], rows["playwright"]
@@ -1092,7 +1092,7 @@ jobs:
 
           from mcp.client.session import ClientSession
           from mcp.shared.memory import create_client_server_memory_streams
-          from vidkit import mcp_server as m
+          from truedemo import mcp_server as m
 
           @contextlib.asynccontextmanager
           async def mcp_session(server):
@@ -1149,7 +1149,7 @@ jobs:
                   opened = await call(client, "session_open",
                                       {"spec": str(story / "video.yaml")})
                   sid = opened["id"]
-                  assert Path(opened["record_dir"]) == out / ".vidkit" / "sessions", opened
+                  assert Path(opened["record_dir"]) == out / ".truedemo" / "sessions", opened
 
                   opened_browser = await call(client, "browser_open",
                                               {"session": sid, "url": ""})
@@ -1194,7 +1194,7 @@ jobs:
           # instead of honouring the promotion the film is black and this fails. It is
           # the check that was missing when the build silently overwrote a chosen take
           # and the record went on naming it.
-          from vidkit.ffmpeg import Ffmpeg
+          from truedemo.ffmpeg import Ffmpeg
 
           film = Path(report["facts"]["output"])
           ff = Ffmpeg()
@@ -1223,7 +1223,7 @@ jobs:
           probe = json.loads(Path("studio-probe.json").read_text())
           report = probe["report"]
           out = Path("studio-out")
-          sessions = out / ".vidkit" / "sessions"
+          sessions = out / ".truedemo" / "sessions"
 
           # the film the client was told about
           film = out / "probe.mp4"
@@ -1258,7 +1258,7 @@ jobs:
           # the record names is still the file on disk.
           listed = json.loads(subprocess.run(
               [sys.executable, "-c",
-               "import json,sys;from pathlib import Path;from vidkit import studio as s;"
+               "import json,sys;from pathlib import Path;from truedemo import studio as s;"
                "r=s.Registry(sys.argv[1]);"
                "print(json.dumps(s.list_takes(r.load(sys.argv[2]))))",
                str(out), record["id"]],

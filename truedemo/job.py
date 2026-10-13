@@ -1,7 +1,7 @@
 """The job contract: ``{story, timeframe, out} → artifact manifest`` (R-G3).
 
 An agent should not have to know which of a dozen commands to call, in what order,
-or what the result looks like. It should be able to hand vidkit a job and read back
+or what the result looks like. It should be able to hand truedemo a job and read back
 a manifest. That contract is what this module is.
 
 Design
@@ -11,7 +11,7 @@ Design
   caller can branch on ``ok`` rather than on which command it happened to invoke.
 * **Failures are data, not exceptions.** A caller that reads ``ok: false`` and a
   ``failure`` block never has to parse a sentence, and — more importantly — never
-  mistakes a crash for a result. :class:`VidkitError` is caught here; anything else
+  mistakes a crash for a result. :class:`TruedemoError` is caught here; anything else
   is a bug and is allowed to propagate.
 * **The manifest describes the run, not the wish.** Paths are reported only when the
   file is actually on disk, the report is the real ``verify.json``, and ``timeline``
@@ -35,7 +35,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 from . import __version__
-from .errors import SpecError, ToolError, VidkitError
+from .errors import SpecError, ToolError, TruedemoError
 from .timeframe import Timeframe, parse_timeframe
 
 #: The actions a job may ask for. Each is a verb an agent can reason about.
@@ -106,7 +106,7 @@ class Progress:
 class _LineTicker(io.TextIOBase):
     """Report each whole line the pipeline prints as a progress step.
 
-    The pipeline already narrates itself with ``[vidkit] …`` lines. Rather than
+    The pipeline already narrates itself with ``[truedemo] …`` lines. Rather than
     re-plumbing every stage to take a callback, a job reads that stream — so the
     progress a caller sees is the pipeline's own account of itself, not a second,
     parallel one that could drift from it.
@@ -127,8 +127,8 @@ class _LineTicker(io.TextIOBase):
         text = line.strip()
         if not text:
             return
-        if text.startswith("[vidkit]"):
-            text = text[len("[vidkit]"):].strip()
+        if text.startswith("[truedemo]"):
+            text = text[len("[truedemo]"):].strip()
         # classified rather than lumped together, so a caller can show stage
         # transitions in a spinner and checks in a list without parsing the text
         kind = "log"
@@ -190,7 +190,7 @@ def _manifest(action: str, story: Path | None, out: Path | None,
         "timeline": [],
         "failure": None,
         "progress": None,
-        "vidkit": __version__,
+        "truedemo": __version__,
     }
 
 
@@ -234,8 +234,8 @@ def _failure(exc: BaseException, action: str, story: Path | None) -> dict[str, A
         kind = "spec"
     elif isinstance(exc, ToolError):
         kind = "tool"
-    elif isinstance(exc, VidkitError):
-        kind = "vidkit"
+    elif isinstance(exc, TruedemoError):
+        kind = "truedemo"
     return {
         "kind": kind,
         "message": text,
@@ -247,12 +247,12 @@ def _failure(exc: BaseException, action: str, story: Path | None) -> dict[str, A
 
 _HINTS = (
     # argument mistakes first: their advice is about the call, not about the machine
-    ("unknown action", "actions are listed by `vidkit_actions`"),
+    ("unknown action", "actions are listed by `truedemo_actions`"),
     ("no story given", "pass `story`: the folder holding the story's video.yaml"),
     ("no video.yaml/spec.yaml inside", "check the folder, or `init` a new story there"),
-    ("no such file", "check the path; `vidkit_doctor` will list what the spec needs"),
-    ("not installed", "run `vidkit_doctor` to see which tool is missing"),
-    ("is not in PATH", "run `vidkit_doctor` to see which tool is missing"),
+    ("no such file", "check the path; `truedemo_doctor` will list what the spec needs"),
+    ("not installed", "run `truedemo_doctor` to see which tool is missing"),
+    ("is not in PATH", "run `truedemo_doctor` to see which tool is missing"),
     ("snapshot is stale", "build with refresh=true, or widen the window back"),
     ("no dataset snapshot", "drop `data` from `only`, or pass refresh=true"),
     ("missing_required", "export the named variables, then retry"),
@@ -271,7 +271,7 @@ def _hint(message: str, action: str) -> str:
             return hint
     if action == "init":
         return "pass `story`, the directory the new story should be written to"
-    return "run `vidkit_doctor` first; it names the missing piece"
+    return "run `truedemo_doctor` first; it names the missing piece"
 
 
 # --------------------------------------------------------------------------- #
@@ -319,7 +319,7 @@ def run_job(action: str = "plan", *, story: str | Path | None = None,
 
     The returned manifest always has the same keys, so a caller can branch on
     ``ok``. Nothing here raises for an expected failure: an agent reading a
-    manifest should never have to tell "vidkit said no" apart from "vidkit crashed".
+    manifest should never have to tell "truedemo said no" apart from "truedemo crashed".
     """
     story_path = Path(story).expanduser().resolve() if story else None
     out_dir = Path(out).expanduser().resolve() if out else None
@@ -370,7 +370,7 @@ def run_job(action: str = "plan", *, story: str | Path | None = None,
             else:
                 _do_build(manifest, progress, spec_path, out_dir, timeframe, as_of,
                           refresh, action, only, from_stage)
-    except VidkitError as exc:
+    except TruedemoError as exc:
         manifest["ok"] = False
         manifest["failure"] = _failure(exc, action, story_path)
         progress.step(f"{action} failed", False, str(exc))
@@ -562,7 +562,7 @@ def _do_build(manifest, progress: Progress, spec: Path, out: Path | None,
             "message": f"{len(failed)} acceptance check(s) failed: " + ", ".join(failed),
             "action": action,
             "story": manifest["story"],
-            "hint": "read report.checks for the detail, or `vidkit docs verification`",
+            "hint": "read report.checks for the detail, or `truedemo docs verification`",
         }
 
 

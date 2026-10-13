@@ -16,4 +16,4 @@ select = ["F", "E4", "E7", "E9", "I"]
 ignore = ["E501", "E741"]
 
 [lint.isort]
-known-first-party = ["vidkit"]
+known-first-party = ["truedemo"]

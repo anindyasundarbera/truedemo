@@ -5,12 +5,12 @@ same shape: a test module depended on something that is present on a developer's
 machine but absent from the job that runs it.
 
 * ``tests/test_mcp.py`` and friends imported ``anyio`` at module level. ``anyio``
-  is not a declared dependency of vidkit at all — it arrives as a transitive
+  is not a declared dependency of truedemo at all — it arrives as a transitive
   dependency of ``mcp`` — so the lean ``pytest`` job, which installs only
   ``.[dev]``, died at *collection* with ``ModuleNotFoundError`` rather than at an
   assertion. Every run locally was green purely because ``mcp`` happened to be
   installed here.
-* ``vidkit/studio.py`` contained a PEP 701 f-string, which Python 3.12 accepts and
+* ``truedemo/studio.py`` contained a PEP 701 f-string, which Python 3.12 accepts and
   Python 3.10 rejects. The CI matrix runs 3.10, so the module could not be
   imported there at all, while the local 3.14 interpreter compiled it happily.
 
@@ -41,18 +41,18 @@ REPO = Path(__file__).resolve().parents[1]
 # every test import is something the lean job is guaranteed to have
 # --------------------------------------------------------------------------- #
 #: The packages every ``pytest`` CI job installs by construction. ``.[dev]`` pulls
-#: in ``pytest``; ``vidkit`` is the project itself, so its own declared runtime
+#: in ``pytest``; ``truedemo`` is the project itself, so its own declared runtime
 #: dependencies (``PyYAML``) come with it; ``conftest`` is the suite's own module.
 #: Anything outside this set may only be imported inside a *function* body, so a
 #: missing package fails one test rather than the whole collection.
-BASE = {"pytest", "yaml", "vidkit", "conftest"}
+BASE = {"pytest", "yaml", "truedemo", "conftest"}
 
 
 def _package_metadata():
     try:
-        return metadata("vidkit")
+        return metadata("truedemo")
     except PackageNotFoundError:  # pragma: no cover - a source checkout, uninstalled
-        pytest.skip("vidkit is not installed, so its declared metadata is unreadable")
+        pytest.skip("truedemo is not installed, so its declared metadata is unreadable")
 
 
 def _extras_of(requirement: str) -> set[str]:
@@ -128,26 +128,26 @@ def test_no_test_module_imports_a_package_the_lean_job_lacks():
 def test_version_is_single_sourced():
     """``__version__`` lives in exactly one module.
 
-    The distribution reads ``vidkit._version.__version__`` for its metadata, and
-    ``vidkit.__version__`` re-exports it. A second literal somewhere in the package
+    The distribution reads ``truedemo._version.__version__`` for its metadata, and
+    ``truedemo.__version__`` re-exports it. A second literal somewhere in the package
     would drift from the one the distribution actually ships.
     """
-    import vidkit
-    import vidkit._version as v
+    import truedemo
+    import truedemo._version as v
 
-    assert vidkit.__version__ == v.__version__
+    assert truedemo.__version__ == v.__version__
 
     import ast
 
     # The only assignment to a ``__version__`` string literal is the source module.
     literal_sites = []
-    for py in sorted((REPO / "vidkit").glob("*.py")):
+    for py in sorted((REPO / "truedemo").glob("*.py")):
         for node in ast.walk(ast.parse(py.read_text(encoding="utf-8"))):
             if (isinstance(node, ast.Assign)
                     and any(t.id == "__version__" for t in node.targets
                             if isinstance(t, ast.Name))):
                 literal_sites.append(str(py))
-    assert literal_sites == [str(REPO / "vidkit" / "_version.py")], literal_sites
+    assert literal_sites == [str(REPO / "truedemo" / "_version.py")], literal_sites
 
 
 # --------------------------------------------------------------------------- #
@@ -220,7 +220,7 @@ def test_requires_python_matches_the_ci_matrix():
     assert "3.10" in versions, versions
 
 
-@pytest.mark.parametrize("path", sorted((REPO / "vidkit").glob("*.py")),
+@pytest.mark.parametrize("path", sorted((REPO / "truedemo").glob("*.py")),
                          ids=lambda p: p.name)
 def test_every_module_uses_no_syntax_feature_newer_than_310(path: Path):
     """No module may carry a syntax *feature* the oldest supported interpreter lacks.
@@ -240,7 +240,7 @@ def test_every_module_uses_no_syntax_feature_newer_than_310(path: Path):
 
 
 @pytest.mark.needs_pre_312_python
-@pytest.mark.parametrize("path", sorted((REPO / "vidkit").glob("*.py")),
+@pytest.mark.parametrize("path", sorted((REPO / "truedemo").glob("*.py")),
                          ids=lambda p: p.name)
 def test_every_module_compiles_as_the_oldest_supported_python(path: Path):
     """No module may carry a tokenizer rule a pre-3.12 interpreter rejects.

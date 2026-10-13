@@ -1,7 +1,7 @@
 # A tour: what happens when you build
 
-This page assumes you have never seen vidkit. It answers one question — *what does
-`vidkit build` actually do?* — and then points you at the page that goes deeper on whatever
+This page assumes you have never seen truedemo. It answers one question — *what does
+`truedemo build` actually do?* — and then points you at the page that goes deeper on whatever
 you care about. Read it once; everything else refers back to it.
 
 If you would rather do it than read it, start with
@@ -17,7 +17,7 @@ You run one command. You get a video, captions, and a report that checks the vid
 
 ```
  video.yaml ──┐
- provider.py ─┼─► vidkit build ─►   your-video.mp4
+ provider.py ─┼─► truedemo build ─►   your-video.mp4
  narration.md ┘                    your-video.srt
  assets/*.svg                      _build/verify.json      ← did we keep our promises?
                                    _build/provenance.json  ← what is this file, exactly?
@@ -33,7 +33,7 @@ unfamiliar, that page is the one to read next.
 
 ## The ten stages
 
-A build is a fixed, ordered list of **stages**. `vidkit build` runs them all; `--only a,b`
+A build is a fixed, ordered list of **stages**. `truedemo build` runs them all; `--only a,b`
 runs a subset. Each stage reads something, writes a file, or stops the build.
 
 | Stage | What it does |
@@ -86,7 +86,7 @@ Every field, default, and constraint lives in the
 | Go from an empty clone to a verified `.mp4` | [your first video](first-video.md) |
 | Copy a working pattern for a common task | [recipes](recipes.md) |
 | Write or validate a `video.yaml` | [spec reference](../authoring/spec-reference.md) |
-| Connect vidkit to your data | [provider guide](../authoring/provider-guide.md) |
+| Connect truedemo to your data | [provider guide](../authoring/provider-guide.md) |
 | Draw a chart or panel | [panels reference](../authoring/panels-reference.md) |
 | Write the script and control captions | [narration and captions](../authoring/narration-and-captions.md) |
 | Record real UI and assert it | [capture guide](../capture/capture-guide.md) |
@@ -97,12 +97,12 @@ Every field, default, and constraint lives in the
 ## Extending
 
 The engine is meant to be extended from your provider, not edited. If you do find yourself
-in `vidkit/`:
+in `truedemo/`:
 
 - **A new chart** — `panels.register(name, fn)` from your provider; `fn(data, options, doc)`
-  appends SVG via the helpers in `vidkit.svg`.
-- **A new capture action** — add a branch in `vidkit/capture.py::apply`.
-- **A new TTS engine** — add a branch in `vidkit/tts.py`.
+  appends SVG via the helpers in `truedemo.svg`.
+- **A new capture action** — add a branch in `truedemo/capture.py::apply`.
+- **A new TTS engine** — add a branch in `truedemo/tts.py`.
 - **A new stage** — *don't, not casually.* The stage list is the design's contract: ten phases
   added Docker, an executor, movie mode, and a whole session layer without an eleventh.
 

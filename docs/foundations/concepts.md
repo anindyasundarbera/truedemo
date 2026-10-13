@@ -40,7 +40,7 @@ Read this once; everything else refers back to it.
 ### 1. Audio is the master clock
 
 Most slideshow-video failures come from a hand-typed timing table drifting away from the
-actual narration. vidkit removes the table. It synthesizes **one WAV per scene**, *measures*
+actual narration. truedemo removes the table. It synthesizes **one WAV per scene**, *measures*
 each with ffmpeg, and builds the scene timeline from those measurements. Each scene's video
 segment is then sized to its measured audio. Result: sync is a consequence of the pipeline,
 not a thing you maintain.
@@ -72,14 +72,14 @@ rows" is one atomic step.
 Some things cannot be screenshotted from the DOM — a downloaded CSV, a PDF, an export. A
 capture may therefore declare `artifact:` instead of `url:` and film a file a `download`
 action produced. The file must exist, must be non-empty, and must be *recognisably* what it
-claims: vidkit sniffs the bytes, and a PDF is rasterised through `pdftoppm` (or `gs`). If
+claims: truedemo sniffs the bytes, and a PDF is rasterised through `pdftoppm` (or `gs`). If
 neither rasteriser is installed, or a file's bytes do not match its extension, the build
 refuses. It never films a placeholder.
 
 - Modules: `capture.py::sniff`, `capture.py::rasterize_pdf`, `capture.py::shoot_artifact`.
 - `verify.py::filmed artifacts are real files` is the last line of that defence.
 
-Signing in is deliberately **not** a capture action. `vidkit auth` records a storage state
+Signing in is deliberately **not** a capture action. `truedemo auth` records a storage state
 once, by hand; a capture reuses it. Filming a login form is possible but must be declared,
 with `allow_login: true`.
 
@@ -125,7 +125,7 @@ assertions: **promises in the spec, proof in the report.**
 | Narration audio (TTS) | — |
 | Captions, timing, muxing | — |
 
-vidkit will **never** synthesize something that purports to be a live interface. If a frame
+truedemo will **never** synthesize something that purports to be a live interface. If a frame
 shows a product, it came from a capture. (See the non-goals in `README.md`.)
 
 ## The lifetime of a run

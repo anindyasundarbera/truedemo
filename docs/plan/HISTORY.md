@@ -2104,3 +2104,69 @@ grep -rn "pip install vidkit" docs/                      -> no bare-PyPI instruc
 python3 -m pytest tests/test_cli.py -q                   -> (needs_render tests run under CI)
 ```
 
+
+---
+
+## 2026-10-13 — Renamed `vidkit` → `truedemo`, released as v2.0.0
+
+The `v1.2.0` release exposed a hard stop: the project could not be published, because its name
+was already taken on PyPI.
+
+### The check, with controls
+
+A status-code probe is exactly the kind of "check" this project distrusts, so the availability
+check carried controls — a name known to exist, and a name known not to:
+
+```
+vidkit                       -> TAKEN  0.1.3.2  A Python package for generating videos from JSON specificati
+requests                     -> TAKEN  2.34.2   Python HTTP for Humans.
+zzz-nonexistent-pkg-xyz-123  -> free
+```
+
+`vidkit` resolves to an unrelated project. The candidates were then checked the same way, and
+the ones that came back free — `truedemo`, `proofreel`, `demoreel`, `screenproof`, `verivid` —
+were free in the discriminating sense, not merely in the "everything is free" sense.
+
+### What changed
+
+| Surface | Before | After |
+|---|---|---|
+| Distribution / import | `vidkit` | `truedemo` |
+| Console scripts | `vidkit`, `vidkit-mcp` | `truedemo`, `truedemo-mcp` |
+| MCP tools (15) | `vidkit_run`, `vidkit_build`, … | `truedemo_run`, `truedemo_build`, … |
+| MCP resources (7) | `vidkit://…` | `truedemo://…` |
+| Environment | `VIDKIT_RUN_TIMEOUT`, `VIDKIT_SANDBOX` | `TRUEDEMO_RUN_TIMEOUT`, `TRUEDEMO_SANDBOX` |
+| Docker labels | `vidkit.role`, `vidkit-` | `truedemo.role`, `truedemo-` |
+| Repository | `github.com/…/vidkit` | `github.com/…/truedemo` |
+
+98 source files, plus the package directory (`git mv vidkit truedemo`), the two console
+scripts, `packages.find`, `package-data`, and the dynamic version attribute. Version → `2.0.0`
+(a rename is breaking by definition, so it is a major, not a minor).
+
+### The rule this did *not* break
+
+The historical documents were **left alone**: `HISTORY.md`, `DECISIONS.md`,
+`FEATURE-ROADMAP.md`, `OPENMONTAGE.md`, and every released CHANGELOG section still say
+`vidkit`. The project genuinely *was* called that through M0–M10. Rewriting the record to make
+the past agree with the present would be the same failure mode the project exists to prevent —
+a claim edited to match the answer we wanted — so the rename is an appended entry, not a
+replacement. See [DECISIONS.md](DECISIONS.md) D66.
+
+### Two things caught by re-running the sweep
+
+1. **`.svg` and `.srt` were skipped** by the first pass's extension filter, so the
+   hello-world title and end cards still read *"That is vidkit."* A rename is not done when
+   the `.py` files are done; it is done when a byte-level grep finds nothing.
+2. **Build artifacts under `examples/*/_build/`** carry the old name in absolute paths and in
+   the filmed panel SVGs. They are gitignored and regenerate on the next build — which is why
+   the CI `build-example` probe is the check that proves this, not a grep.
+
+### Evidence
+
+```
+curl control pair                            -> vidkit TAKEN, nonsense free (the check discriminates)
+python3 -c "import truedemo; ..."            -> import ok, version 2.0.0
+git status                                   -> package dir shows as R (rename), not add+delete
+grep -rn "vidkit" (excl. frozen history/_build) -> no source reference remains
+gh repo view --json name                     -> truedemo
+```

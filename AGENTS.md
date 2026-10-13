@@ -1,9 +1,9 @@
 # AGENTS.md — the contract for working in this repository
 
 > **Read this file first, every session.** It is the durable operating contract for
-> `vidkit`. It survives context compaction; the conversation does not.
+> `truedemo`. It survives context compaction; the conversation does not.
 >
-> **Repo:** <https://github.com/anindyasundarbera/vidkit> (public, Apache-2.0) · default branch `main`
+> **Repo:** <https://github.com/anindyasundarbera/truedemo> (public, Apache-2.0) · default branch `main`
 > · first commit `87b7435`. CI (`.github/workflows/ci.yml`) runs **seven job keys / eight
 > job runs**: the lean unit suite on Python 3.10/3.12 — the `test` matrix is **two** jobs —
 > and six end-to-end probes (`build-example`, `capture-probe`, `exec-probe`, `docker-probe`, `movie-probe`,
@@ -18,12 +18,12 @@
 
 ## 1. What this project is
 
-`vidkit` turns a small declarative **spec** (`video.yaml`) plus an optional **provider**
+`truedemo` turns a small declarative **spec** (`video.yaml`) plus an optional **provider**
 module into a **narrated, captioned `.mp4`** and a machine-readable **`verify.json`**.
 
 The user's stated goal, verbatim in intent:
 
-> Turn vidkit into a capable **presentation studio** for software demos — with **Playwright**,
+> Turn truedemo into a capable **presentation studio** for software demos — with **Playwright**,
 > a **sandboxed terminal**, and **Docker** access — exposed as a **standalone MCP server**,
 > drivable by an external capable agent. It must also be versatile enough to produce
 > **movies**, not only product demos.
@@ -34,7 +34,7 @@ The north star, from [ROADMAP.md](ROADMAP.md) §1.1:
 > captioned demo video** plus a **verification report** — with no human editing of scripts
 > or specs.
 
-### 1.1 The one thing that makes vidkit worth existing
+### 1.1 The one thing that makes truedemo worth existing
 
 **Honest by construction.** Every visual is sourced from something real — a live capture of a
 running product, a chart drawn from a provider's measured data, or a declared graphic asset
@@ -53,7 +53,7 @@ Violating any of these is a bug, regardless of what it makes easier.
 
 | # | Invariant | Enforced by |
 |---|---|---|
-| I1 | The engine is **host-agnostic**. No product name, URL, port, or dataset id appears in `vidkit/vidkit/*.py` outside comments. | CI grep; [ROADMAP.md](ROADMAP.md) §3.2 |
+| I1 | The engine is **host-agnostic**. No product name, URL, port, or dataset id appears in `truedemo/truedemo/*.py` outside comments. | CI grep; [ROADMAP.md](ROADMAP.md) §3.2 |
 | I2 | **A failed assertion aborts the build** — captures assert *before* screenshotting. | `capture.py` |
 | I3 | Captions are **token-for-token faithful** to the script. No word dropped or reordered. | `narration.py::build_srt(strict=True)` |
 | I4 | Captions are **≤ 2 lines, ≤ 42 characters per line**. | `narration.py` + `verify.py` |
@@ -61,7 +61,7 @@ Violating any of these is a bug, regardless of what it makes easier.
 | I6 | A **silent cut must be declared** (`guard.require_audio: false`), never accidental. | `verify.py` |
 | I7 | **Nothing fabricated is rendered.** Not a mock UI, not an invented number, not a restaged take — and not a terminal transcript recorded off a pipe, where the program would have printed something else. | `verify.py`, `exec.py`, review |
 | I8 | Specs are **plain data**. A spec never executes arbitrary code; only the named provider is imported. | `spec.py` |
-| I9 | The **story lives in the consumer's repo**, never bundled into vidkit. Integration is **MCP-only, never vendored**. | [ROADMAP.md](ROADMAP.md) decision of record |
+| I9 | The **story lives in the consumer's repo**, never bundled into truedemo. Integration is **MCP-only, never vendored**. | [ROADMAP.md](ROADMAP.md) decision of record |
 | I10 | Provider **datasets are snapshotted** to `data/*.json`, so panels re-render without re-fetching. | `assembler.py` |
 
 ---
@@ -69,7 +69,7 @@ Violating any of these is a bug, regardless of what it makes easier.
 ## 3. Repository map
 
 ```
-vidkit/
+truedemo/
 ├─ AGENTS.md              ← you are here (agent contract)
 ├─ README.md              user-facing overview
 ├─ ROADMAP.md             requirements R-A1…R-H9, root milestones M0–M6  ← governing document
@@ -77,7 +77,7 @@ vidkit/
 ├─ CHANGELOG.md           release notes
 ├─ LICENSE                Apache-2.0
 ├─ pyproject.toml         packaging, extras, console scripts
-├─ vidkit/                the engine (29 modules)
+├─ truedemo/                the engine (29 modules)
 │    assembler.py         the 10-stage pipeline + Context/Assets wiring
 │    spec.py              dataclasses + loader + cross-reference validation
 │    context.py           Context/Assets: the paths every stage shares
@@ -95,7 +95,7 @@ vidkit/
 │    timeframe.py         the resolved window (days/as_of or start/end)
 │    secrets.py           declared secrets + redaction
 │    snapshot.py          dataset snapshots, freshness, degraded replay
-│    scaffold.py          `vidkit new` project skeleton
+│    scaffold.py          `truedemo new` project skeleton
 │    provenance.py        what the build was and what made it -> provenance.json
 │    verify.py            the acceptance checks → Report
 │    reports.py           report rendering helpers (shared by CLI and MCP)
@@ -104,9 +104,9 @@ vidkit/
 │    _loop.py             M10: offload blocking work off the event loop (a Worker thread)
 │    cli.py               doctor/plan/build/tts/capture/auth/init/run/verify/provenance/docs
 │    mcp_server.py        MCP tools (34) + resources (7) + transports
-│    errors.py            VidkitError / SpecError / ToolError / ProviderError
+│    errors.py            TruedemoError / SpecError / ToolError / ProviderError
 │    __init__.py          version + public exports
-│    __main__.py          python -m vidkit
+│    __main__.py          python -m truedemo
 ├─ tests/
 │    test_core.py         panels, spec, captions, report — pure Python
 │    test_job.py          the job contract: manifest shape, refusals, progress
@@ -187,7 +187,7 @@ without Docker** — the load-time policy check calls `resolve_backend("docker")
 exception and `result == {...}` is comparing a dict to a coroutine — **green, and
 meaningless**. `tests/test_mcp.py::test_no_test_calls_an_async_tool_without_awaiting_it`
 scans every `tests/test_*.py` for this and fails if it appears. Await a tool through the
-**stdlib-only** `arun()` helper in `tests/conftest.py` — **not** `anyio`, which vidkit does
+**stdlib-only** `arun()` helper in `tests/conftest.py` — **not** `anyio`, which truedemo does
 not declare as a dependency at all (it only arrives with the optional `mcp` extra, and CI's
 lean `pytest` job installs `.[dev]` alone, so a top-level `import anyio` in a test module
 kills that module at *collection*). And note that `anyio.run(fn, *args)` does not forward
@@ -208,11 +208,11 @@ a fully equipped box.
 
 ```bash
 python3 -m pytest tests -q                                 # local: 781 passed, 1 Chromium failure; CI matrix green
-python3 -m vidkit doctor  examples/hello-world/video.yaml  # exit 0
-python3 -m vidkit plan    examples/hello-world/video.yaml  # scene plan + estimate
-python3 -m vidkit build   examples/hello-world/video.yaml  # mp4 + srt + verify.json
-python3 -m vidkit --json run plan --story examples/hello-world   # the agent surface
-python3 -m vidkit docs --index                             # JSON route table
+python3 -m truedemo doctor  examples/hello-world/video.yaml  # exit 0
+python3 -m truedemo plan    examples/hello-world/video.yaml  # scene plan + estimate
+python3 -m truedemo build   examples/hello-world/video.yaml  # mp4 + srt + verify.json
+python3 -m truedemo --json run plan --story examples/hello-world   # the agent surface
+python3 -m truedemo docs --index                             # JSON route table
 ```
 
 ### 4.3 When you change code
@@ -224,7 +224,7 @@ python3 -m vidkit docs --index                             # JSON route table
    form before you claim a phase is done. Never run two `pytest` processes at once — they
    share `.pytest-tmp/` and will fail each other spuriously.
 4. If you touched the pipeline, **build the hello-world fixture**:
-   `vidkit build examples/hello-world/video.yaml`. It must produce an `.mp4`, a
+   `truedemo build examples/hello-world/video.yaml`. It must produce an `.mp4`, a
    `narration.srt`, and a `verify.json` with **all checks passing**, using only `ffmpeg`
    and `rsvg-convert`.
 5. Update the spec/panel/CLI docs that your change invalidates — see [docs/modules.yaml](docs/modules.yaml).
@@ -253,7 +253,7 @@ python3 -m vidkit docs --index                             # JSON route table
   Any new printing code path must be wrapped too.
 - **`_FALLBACK_WPS = 2.5`** in `tts.py` disagrees with the CLI `plan` estimator (`words/2.78`).
   A known, documented minor inconsistency.
-- **This repo has a `build/` directory and `vidkit.egg-info/`** from an editable install.
+- **This repo has a `build/` directory and `truedemo.egg-info/`** from an editable install.
   They are gitignored scratch; do not commit them.
 - **The exec stage films a PTY, never a pipe.** A program checks `isatty` and changes what it
   prints when it is not on one, so piping would record a transcript that never happened
@@ -378,7 +378,7 @@ python3 -m vidkit docs --index                             # JSON route table
   (`probe_dispatch.py`: both sync and async bodies execute on the loop thread). Playwright's
   sync API therefore raises `It looks like you are using Playwright Sync API inside the asyncio
   loop` — every browser and capture tool was dead over MCP, always, until each became
-  `async def` and offloaded through `vidkit/_loop.py`. **`tool_run` is deliberately the one
+  `async def` and offloaded through `truedemo/_loop.py`. **`tool_run` is deliberately the one
   sync tool**, because its `_deadline` needs a main-thread `SIGALRM`; its ceiling is conditional
   and it reports `timeout_enforced` tri-state rather than pretending otherwise.
 - **A registration closure must be `async def` if and only if the thing it wraps is a
@@ -386,7 +386,7 @@ python3 -m vidkit docs --index                             # JSON route table
   *assignment* (`result = tool_session_exec(...)`) that no `return tool_x(` regex catches.
   `tests/test_mcp.py` now AST-scans every closure for both directions.
 - **A resource URI cannot carry the record root.** FastMCP enforces an exact parameter match
-  between a URI template and the function, so `vidkit://sessions/{session}/…` can name only the
+  between a URI template and the function, so `truedemo://sessions/{session}/…` can name only the
   session: `ValueError: Mismatch between URI parameters {'session'} and function parameters
   {'root', 'session'}`. `mcp_server._PROJECT` / `set_project()` / `_implicit_project()` and the
   `--project` flag resolve it out of band.
@@ -437,7 +437,7 @@ Use exactly these, so they are greppable:
 > Snapshot taken 2026-10-07 (after M10 merged). If this disagrees with
 > [docs/plan/PLAN.md](docs/plan/PLAN.md), trust PLAN.md.
 
-- **Repo state:** public on GitHub (`anindyasundarbera/vidkit`), default branch `main`,
+- **Repo state:** public on GitHub (`anindyasundarbera/truedemo`), default branch `main`,
   CI green. **M0–M10 are merged** (M8 = PR #9 → `63ad046`; PR #10 → `9d3385b`; M9 = PR #11
   → `1894ec9`; M10 = PR #13 → `b23de00`).
 - **Tests:** the lean local run is **681 passed / 101 skipped**. A local full run observed
@@ -464,7 +464,7 @@ Use exactly these, so they are greppable:
 - **Active phase:** **M0–M10 are complete and merged.** No additional feature phase is
   authorized in [docs/plan/FEATURE-ROADMAP.md](docs/plan/FEATURE-ROADMAP.md) §13. If this
   snapshot disagrees with [docs/plan/PLAN.md](docs/plan/PLAN.md), trust PLAN.md.
-- **What M10 added:** [vidkit/studio.py](../../vidkit/studio.py) — sessions, a record
+- **What M10 added:** [truedemo/studio.py](../../truedemo/studio.py) — sessions, a record
   registry, takes that are re-hashed on every list, selection that survives the render, and
   a `status()` that tells an agent what it may do next. Per-shot `transition:` landed with it
   (and `concat=n=2`'s timebase bug with it). The wire layer had to change underneath: **most
@@ -480,12 +480,13 @@ Use exactly these, so they are greppable:
   durations as positions in a longer film; and `duck_seconds` printed as a number the mix
   never produced. **A check that cannot fail is worse than no check, because it reads as
   assurance** (D49); **an absent measurement is not a negative measurement** (D52).
-- **Released: `v1.2.0` (2026-10-13).** This was the item that needed an owner decision, and it
-  is now closed. The version string had drifted behind the code (`1.0.0` while M7–M10 sat under
-  `## [Unreleased]`); `1.2.0` is the first release that matches, and the `v1.0.0` tag was
-  superseded without ever being pushed. **PyPI remains unpublished and is now blocked** — the
-  name `vidkit` belongs to an unrelated project (`SpyC0der77/vidkit`), so a publish would need
-  a different distribution name; the docs install from the git URL.
+- **Released: `v2.0.0` — renamed `vidkit` → `truedemo` (2026-10-13).** `v1.2.0` closed the
+  version drift (the `v1.0.0` tag was superseded without being pushed). `v2.0.0` then renamed
+  the project, because the name `vidkit` belongs on PyPI to an unrelated project
+  (`SpyC0der77/vidkit`). The import package, both console scripts, the 15 MCP tool names, the
+  7 resource URIs, and the environment variables all changed; the repository was renamed too.
+  **PyPI is still unpublished** — the rename removed the blocker, and publishing remains a
+  separate owner-owned step. See [DECISIONS.md](DECISIONS.md) D66.
 - **Host-safety contract (M8).** A container may never mount the Docker socket, runs
   unprivileged, has a hard timeout, and is torn down in a `finally` on every exit path.
   Teardown is *reported*, not assumed (`facts.environments[].teardown`). Do not weaken this

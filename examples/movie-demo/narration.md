@@ -1,4 +1,4 @@
-# vidkit movie mode — narration
+# truedemo movie mode — narration
 
 The score is mixed under the narration spans `verify.json` reports, and those
 spans come from these lines. Nothing here is a picture: the words are what the

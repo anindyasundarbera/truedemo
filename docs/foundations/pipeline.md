@@ -1,6 +1,6 @@
 # Pipeline
 
-The pipeline is a fixed, ordered list of **stages**. `vidkit build` runs them all;
+The pipeline is a fixed, ordered list of **stages**. `truedemo build` runs them all;
 `--only a,b` runs a subset. This document defines each stage precisely: what it reads,
 what it writes, and what it needs.
 
@@ -14,7 +14,7 @@ data → panels → stills → capture → narration → clips → concat → re
 - `--only` accepts any comma-separated subset, e.g. `--only panels` or
   `--only clips,concat,render`.
 - **Dependency note:** `clips` needs `narration` results. If you run `--only clips`
-  without narration, vidkit loads existing WAVs from `_build/wavs/` if present, else
+  without narration, truedemo loads existing WAVs from `_build/wavs/` if present, else
   estimates duration from word count. `render` re-loads `_build/narration.wav` if the
   narration stage did not run.
 
@@ -108,7 +108,7 @@ stream copy, so nothing is re-encoded; with any other transition it becomes a ch
 **Reads:** the output media, the guards, the narration text, and `provenance.json`.
 **Writes:** `OUT/_build/verify.json`; prints a PASS/FAIL table.
 **Purpose:** evaluate the acceptance checks (see [`verification.md`](../verification/verification.md)).
-**Exit code:** `vidkit build` returns `2` if any check fails, `0` otherwise.
+**Exit code:** `truedemo build` returns `2` if any check fails, `0` otherwise.
 
 It *reads* provenance rather than writing it: it is describing a build somebody else made,
 and a record composed at read time would describe today while appearing to describe the build
@@ -126,13 +126,13 @@ stages that ran, the dataset hashes, and the UTC time it finished.
 
 ```bash
 # re-render panels only (fast; uses persisted datasets)
-vidkit build SPEC --only panels
+truedemo build SPEC --only panels
 
 # re-clip and re-render after changing a scene's shot order
-vidkit build SPEC --only clips,concat,render
+truedemo build SPEC --only clips,concat,render
 
 # refresh the screen recordings without redoing anything else
-vidkit build SPEC --only capture
+truedemo build SPEC --only capture
 ```
 
 > After `--only panels`, the PNG stills are refreshed, but existing **clips** still hold

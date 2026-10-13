@@ -12,7 +12,7 @@ and hand the resolved dates to their data source instead of hard-coding
 ``?days=28`` in a URL.
 
 The same grammar (:func:`find_window_claims`) reads a window back *out of
-narration*, which is how :mod:`vidkit.verify` catches a video that says "the last
+narration*, which is how :mod:`truedemo.verify` catches a video that says "the last
 28 days" while its spec says 90. The spoken forms are documented in
 ``docs/authoring/stories-and-timeframes.md``.
 """
@@ -179,7 +179,7 @@ def parse_timeframe(raw: Any, *, where: str = "timeframe", source: str = "spec",
 
     When a relative window has no ``as_of`` it resolves against ``default_as_of``
     (today, normally) and is marked ``floating`` — the same spec would mean a
-    different window tomorrow, so :mod:`vidkit.spec` refuses to let narration
+    different window tomorrow, so :mod:`truedemo.spec` refuses to let narration
     spell out an end date it cannot guarantee.
     """
     if raw is None or (isinstance(raw, str) and not raw.strip()):

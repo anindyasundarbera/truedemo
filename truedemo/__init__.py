@@ -1,6 +1,6 @@
-"""vidkit — a declarative toolkit for producing narrated, captioned screen-recordings.
+"""truedemo — a declarative toolkit for producing narrated, captioned screen-recordings.
 
-vidkit turns a small YAML *spec* plus a data provider into:
+truedemo turns a small YAML *spec* plus a data provider into:
 
 * per-scene narration audio (TTS),
 * real or captured still frames (screen recordings via Playwright, charts from data),
@@ -19,6 +19,6 @@ library itself contains no product knowledge.
 from __future__ import annotations
 
 from ._version import __version__  # noqa: F401  (re-exported)
-from .errors import SpecError, ToolError, VidkitError  # noqa: F401
+from .errors import SpecError, ToolError, TruedemoError  # noqa: F401
 
-__all__ = ["VidkitError", "SpecError", "ToolError", "__version__"]
+__all__ = ["TruedemoError", "SpecError", "ToolError", "__version__"]

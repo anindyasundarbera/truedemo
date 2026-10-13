@@ -177,16 +177,16 @@ you are about to create a mismatch verify will find.
 ## Scaffolding a new story
 
 ```bash
-vidkit init my-story --title "My Story" --days 14 --as-of 2026-10-06
+truedemo init my-story --title "My Story" --days 14 --as-of 2026-10-06
 ```
 
 Writes a runnable four-file story — `story.yaml`, `video.yaml`, `narration.md`,
-`provider.py` — that builds with `vidkit build my-story/video.yaml` and passes `verify`
+`provider.py` — that builds with `truedemo build my-story/video.yaml` and passes `verify`
 unmodified. The narration states the window it was given, and the runtime window
 (`min_seconds`/`max_seconds`) is sized from the narration's own word count at 2.5 words/sec,
 so a fresh scaffold never trips its own runtime check.
 
-Existing files are **never** overwritten: `vidkit init` in a folder that already has work in
+Existing files are **never** overwritten: `truedemo init` in a folder that already has work in
 it fails rather than clobbering.
 
 ---
@@ -194,7 +194,7 @@ it fails rather than clobbering.
 ## Quick reference
 
 ```python
-from vidkit.timeframe import parse_timeframe, find_window_claims, timeframe_matches
+from truedemo.timeframe import parse_timeframe, find_window_claims, timeframe_matches
 
 tf = parse_timeframe({"days": 28, "as_of": "2026-10-06"})
 tf.days                     # 28 — inclusive
@@ -215,4 +215,4 @@ for claim in find_window_claims("the last 28 days to 2026-10-06"):
 - [Spec reference](./spec-reference.md) — the `timeframe:` key in context.
 - [Verification](../verification/verification.md) — R-F7 among the other checks.
 - [Narration and captions](./narration-and-captions.md) — script grammar and caption rules.
-- [CLI reference](../operations/cli-reference.md) — `vidkit init`, `--timeframe`, `--days`, `--as-of`.
+- [CLI reference](../operations/cli-reference.md) — `truedemo init`, `--timeframe`, `--days`, `--as-of`.

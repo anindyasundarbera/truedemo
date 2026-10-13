@@ -29,7 +29,7 @@ answers ``pg_isready`` at t≈1.30 s against its *bootstrap* server, which is sh
 down at t≈1.45 s; the server that survives only accepts connections from
 t≈1.84 s. A single successful sample therefore certifies a database that is
 about to vanish, and the next ``docker exec`` fails with ``the database system is
-shutting down``. See :data:`vidkit.exec.READY_HOLD`.
+shutting down``. See :data:`truedemo.exec.READY_HOLD`.
 """
 
 from __future__ import annotations
@@ -41,10 +41,10 @@ from pathlib import Path
 import pytest
 from conftest import _HAVE_DOCKER
 
-from vidkit import exec as ex
-from vidkit import spec as sp
-from vidkit.assembler import Assets, _start_environments, _stop_environments
-from vidkit.errors import SpecError
+from truedemo import exec as ex
+from truedemo import spec as sp
+from truedemo.assembler import Assets, _start_environments, _stop_environments
+from truedemo.errors import SpecError
 
 needs_docker = pytest.mark.needs_docker
 
@@ -208,7 +208,7 @@ def test_the_container_is_named_after_the_environment_and_is_identifiable(env):
 def test_a_name_with_an_ugly_environment_name_is_still_a_legal_container_name(env):
     env.name = "My Environment/Db!"
     name = ex._container_name(env, "s")
-    assert name == "vidkit-my-environment-db-s"
+    assert name == "truedemo-my-environment-db-s"
 
 
 def test_the_project_is_bound_read_only_and_by_the_backend(tmp_path):
@@ -225,7 +225,7 @@ def test_a_declared_volume_is_added_after_the_projects(env, tmp_path):
 
 
 def test_the_container_gets_the_declared_environment(env, tmp_path):
-    argv = ex._docker_create_argv(env, tmp_path, "vidkit-db-x")
+    argv = ex._docker_create_argv(env, tmp_path, "truedemo-db-x")
     assert "-e" in argv and "POSTGRES_PASSWORD=demo" in argv
 
 
@@ -246,7 +246,7 @@ def test_the_container_is_created_in_the_background_and_not_self_removing(env, t
     assert "--rm" not in argv
 
 
-def test_the_container_carries_vidkit_s_own_labels(env, tmp_path):
+def test_the_container_carries_truedemo_s_own_labels(env, tmp_path):
     argv = ex._docker_create_argv(env, tmp_path, "n")
     for key, value in ex.DOCKER_LABELS.items():
         assert f"{key}={value}" in argv
@@ -502,7 +502,7 @@ def test_a_spec_declaring_docker_says_the_sandbox_is_needed(tmp_path, monkeypatc
     loads at all on a host that really can run a container. Both halves are asserted
     here: the refusal on a host that cannot, and the verdict on the loaded spec.
     """
-    from vidkit.reports import _sandbox_needs
+    from truedemo.reports import _sandbox_needs
     monkeypatch.setattr(ex, "_PROBE_CACHE", {})
     monkeypatch.setattr(ex, "docker_client", lambda: "/usr/bin/docker")
     monkeypatch.setattr(ex, "_docker_run", lambda *a, timeout: subprocess.CompletedProcess(
@@ -522,7 +522,7 @@ def test_a_spec_declaring_docker_says_the_sandbox_is_needed(tmp_path, monkeypatc
 
 
 def test_a_spec_declaring_docker_on_a_working_host_is_reported_as_runnable(tmp_path, monkeypatch):
-    from vidkit.reports import _sandbox_needs
+    from truedemo.reports import _sandbox_needs
     if not _HAVE_DOCKER:
         pytest.skip("a spec declaring docker only loads on a host that can run one")
     needs = _sandbox_needs(_docker_spec(tmp_path))
@@ -720,7 +720,7 @@ def test_image_digest_identifies_what_actually_ran(env):
 
 
 def test_image_digest_of_a_missing_image_is_the_empty_string():
-    assert ex.image_digest("vidkit-no-such-image:1") == ""
+    assert ex.image_digest("truedemo-no-such-image:1") == ""
 
 
 # --------------------------------------------------------------------------- #
@@ -774,7 +774,7 @@ def test_the_second_teardown_pass_does_not_erase_the_first_pass_evidence(tmp_pat
 @needs_docker
 def test_an_environment_that_cannot_start_is_a_warning_and_a_fact_not_a_crash(tmp_path):
     spec = _docker_spec(tmp_path, image="alpine")
-    spec.environments[0].image = "vidkit-no-such-image:1"
+    spec.environments[0].image = "truedemo-no-such-image:1"
     ctx = _Ctx(tmp_path, spec)
     assets = Assets()
     started: list[ex.EnvState] = []
@@ -804,7 +804,7 @@ def test_an_environment_nothing_references_is_never_started(monkeypatch, tmp_pat
 def test_the_stage_still_has_ten_stages():
     """M9's constraint P5: no eleventh pipeline stage. Environments are a
     *property of* the exec stage, not a new one."""
-    from vidkit.assembler import STAGES
+    from truedemo.assembler import STAGES
     assert len(STAGES) == 10
     assert "exec" in STAGES
     assert not any("env" in s for s in STAGES)

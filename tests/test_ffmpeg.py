@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-from vidkit.ffmpeg import Ffmpeg, Shell, fit_filters
+from truedemo.ffmpeg import Ffmpeg, Shell, fit_filters
 
 HAVE_FFMPEG = shutil.which("ffmpeg") is not None
 needs_ffmpeg = pytest.mark.skipif(not HAVE_FFMPEG, reason="ffmpeg not installed")
@@ -341,7 +341,7 @@ def test_concat_with_transitions_falls_back_to_a_hard_cut():
 
 
 def test_concat_with_transitions_refuses_a_single_clip():
-    from vidkit.errors import ToolError
+    from truedemo.errors import ToolError
 
     ff, _ = _ffmpeg()
     with pytest.raises(ToolError, match="at least two clips"):

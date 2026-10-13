@@ -1,8 +1,8 @@
-# vidkit documentation module map.
+# truedemo documentation module map.
 #
 # Machine-readable route table for agents. Each module groups related docs and
-# declares who should read it and in what order. `vidkit_docs` (MCP) and
-# `vidkit docs` (CLI) resolve names against this file, so a doc is reachable by
+# declares who should read it and in what order. `truedemo_docs` (MCP) and
+# `truedemo docs` (CLI) resolve names against this file, so a doc is reachable by
 # its bare stem regardless of which module folder it lives in.
 #
 # Fields:
@@ -34,7 +34,7 @@ modules:
     route: docs/authoring/<doc>
     docs:
       - {file: authoring/spec-reference.md, title: Spec reference, summary: Every video.yaml field, type, and default.}
-      - {file: authoring/provider-guide.md, title: Provider guide, summary: The bridge between vidkit and your data.}
+      - {file: authoring/provider-guide.md, title: Provider guide, summary: The bridge between truedemo and your data.}
       - {file: authoring/panels-reference.md, title: Panels reference, summary: Every built-in panel kind and its dataset shape.}
       - {file: authoring/stories-and-timeframes.md, title: Stories and timeframes, summary: Story folders, the timeframe contract, and what narration may state about time.}
       - {file: authoring/narration-and-captions.md, title: Narration and captions, summary: Script grammar, caption rules, voice tuning.}
@@ -76,7 +76,7 @@ modules:
     audience: both
     route: docs/guides/<doc>
     docs:
-      - {file: guides/tour.md, title: A tour, summary: What a build does, stage by stage — the newcomer's orientation to vidkit.}
+      - {file: guides/tour.md, title: A tour, summary: What a build does, stage by stage — the newcomer's orientation to truedemo.}
       - {file: guides/first-video.md, title: Your first video, summary: Fresh clone to a verified mp4, by CLI and by MCP, using only the docs.}
       - {file: guides/recipes.md, title: Recipes, summary: Known-good patterns for common video tasks.}
 

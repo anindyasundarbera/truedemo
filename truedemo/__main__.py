@@ -1,4 +1,4 @@
-"""`python -m vidkit` entry point."""
+"""`python -m truedemo` entry point."""
 
 from .cli import main
 

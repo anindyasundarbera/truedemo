@@ -1,6 +1,6 @@
-"""vidkit as an MCP server.
+"""truedemo as an MCP server.
 
-Exposes vidkit's capabilities as MCP tools and resources so an agent (in an IDE or a chat
+Exposes truedemo's capabilities as MCP tools and resources so an agent (in an IDE or a chat
 client) can plan, build, inspect, and verify videos directly.
 
 Design
@@ -18,8 +18,8 @@ are unit-tested in ``tests/test_mcp.py``.
 
 Run::
 
-    python -m vidkit.mcp_server            # stdio
-    python -m vidkit.mcp_server --transport streamable-http --port 8765
+    python -m truedemo.mcp_server            # stdio
+    python -m truedemo.mcp_server --transport streamable-http --port 8765
 """
 
 from __future__ import annotations
@@ -37,7 +37,7 @@ from typing import TYPE_CHECKING, Any, Iterator
 if TYPE_CHECKING:
     from . import studio
 
-from .errors import ToolError, VidkitError
+from .errors import ToolError, TruedemoError
 from .provenance import Provenance
 from .reports import doctor_report, plan_report
 
@@ -78,7 +78,7 @@ def _server_class():
         except (ImportError, AttributeError) as exc:
             errors.append(exc)
     raise ImportError(
-        "no MCP app class found — this version of 'mcp' is newer than vidkit knows "
+        "no MCP app class found — this version of 'mcp' is newer than truedemo knows "
         f"(looked for {', '.join(f'{m}.{a}' for m, a in _SERVER_CLASSES)})"
     ) from errors[0]
 
@@ -137,12 +137,12 @@ def default_spec() -> str | None:
 
     # 2. the first spec under examples/
     for pattern in ("examples/*/video.y*ml", "examples/*/spec.y*ml",
-                    "vidkit/examples/*/video.y*ml"):
+                    "truedemo/examples/*/video.y*ml"):
         hits = sorted(glob.glob(pattern))
         if hits:
             return str(Path(hits[0]).resolve())
 
-    # 3. any file under the CWD that looks like a vidkit spec
+    # 3. any file under the CWD that looks like a truedemo spec
     for pattern in ("*.y*ml", "*.json", "**/video.y*ml", "**/spec.y*ml"):
         for p in sorted(Path.cwd().rglob(pattern)):
             try:
@@ -244,7 +244,7 @@ def _implicit_project() -> Path:
     """The project this server, running with no argument, is about.
 
     A session's record is a file, and a resource URI names only the session — so a
-    server that is asked for ``vidkit://sessions/<id>/status`` has to know which
+    server that is asked for ``truedemo://sessions/<id>/status`` has to know which
     project to look in. It resolves it the same way a bare tool call does: the
     directory the server was told to serve (``--project``), else the directory of
     the default spec, else the working directory. ``set_project`` pins the first.
@@ -288,14 +288,14 @@ def tool_session_open(spec: str | None = None, out: str | None = None,
 
     A session is a *sitting*: everything a director does between "open the set" and
     "show me the film". It is durable — the record is a JSON file under
-    ``<out>/.vidkit/sessions/`` — so a client that comes back after a restart, or
+    ``<out>/.truedemo/sessions/`` — so a client that comes back after a restart, or
     after its own context was compacted, can call ``session_status`` and find out
     exactly where it was.
 
     ``max_seconds``, ``max_containers`` and ``max_tokens`` are the budget the sitting
     declares. Wall-clock and container counts are measured against what the work
     actually did and refuse when exhausted; the token budget is *recorded* but not
-    enforced, because vidkit cannot see a client's token meter.
+    enforced, because truedemo cannot see a client's token meter.
     """
     from . import studio
 
@@ -512,10 +512,10 @@ async def _narrate_chunks(ctx, result: dict[str, Any]) -> None:
 # --------------------------------------------------------------------------- #
 # Tool functions (pure data in, pure data out)
 # --------------------------------------------------------------------------- #
-#: Default wall-clock ceiling for ``vidkit_run``. A tool call has no terminal to
+#: Default wall-clock ceiling for ``truedemo_run``. A tool call has no terminal to
 #: Ctrl-C and no job object to cancel, so an unbounded render is a client that
 #: hangs with no way to ask what happened. Override per call, or with
-#: ``VIDKIT_RUN_TIMEOUT`` (seconds; ``0`` disables the ceiling).
+#: ``TRUEDEMO_RUN_TIMEOUT`` (seconds; ``0`` disables the ceiling).
 RUN_TIMEOUT = 1800.0
 async def tool_env_up(session: str, name: str, out: str | None = None) -> dict[str, Any]:
     """Start a declared environment (a container) for this session.
@@ -820,7 +820,7 @@ async def tool_build(spec: str | None = None, out: str | None = None,
             with stdout_to_stderr():
                 return run(spec_path, only=only or None, from_stage=from_stage,
                            out_dir=out_dir, refresh=refresh)
-        except VidkitError as exc:
+        except TruedemoError as exc:
             raise ToolError(str(exc)) from exc
 
     result = _assets_summary(await _offloop(render))
@@ -839,7 +839,7 @@ async def tool_tts(spec: str | None = None, out: str | None = None) -> dict[str,
         try:
             with stdout_to_stderr():
                 return run(spec_path, only=["narration"], out_dir=out_dir)
-        except VidkitError as exc:
+        except TruedemoError as exc:
             raise ToolError(str(exc)) from exc
 
     assets = await _offloop(speak)
@@ -862,7 +862,7 @@ async def tool_capture(spec: str | None = None, out: str | None = None) -> dict[
         try:
             with stdout_to_stderr():
                 return run(spec_path, only=["capture"], out_dir=out_dir)
-        except VidkitError as exc:
+        except TruedemoError as exc:
             raise ToolError(str(exc)) from exc
 
     assets = await _offloop(shoot)
@@ -927,11 +927,11 @@ async def tool_provenance(spec: str | None = None, out: str | None = None) -> di
 
 
 def _run_timeout(timeout: float | None) -> float:
-    """The wall-clock ceiling for one ``vidkit_run`` call (``0`` = unbounded)."""
+    """The wall-clock ceiling for one ``truedemo_run`` call (``0`` = unbounded)."""
     if timeout is not None:
         return max(0.0, float(timeout))
     try:
-        return max(0.0, float(os.environ.get("VIDKIT_RUN_TIMEOUT", RUN_TIMEOUT)))
+        return max(0.0, float(os.environ.get("TRUEDEMO_RUN_TIMEOUT", RUN_TIMEOUT)))
     except ValueError:
         return RUN_TIMEOUT
 
@@ -978,12 +978,12 @@ def tool_run(action: str = "plan", story: str | None = None, out: str | None = N
              progress: bool = False, timeout: float | None = None) -> dict[str, Any]:
     """Run one job and return its manifest (R-G3).
 
-    The whole point of the job contract: a caller that does not know vidkit can
+    The whole point of the job contract: a caller that does not know truedemo can
     call this with an action and a story and read ``ok`` and ``failure`` back,
     instead of choosing among a dozen tools and guessing their order.
 
     ``timeout`` bounds the call in seconds (default :data:`RUN_TIMEOUT`, or
-    ``VIDKIT_RUN_TIMEOUT``; ``0`` disables it). A job that overruns is refused with a
+    ``TRUEDEMO_RUN_TIMEOUT``; ``0`` disables it). A job that overruns is refused with a
     manifest rather than left hanging — see :func:`_deadline`.
     """
     from .job import refused, run_job
@@ -1242,17 +1242,17 @@ def build_server(*, host: str = "127.0.0.1", port: int = 8765,
     except ImportError as exc:  # pragma: no cover - optional dependency
         raise SystemExit(
             "The MCP server needs the 'mcp' package. Install it with:\n"
-            "    pip install 'vidkit[mcp]'\n"
+            "    pip install 'truedemo[mcp]'\n"
             f"(import error: {exc})"
         ) from exc
 
     server = Server(
-        name="vidkit",
+        name="truedemo",
         instructions=(
-            "vidkit produces narrated, captioned screen-recording videos from a YAML "
-            "spec plus a data provider. Typical flow: call `vidkit_plan` to preview, "
-            "`vidkit_build` to render, then `vidkit_verify` to check the result. Use "
-            "`vidkit_doctor` first if a build fails. `vidkit_docs` returns the full "
+            "truedemo produces narrated, captioned screen-recording videos from a YAML "
+            "spec plus a data provider. Typical flow: call `truedemo_plan` to preview, "
+            "`truedemo_build` to render, then `truedemo_verify` to check the result. Use "
+            "`truedemo_doctor` first if a build fails. `truedemo_docs` returns the full "
             "documentation (start with 'concepts', then 'spec-reference')."
         ),
     )
@@ -1281,15 +1281,15 @@ def _apply_transport_settings(server, *, host: str, port: int, path: str) -> Non
 
 
 def _register_tools(server) -> None:
-    """Register the vidkit tools.
+    """Register the truedemo tools.
 
     Schemas are inferred by the MCP SDK from the type hints and defaults, so the
     ``tool_*`` functions' signatures are the single source of truth.
     """
 
     @server.tool(
-        name="vidkit_run",
-        title="Run a vidkit job",
+        name="truedemo_run",
+        title="Run a truedemo job",
         description="Run one job — `init`, `doctor`, `plan`, `build`, `capture`, `tts` "
                     "or `verify` — and return its manifest. `story` is a story folder "
                     "(its video.yaml is found inside) or a spec path; `out` is where "
@@ -1301,7 +1301,7 @@ def _register_tools(server) -> None:
                     "rather than left hanging. This is the one call to use when you "
                     "do not want to choose among the individual tools.",
     )
-    def vidkit_run(action: str = "plan", story: str | None = None, out: str | None = None,
+    def truedemo_run(action: str = "plan", story: str | None = None, out: str | None = None,
                    timeframe: str | None = None, as_of: str | None = None,
                    refresh: bool = False, title: str | None = None,
                    slug: str | None = None, only: list[str] | None = None,
@@ -1311,54 +1311,54 @@ def _register_tools(server) -> None:
                         only, from_stage, progress, timeout)
 
     @server.tool(
-        name="vidkit_actions",
+        name="truedemo_actions",
         title="List the job actions",
-        description="The actions `vidkit_run` accepts, what each one does, and which "
+        description="The actions `truedemo_run` accepts, what each one does, and which "
                     "pipeline stages each one runs.",
     )
-    def vidkit_actions() -> dict:
+    def truedemo_actions() -> dict:
         return tool_actions()
 
     @server.tool(
-        name="vidkit_init",
+        name="truedemo_init",
         title="Scaffold a new story",
         description="Create a runnable story directory (story.yaml, video.yaml, "
                     "provider.py, narration.md) and return the manifest. Refuses to "
                     "overwrite anything already there.",
     )
-    def vidkit_init(story: str, title: str | None = None, slug: str | None = None,
+    def truedemo_init(story: str, title: str | None = None, slug: str | None = None,
                     timeframe: str | None = None, as_of: str | None = None) -> dict:
         return tool_init(story, title, slug, timeframe, as_of)
 
     @server.tool(
-        name="vidkit_capture_plan",
+        name="truedemo_capture_plan",
         title="What the captures will film",
         description="The captures a build would run — URLs, action steps, assertions, "
                     "downloads — without filming any of them. Use it to check a plan "
                     "before spending a minute on a browser.",
     )
-    def vidkit_capture_plan(spec: str | None = None) -> dict:
+    def truedemo_capture_plan(spec: str | None = None) -> dict:
         return tool_capture_plan(spec)
 
     @server.tool(
-        name="vidkit_doctor",
-        title="Check the vidkit environment",
+        name="truedemo_doctor",
+        title="Check the truedemo environment",
         description="Verify ffmpeg/rsvg-convert/playwright/piper and, if a spec is given, "
                     "its validity. Run this first when something fails.",
     )
-    def vidkit_doctor(spec: str | None = None) -> dict:
+    def truedemo_doctor(spec: str | None = None) -> dict:
         return tool_doctor(spec)
 
     @server.tool(
-        name="vidkit_plan",
+        name="truedemo_plan",
         title="Plan a video (no render)",
         description="Show the scene plan, shots, guards, and estimated runtime for a spec.",
     )
-    def vidkit_plan(spec: str | None = None) -> dict:
+    def truedemo_plan(spec: str | None = None) -> dict:
         return tool_plan(spec)
 
     @server.tool(
-        name="vidkit_build",
+        name="truedemo_build",
         title="Build the video",
         description="Run the full pipeline (capture, charts, narration, render, verify). "
                     "Returns the output path, captions, and the verification report. "
@@ -1366,82 +1366,82 @@ def _register_tools(server) -> None:
                     "narration, clips, concat, render, verify. `refresh: true` re-asks "
                     "the data source even when a snapshot would do. `progress: true` "
                     "returns the job manifest and narrates the run to stderr; prefer "
-                    "`vidkit_run` for that.",
+                    "`truedemo_run` for that.",
     )
-    async def vidkit_build(spec: str | None = None, out: str | None = None,
+    async def truedemo_build(spec: str | None = None, out: str | None = None,
                      only: list[str] | None = None, from_stage: str | None = None,
                      refresh: bool = False, progress: bool = False) -> dict:
         return await tool_build(spec, out, only, from_stage, refresh, progress)
 
     @server.tool(
-        name="vidkit_tts",
+        name="truedemo_tts",
         title="Synthesize narration",
         description="(Re)generate per-scene narration audio and re-measure timings.",
     )
-    async def vidkit_tts(spec: str | None = None, out: str | None = None) -> dict:
+    async def truedemo_tts(spec: str | None = None, out: str | None = None) -> dict:
         return await tool_tts(spec, out)
 
     @server.tool(
-        name="vidkit_capture",
+        name="truedemo_capture",
         title="Capture screen recordings",
         description="(Re)run the Playwright screen captures (the real UI, with assertions).",
     )
-    async def vidkit_capture(spec: str | None = None, out: str | None = None) -> dict:
+    async def truedemo_capture(spec: str | None = None, out: str | None = None) -> dict:
         return await tool_capture(spec, out)
 
     @server.tool(
-        name="vidkit_verify",
+        name="truedemo_verify",
         title="Verify the last render",
         description="Re-run the acceptance checks (runtime window, banned/required phrases, "
                     "caption readability, audio, live captures) against the last output.",
     )
-    async def vidkit_verify(spec: str | None = None, out: str | None = None) -> dict:
+    async def truedemo_verify(spec: str | None = None, out: str | None = None) -> dict:
         return await tool_verify(spec, out)
 
     @server.tool(
-        name="vidkit_verify_report",
+        name="truedemo_verify_report",
         title="Read the verification report",
         description="Return the persisted verify.json from the last build without re-running checks.",
     )
-    async def vidkit_verify_report(spec: str | None = None, out: str | None = None) -> dict:
+    async def truedemo_verify_report(spec: str | None = None, out: str | None = None) -> dict:
         return await tool_verify_report(spec, out)
 
     @server.tool(
-        name="vidkit_provenance",
+        name="truedemo_provenance",
         title="Read the build provenance",
         description="Return the persisted provenance.json: spec hash, window, provider "
                     "hash, stage list, dataset hashes, and the version of every tool "
                     "that rendered it. Answers 'which build is this?', where "
                     "`verify.json` answers 'is it honest?'.",
     )
-    async def vidkit_provenance(spec: str | None = None, out: str | None = None) -> dict:
+    async def truedemo_provenance(spec: str | None = None, out: str | None = None) -> dict:
         return await tool_provenance(spec, out)
 
     @server.tool(
-        name="vidkit_panel_kinds",
+        name="truedemo_panel_kinds",
         title="List panel kinds",
         description="List the built-in chart/panel kinds a spec chart may reference.",
     )
-    def vidkit_panel_kinds() -> dict:
+    def truedemo_panel_kinds() -> dict:
         return tool_panel_kinds()
 
     @server.tool(
-        name="vidkit_docs",
-        title="Read vidkit documentation",
+        name="truedemo_docs",
+        title="Read truedemo documentation",
         description="Return the documentation index (the module router), or a named document. "
                     "Names are module-routed, so a bare stem ('concepts', 'spec-reference'), "
                     "a module-qualified name ('authoring/spec-reference'), or a path all work.",
     )
-    def vidkit_docs(name: str | None = None) -> str:
+    def truedemo_docs(name: str | None = None) -> str:
         return tool_docs(name)
 
     @server.tool(
-        name="vidkit_docs_index",
+        name="truedemo_docs_index",
         title="Documentation route table",
         description="Return the machine-readable module map (docs/modules.yaml): modules, "
                     "their docs, and suggested reading order. Use it to route to the right doc.",
     )
-    def vidkit_docs_index() -> dict:
+    def truedemo_docs_index() -> dict:
         return tool_docs_index()
 
     # ----------------------------------------------------------------- studio --
@@ -1671,32 +1671,32 @@ def _register_tools(server) -> None:
 
 
 def _register_resources(server) -> None:
-    @server.resource("vidkit://docs/index", name="vidkit docs index",
+    @server.resource("truedemo://docs/index", name="truedemo docs index",
                      description="The documentation module router (table of contents).",
                      mime_type="text/markdown")
     def docs_index() -> str:
         return tool_docs(None)
 
-    @server.resource("vidkit://docs/modules", name="vidkit docs modules",
+    @server.resource("truedemo://docs/modules", name="truedemo docs modules",
                      description="The machine-readable module route table.",
                      mime_type="application/json")
     def docs_modules() -> str:
         return json.dumps(tool_docs_index(), indent=1)
 
-    @server.resource("vidkit://actions", name="vidkit job actions",
-                     description="The job actions vidkit_run accepts, and their stages.",
+    @server.resource("truedemo://actions", name="truedemo job actions",
+                     description="The job actions truedemo_run accepts, and their stages.",
                      mime_type="application/json")
     def actions() -> str:
         return json.dumps(tool_actions(), indent=1)
 
-    @server.resource("vidkit://docs/{name}", name="vidkit doc",
-                     description="A named vidkit document as Markdown (module-routed).",
+    @server.resource("truedemo://docs/{name}", name="truedemo doc",
+                     description="A named truedemo document as Markdown (module-routed).",
                      mime_type="text/markdown")
     def doc(name: str) -> str:
         return tool_docs(name)
 
-    @server.resource("vidkit://sessions/{session}/status",
-                     name="vidkit session status",
+    @server.resource("truedemo://sessions/{session}/status",
+                     name="truedemo session status",
                      description="One studio session's whole state: record, takes, "
                                  "environments, artifacts, and the next step.",
                      mime_type="application/json")
@@ -1706,15 +1706,15 @@ def _register_resources(server) -> None:
         # await, because the live path hops threads — this one does not, and says so.
         return json.dumps(tool_session_status(session, None), indent=1)
 
-    @server.resource("vidkit://sessions/{session}/takes",
-                     name="vidkit session takes",
+    @server.resource("truedemo://sessions/{session}/takes",
+                     name="truedemo session takes",
                      description="The takes on disk for a session, with hashes and sizes.",
                      mime_type="application/json")
     async def session_takes(session: str) -> str:
         return json.dumps(await tool_take_list(session, None, None), indent=1)
 
-    @server.resource("vidkit://sessions/{session}/report",
-                     name="vidkit session report",
+    @server.resource("truedemo://sessions/{session}/report",
+                     name="truedemo session report",
                      description="This session's persisted verify.json, failed checks first.",
                      mime_type="application/json")
     async def session_report(session: str) -> str:
@@ -1725,7 +1725,7 @@ def _register_resources(server) -> None:
 def main(argv: list[str] | None = None) -> int:
     import argparse
 
-    parser = argparse.ArgumentParser(prog="vidkit-mcp", description=__doc__,
+    parser = argparse.ArgumentParser(prog="truedemo-mcp", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--transport", default="stdio",
                         choices=["stdio", "streamable-http", "sse"],
@@ -1762,7 +1762,7 @@ def main(argv: list[str] | None = None) -> int:
         where = (f"http://{args.host}:{args.port}{args.path}"
                  if args.transport == "streamable-http"
                  else f"http://{args.host}:{args.port}/sse")
-        print(f"vidkit MCP server ({args.transport}): {where}", file=sys.stderr)
+        print(f"truedemo MCP server ({args.transport}): {where}", file=sys.stderr)
         server.run(args.transport, **_transport_kwargs(server, args))
     return 0
 

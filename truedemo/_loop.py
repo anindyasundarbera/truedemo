@@ -56,7 +56,7 @@ class Worker:
     to serve a client that runs no loop at all.
     """
 
-    def __init__(self, name: str = "vidkit-worker") -> None:
+    def __init__(self, name: str = "truedemo-worker") -> None:
         self._name = name
         self._thread: threading.Thread | None = None
         self._jobs: "queue.Queue[Any] | None" = None
@@ -161,10 +161,10 @@ async def offload(fn: Callable[..., T], /, *args: Any, **kwargs: Any) -> T:
 
     Deliberately built only on :mod:`asyncio` and :mod:`contextvars`, with no
     third-party thread pool. An earlier version delegated to ``anyio.to_thread``,
-    which is *not* one of vidkit's declared dependencies — it merely arrives
+    which is *not* one of truedemo's declared dependencies — it merely arrives
     alongside the optional ``mcp`` extra. So the seam held exactly as long as every
     caller also installed the MCP server, and any caller with the engine alone (a
-    lean test run, a host mounting ``vidkit://`` by hand) got
+    lean test run, a host mounting ``truedemo://`` by hand) got
     ``RuntimeError: ... anyio is not installed`` from a function documented as a
     plain hop off the loop. A seam this central should not have a dependency the
     engine does not declare, and it does not need a thread *pool*: the work here is

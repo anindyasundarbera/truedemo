@@ -11,10 +11,10 @@ from pathlib import Path
 
 import pytest
 
-from vidkit.errors import SpecError
-from vidkit.scaffold import scaffold_story
-from vidkit.spec import STORY_MANIFEST, load_spec, load_story
-from vidkit.timeframe import (
+from truedemo.errors import SpecError
+from truedemo.scaffold import scaffold_story
+from truedemo.spec import STORY_MANIFEST, load_spec, load_story
+from truedemo.timeframe import (
     find_window_claims,
     from_absolute,
     from_relative,
@@ -234,7 +234,7 @@ def test_story_identity_is_synthesised_from_the_folder(tmp_path):
 
 
 def _slug(text: str) -> str:
-    from vidkit.spec import _slugify
+    from truedemo.spec import _slugify
     return _slugify(text)
 
 
@@ -282,8 +282,8 @@ def test_a_disagreeing_narration_window_loads_and_is_caught_by_verify(tmp_path):
 
 
 def test_verify_rejects_a_narration_window_that_disagrees_with_the_spec(tmp_path):
-    from vidkit.assembler import Assets, make_context
-    from vidkit.verify import verify_output
+    from truedemo.assembler import Assets, make_context
+    from truedemo.verify import verify_output
 
     p = _story(tmp_path, narration="**This covers the last 90 days to 2026-10-06.**")
     ctx = make_context(p, tmp_path / "out", timeframe="28d", as_of=date(2026, 10, 6))
@@ -294,8 +294,8 @@ def test_verify_rejects_a_narration_window_that_disagrees_with_the_spec(tmp_path
 
 
 def test_verify_accepts_a_narration_window_that_agrees_with_the_spec(tmp_path):
-    from vidkit.assembler import Assets, make_context
-    from vidkit.verify import verify_output
+    from truedemo.assembler import Assets, make_context
+    from truedemo.verify import verify_output
 
     p = _story(tmp_path, narration="**This covers 9 September 2026 to 6 October 2026.**")
     ctx = make_context(p, tmp_path / "out", timeframe="28d", as_of=date(2026, 10, 6))
@@ -357,7 +357,7 @@ def test_scaffold_sizes_its_runtime_window_to_its_own_words(tmp_path):
     target = tmp_path / "s"
     scaffold_story(target, timeframe=from_relative(7, AS_OF))
     spec = load_spec(target / "video.yaml")
-    from vidkit.narration import parse_scene_script
+    from truedemo.narration import parse_scene_script
     words = sum(len(s.spoken.split()) for s in parse_scene_script(
         (target / "narration.md").read_text(encoding="utf-8")))
     est = words / 2.5

@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from vidkit.job import ACTIONS, Progress, actions_help, run_job, stages_for
+from truedemo.job import ACTIONS, Progress, actions_help, run_job, stages_for
 
 REPO = Path(__file__).resolve().parents[1]
 EXAMPLE = REPO / "examples" / "hello-world"
@@ -26,7 +26,7 @@ EXAMPLE = REPO / "examples" / "hello-world"
 #: added on top — `plan` grows a `plan` key — but these are never missing, so a
 #: caller can read them before it knows whether the job worked.
 BASE_KEYS = {"action", "ok", "story", "out", "spec", "timeframe", "artifacts",
-             "report", "timeline", "failure", "progress", "vidkit"}
+             "report", "timeline", "failure", "progress", "truedemo"}
 
 
 def test_a_manifest_always_has_the_same_base_keys():
@@ -70,9 +70,9 @@ def test_a_manifest_is_json_serializable():
 
 
 def test_the_version_is_reported():
-    from vidkit import __version__
+    from truedemo import __version__
 
-    assert run_job("plan", story=str(EXAMPLE))["vidkit"] == __version__
+    assert run_job("plan", story=str(EXAMPLE))["truedemo"] == __version__
 
 
 # --------------------------------------------------------------------------- #
@@ -84,7 +84,7 @@ def test_an_unknown_action_is_answered_not_raised():
     assert manifest["ok"] is False
     assert manifest["failure"]["kind"] == "tool"
     assert "unknown action" in manifest["failure"]["message"]
-    assert "vidkit_actions" in manifest["failure"]["hint"]
+    assert "truedemo_actions" in manifest["failure"]["hint"]
 
 
 def test_no_story_at_all_says_so():
@@ -182,7 +182,7 @@ def test_doctor_answers_the_sandbox_question_with_or_without_a_story():
 def test_a_sandbox_verdict_without_a_spec_is_not_a_crash_on_a_lean_host():
     """On a machine with no bubblewrap, `doctor` is allowed to say `NO` — it is not
     allowed to raise, because an agent probing the host is exactly what it is for."""
-    from vidkit.reports import format_doctor
+    from truedemo.reports import format_doctor
 
     report = run_job("doctor")["doctor"]
     text = format_doctor(report)
@@ -272,10 +272,10 @@ def test_progress_steps_are_classified():
         pass
 
     progress = Progress()
-    from vidkit.job import _LineTicker
+    from truedemo.job import _LineTicker
 
     sink = _LineTicker(progress)
-    sink.write("[vidkit] panels: 8\n[PASS] output exists — x\nWARN no TTS engine\n")
+    sink.write("[truedemo] panels: 8\n[PASS] output exists — x\nWARN no TTS engine\n")
     sink.flush()
 
     kinds = [s["kind"] for s in progress.steps]
@@ -301,14 +301,14 @@ def test_progress_does_not_leak_onto_stdout(capsys):
 # The artifact manifest describes the run, not the wish
 # --------------------------------------------------------------------------- #
 def test_a_missing_file_is_never_reported_as_an_artifact():
-    from vidkit.job import _artifact
+    from truedemo.job import _artifact
 
     assert _artifact(None) is None
     assert _artifact(Path("/no/such/file.mp4")) is None
 
 
 def test_an_empty_file_is_reported_but_not_as_ok(tmp_path):
-    from vidkit.job import _artifact
+    from truedemo.job import _artifact
 
     empty = tmp_path / "empty.mp4"
     empty.write_bytes(b"")
@@ -316,7 +316,7 @@ def test_an_empty_file_is_reported_but_not_as_ok(tmp_path):
 
 
 def test_a_real_file_is_reported_with_its_size(tmp_path):
-    from vidkit.job import _artifact
+    from truedemo.job import _artifact
 
     real = tmp_path / "clip.mp4"
     real.write_bytes(b"x" * 12)

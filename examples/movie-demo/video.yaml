@@ -1,4 +1,4 @@
-# vidkit spec — movie-demo (M9's exit proof)
+# truedemo spec — movie-demo (M9's exit proof)
 #
 # This is a *film*, not a product demo, and it is built to prove one thing that
 # nothing before M9 could: it has **no captures, no provider and no browser**. Every
@@ -7,15 +7,15 @@
 # `verify` passes.
 #
 # Run from the repo root:
-#   vidkit doctor examples/movie-demo/video.yaml
-#   vidkit plan   examples/movie-demo/video.yaml
-#   vidkit build  examples/movie-demo/video.yaml
+#   truedemo doctor examples/movie-demo/video.yaml
+#   truedemo plan   examples/movie-demo/video.yaml
+#   truedemo build  examples/movie-demo/video.yaml
 #
 # Requires: ffmpeg, rsvg-convert. No browser, no voice model, no network — which is
 # why it works as a CI fixture on a machine that has none of those.
 
 project:
-  title: "vidkit movie mode — declared pictures, an expressed clock, a score"
+  title: "truedemo movie mode — declared pictures, an expressed clock, a score"
   slug: movie-demo
   output: movie-demo.mp4
   size: [1280, 720]
@@ -52,7 +52,7 @@ scenes:
     seconds: 4.0
     shots:
       - card: "A film from a specification"
-        kicker: "vidkit movie mode"
+        kicker: "truedemo movie mode"
         motion: {kind: zoom, direction: in, amount: 0.08}
 
   # A solid, with a pan across it — and here is why it stays this way. The field is
@@ -95,7 +95,7 @@ scenes:
     seconds: 3.0
     shots:
       - card: "Honest by construction"
-        kicker: "vidkit"
+        kicker: "truedemo"
         backdrop: assets/frame.svg
         motion: {kind: zoom, direction: out, amount: 0.10}
 

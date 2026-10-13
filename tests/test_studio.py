@@ -35,8 +35,8 @@ from pathlib import Path
 import pytest
 from conftest import arun
 
-from vidkit import studio as st
-from vidkit.errors import SpecError, ToolError
+from truedemo import studio as st
+from truedemo.errors import SpecError, ToolError
 
 needs_sandbox = pytest.mark.needs_sandbox
 needs_docker = pytest.mark.needs_docker
@@ -97,7 +97,7 @@ def _spec(tmp_path: Path, *, extra: str = "") -> Path:
 @pytest.fixture(autouse=True)
 def _clean_bindings():
     """A step binding is global process state; a leaked one changes the next test."""
-    from vidkit import exec as ex
+    from truedemo import exec as ex
 
     ex.unbind_environments()
     for sess in st.live_sessions():          # a held session is process state too
@@ -182,7 +182,7 @@ def test_a_budget_round_trips_through_the_record():
 def test_opening_a_session_writes_a_record_beside_the_spec(tmp_path):
     spec = _spec(tmp_path)
     sess = st.open_session(tmp_path, spec=str(spec), story="a story")
-    p = tmp_path / ".vidkit" / "sessions" / f"{sess.id}.json"
+    p = tmp_path / ".truedemo" / "sessions" / f"{sess.id}.json"
     assert p.is_file(), "the record is the point: a sitting that leaves no trace is a rumour"
     raw = json.loads(p.read_text(encoding="utf-8"))
     assert raw["id"] == sess.id and raw["open"] is True
@@ -208,7 +208,7 @@ def test_a_session_id_that_could_escape_the_state_directory_is_refused(tmp_path)
 
 def test_a_corrupt_record_is_skipped_by_the_list_and_not_fatal(tmp_path):
     good = st.open_session(tmp_path, session_id="good")
-    d = tmp_path / ".vidkit" / "sessions"
+    d = tmp_path / ".truedemo" / "sessions"
     (d / "broken.json").write_text("{not json", encoding="utf-8")
     rows = st.list_sessions(tmp_path)
     assert [r["id"] for r in rows["sessions"]] == [good.id]
@@ -219,7 +219,7 @@ def test_a_corrupt_record_is_skipped_by_the_list_and_not_fatal(tmp_path):
 def test_listing_sessions_names_the_directory_they_are_in(tmp_path):
     st.open_session(tmp_path, session_id="s1")
     rows = st.list_sessions(tmp_path)
-    assert rows["sessions_dir"].endswith("/.vidkit/sessions")
+    assert rows["sessions_dir"].endswith("/.truedemo/sessions")
     assert rows["count"] == 1
 
 
@@ -402,7 +402,7 @@ _PROMOTED = b"promoted-take-bytes"
 def _capture_ctx(tmp_path: Path, *, base: bytes | None):
     """A context whose spec declares one capture named ``login`` and whose take files
     are ``base``/``take2`` bytes at the plain name and at ``.take2``."""
-    from vidkit.assembler import make_context
+    from truedemo.assembler import make_context
 
     spec_path = _spec(tmp_path, extra="""
         captures:
@@ -431,7 +431,7 @@ def test_a_build_honours_the_take_the_sitting_selected(tmp_path, monkeypatch):
     browser is not opened at all, so a version that shot the page and then discarded
     the result would still fail here.
     """
-    from vidkit import capture as _cap
+    from truedemo import capture as _cap
 
     ctx = _capture_ctx(tmp_path, base=_PROMOTED)
     ctx.selections = {"login/2"}
@@ -458,7 +458,7 @@ def test_keeping_a_selected_take_does_not_need_a_browser(tmp_path, monkeypatch):
     Playwright is forced unavailable rather than assumed absent, so this test states
     the condition it is about instead of relying on the machine it runs on.
     """
-    from vidkit import capture as _cap
+    from truedemo import capture as _cap
 
     ctx = _capture_ctx(tmp_path, base=_PROMOTED)
     ctx.selections = {"login/2"}
@@ -482,7 +482,7 @@ def test_a_capture_with_no_promoted_take_still_honours_a_missing_browser(tmp_pat
     The other side of the same gate: relaxing it per capture must not turn "cannot
     shoot this page" into a success.
     """
-    from vidkit import capture as _cap
+    from truedemo import capture as _cap
 
     ctx = _capture_ctx(tmp_path, base=None)
     ctx.selections = set()
@@ -523,7 +523,7 @@ def test_a_build_with_no_selection_still_takes_a_fresh_capture(tmp_path, monkeyp
     stage must still run: the page is the frame the spec asked for, and skipping the
     whole stage would film whatever file happened to be left on disk while reporting
     that a capture had been taken."""
-    from vidkit import capture as _cap
+    from truedemo import capture as _cap
 
     ctx = _capture_ctx(tmp_path, base=b"take-one")
     assert ctx.selected_take("login") is None
@@ -546,7 +546,7 @@ def test_a_build_whose_promoted_file_vanished_takes_a_fresh_capture(tmp_path, mo
     """A record can name a take whose bytes were deleted — a cleaned output directory,
     a copied record. Reporting "keeping selected take 2" for a file that is not there
     would put the *absence* into the film and call it the chosen moment."""
-    from vidkit import capture as _cap
+    from truedemo import capture as _cap
 
     ctx = _capture_ctx(tmp_path, base=None)          # `.take2` exists, the base does not
     ctx.selections = {"login/2"}
@@ -589,7 +589,7 @@ def test_status_says_what_to_do_next_and_changes_its_mind_as_the_session_does(tm
     _png(st.take_path(Path(sess.out_dir), "login", 1))
     assert "none is selected" in st.status(sess)["next"]
     st.select_take(sess, "login", 1)
-    assert "vidkit_run" in st.status(sess)["next"]
+    assert "truedemo_run" in st.status(sess)["next"]
 
 
 def test_status_of_a_closed_session_tells_the_caller_to_open_a_new_one(tmp_path):
@@ -699,7 +699,7 @@ def test_a_step_the_spec_does_not_declare_is_refused(tmp_path):
         exec:
           steps: [{label: probe, cmd: ["true"]}]
     """)
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     sess = st.open_session(tmp_path, spec=str(spec_path), session_id="s1")
     with pytest.raises(SpecError, match="declares no exec step 'nuke'"):
         st.run_step(sess, load_spec(spec_path), "nuke")
@@ -707,7 +707,7 @@ def test_a_step_the_spec_does_not_declare_is_refused(tmp_path):
 
 @needs_sandbox
 def test_a_declared_step_runs_and_is_recorded_with_what_it_cost(tmp_path):
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra="""
         exec:
           steps:
@@ -729,7 +729,7 @@ def test_a_declared_step_runs_and_is_recorded_with_what_it_cost(tmp_path):
 def test_the_record_of_a_step_carries_its_timing_and_not_its_transcript(tmp_path):
     """`ExecResult.to_dict()` is a *result*, never a stream: a studio that returned
     every byte of a long build on every call would be unusable over a wire."""
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra="""
         exec:
           steps: [{label: say, cmd: ["true"]}]
@@ -745,7 +745,7 @@ def test_the_record_of_a_step_carries_its_timing_and_not_its_transcript(tmp_path
 def test_a_command_that_fails_is_reported_and_not_raised(tmp_path):
     """A session reports; the *build* aborts (I2). That difference is the whole
     reason an agent can drive this and a pipeline cannot."""
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra="""
         exec:
           steps:
@@ -761,7 +761,7 @@ def test_a_command_that_fails_is_reported_and_not_raised(tmp_path):
 
 @needs_sandbox
 def test_a_step_can_be_run_only_when_there_is_budget_left(tmp_path):
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra="""
         exec:
           steps: [{label: say, cmd: ["true"]}]
@@ -781,7 +781,7 @@ def test_a_step_can_be_run_only_when_there_is_budget_left(tmp_path):
 def test_a_docker_step_without_its_environment_up_is_refused(tmp_path):
     """Silently starting a container would hide which lifecycle the video was
     filmed against."""
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra="""
         environment:
           - name: db
@@ -802,7 +802,7 @@ def test_a_docker_step_without_its_environment_up_is_refused(tmp_path):
 
 @needs_sandbox
 def test_a_local_step_is_not_sent_to_environment_exec(tmp_path):
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra="""
         exec:
           steps: [{label: say, cmd: ["true"]}]
@@ -837,7 +837,7 @@ _DB_SPEC = """
 
 @needs_docker
 def test_an_environment_the_spec_does_not_declare_is_named_in_the_refusal(tmp_path):
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra=_DB_SPEC)
     sess = st.open_session(tmp_path, spec=str(spec_path), session_id="s1")
     with pytest.raises(SpecError, match="declares no environment 'nope' \\(declared: db\\)"):
@@ -862,9 +862,9 @@ def test_the_host_is_asked_what_is_up_rather_than_trusting_a_record(tmp_path):
 
 @needs_docker
 def test_a_started_environment_is_labelled_with_the_session_that_started_it(tmp_path):
-    """The stamp is the session id: `docker ps` on a machine that has run vidkit
+    """The stamp is the session id: `docker ps` on a machine that has run truedemo
     shows which sitting a container belongs to, which is how a leak is traced."""
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra=_DB_SPEC)
     spec = load_spec(spec_path)
     sess = st.open_session(tmp_path, spec=str(spec_path), session_id="s1")
@@ -884,7 +884,7 @@ def test_a_started_environment_is_labelled_with_the_session_that_started_it(tmp_
 def test_one_session_holds_one_container_per_environment(tmp_path):
     """A second container under the same name cannot exist; two under different
     names is how a machine ends up running four copies of Postgres."""
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra=_DB_SPEC)
     spec = load_spec(spec_path)
     sess = st.open_session(tmp_path, spec=str(spec_path), session_id="s1")
@@ -909,7 +909,7 @@ def test_one_session_holds_one_container_per_environment(tmp_path):
 def test_tearing_down_takes_everything_the_session_holds(tmp_path):
     """A session ending should not be able to leave a database behind because the
     caller forgot which one it started."""
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra=_DB_SPEC)
     spec = load_spec(spec_path)
     sess = st.open_session(tmp_path, spec=str(spec_path), session_id="s1")
@@ -924,7 +924,7 @@ def test_tearing_down_takes_everything_the_session_holds(tmp_path):
 def test_a_step_runs_inside_the_session_own_container(tmp_path):
     """The studio reaches the container through the same module-level binding the
     pipeline uses, so a step filmed here is filmed the way the build films it."""
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra=_DB_SPEC)
     spec = load_spec(spec_path)
     sess = st.open_session(tmp_path, spec=str(spec_path), session_id="s1")
@@ -945,7 +945,7 @@ def test_a_step_runs_inside_the_session_own_container(tmp_path):
 def test_a_container_that_died_is_distinguishable_from_one_that_never_started(tmp_path):
     """`alive: false` on a *held* environment is the single most useful thing this
     call can say, and neither half of the answer contains it on its own."""
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra=_DB_SPEC)
     spec = load_spec(spec_path)
     sess = st.open_session(tmp_path, spec=str(spec_path), session_id="s1")
@@ -964,7 +964,7 @@ def test_a_container_that_died_is_distinguishable_from_one_that_never_started(tm
 
 @needs_docker
 def test_closing_a_session_leaves_no_container_behind(tmp_path):
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra=_DB_SPEC)
     spec = load_spec(spec_path)
     sess = st.open_session(tmp_path, spec=str(spec_path), session_id="s1")
@@ -998,7 +998,7 @@ def test_a_browser_can_be_opened_driven_and_photographed_into_the_take_folder(tm
     itself. What it proves is the plumbing — the page survives between calls, the
     action DSL drives it, and the screenshot lands where `capture` would put it.
     """
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path, extra="""
         captures:
           - name: login
@@ -1029,7 +1029,7 @@ def test_a_browser_can_be_opened_driven_and_photographed_into_the_take_folder(tm
 def test_a_second_browser_in_one_session_is_refused(tmp_path):
     """One session, one page: a caller that opens two has lost track of which one
     the pictures came from."""
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path)
     spec = load_spec(spec_path)
     sess = st.open_session(tmp_path, spec=str(spec_path), session_id="s1")
@@ -1045,7 +1045,7 @@ def test_a_second_browser_in_one_session_is_refused(tmp_path):
 def test_an_action_that_fails_is_the_last_step_reported_not_an_exception(tmp_path):
     """An agent that clicks a stale selector needs to *read* the failure and try
     again; an exception would end the sitting."""
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path)
     spec = load_spec(spec_path)
     sess = st.open_session(tmp_path, spec=str(spec_path), session_id="s1")
@@ -1071,8 +1071,8 @@ def test_a_browser_is_frozen_the_same_way_the_capture_stage_freezes_one(tmp_path
     """A picture taken through this door has to be the picture the build would
     film, or the video's frames are unreproducible by the only code that is
     supposed to be able to reproduce them."""
-    from vidkit.capture import FROZEN_LOCALE, FROZEN_TZ
-    from vidkit.spec import load_spec
+    from truedemo.capture import FROZEN_LOCALE, FROZEN_TZ
+    from truedemo.spec import load_spec
     spec_path = _spec(tmp_path)
     spec = load_spec(spec_path)
     sess = st.open_session(tmp_path, spec=str(spec_path), session_id="s1")
@@ -1156,12 +1156,12 @@ def test_the_default_output_directory_is_beside_the_spec(tmp_path):
 def test_an_environment_reference_can_rebuild_the_runtime_state_it_stands_for(tmp_path):
     """`EnvRef.to_state` is why a session can use one engine instead of growing a
     second implementation of the same lifecycle."""
-    from vidkit import exec as ex
+    from truedemo import exec as ex
     spec_path = _spec(tmp_path, extra=_DB_SPEC)
-    from vidkit.spec import load_spec
+    from truedemo.spec import load_spec
     spec = load_spec(spec_path)
     env = st.env_spec(spec, "db")
-    ref = st.EnvRef(name="db", container_name="vidkit-x", container_id="abc123",
+    ref = st.EnvRef(name="db", container_name="truedemo-x", container_id="abc123",
                     image="alpine:3", image_digest="sha256:deadbeef",
                     started=time.time(), ready=True, ready_detail="ok")
     state = ref.to_state(env)
@@ -1190,7 +1190,7 @@ def test_an_mcp_client_can_take_a_sitting_end_to_end(tmp_path):
     """
     from conftest import mcp_is_error, mcp_session
 
-    from vidkit import mcp_server as m
+    from truedemo import mcp_server as m
 
     spec_path = _spec(tmp_path, extra="""
         captures:
@@ -1241,7 +1241,7 @@ def test_an_mcp_client_can_take_a_sitting_end_to_end(tmp_path):
                                 {"spec": str(spec_path), "title": "exit proof"})
             sid = opened["id"]
             assert opened["open"] is True and opened["title"] == "exit proof", opened
-            assert Path(opened["record_dir"]) == out / ".vidkit" / "sessions", opened
+            assert Path(opened["record_dir"]) == out / ".truedemo" / "sessions", opened
 
             # Three photographs of the same moment, taken the way an agent takes
             # them: it acts, then shoots, then acts again. The page has to *change*
@@ -1302,7 +1302,7 @@ def test_an_mcp_client_can_take_a_sitting_end_to_end(tmp_path):
     # that actually used the promoted bytes can produce this frame. Before the build
     # was taught to honour a selection, it re-shot the page here, and the film came out
     # black while the record still said `login/2` — this test could not have failed.
-    from vidkit.ffmpeg import Ffmpeg
+    from truedemo.ffmpeg import Ffmpeg
 
     ff = Ffmpeg()
     scratch = out / "exit-proof.raw"
@@ -1333,7 +1333,7 @@ def test_a_second_tool_call_finds_the_page_the_first_one_opened(tmp_path):
     """
     from conftest import mcp_is_error, mcp_session
 
-    from vidkit import mcp_server as m
+    from truedemo import mcp_server as m
 
     spec_path = _spec(tmp_path, extra="""
         captures:
@@ -1418,7 +1418,7 @@ def test_offload_runs_off_the_event_loop_and_returns_the_value():
     import asyncio
     import threading
 
-    from vidkit import _loop
+    from truedemo import _loop
 
     async def go():
         here = threading.get_ident()
@@ -1433,7 +1433,7 @@ def test_offload_runs_off_the_event_loop_and_returns_the_value():
 def test_offload_propagates_the_exception_rather_than_a_future():
     import asyncio
 
-    from vidkit import _loop
+    from truedemo import _loop
 
     def boom():
         raise SpecError("the shot does not exist")
@@ -1449,7 +1449,7 @@ def test_a_worker_serves_every_job_on_one_thread():
     """Playwright affinity is thread affinity, so this is a correctness property."""
     import threading
 
-    from vidkit import _loop
+    from truedemo import _loop
 
     w = _loop.Worker("t-one-thread")
     try:
@@ -1464,7 +1464,7 @@ def test_a_worker_serves_every_job_on_one_thread():
 def test_stopping_a_worker_twice_is_harmless():
     """The second `stop()` returns `False` — "there was nothing left to stop" — and
     must not raise. A `Session.close` runs on a path that can be walked twice."""
-    from vidkit import _loop
+    from truedemo import _loop
 
     w = _loop.Worker("t-twice")
     w.submit(int)
@@ -1480,7 +1480,7 @@ def test_a_worker_can_stop_itself_without_deadlocking():
     returns as soon as the sentinel is queued instead. The thread then finishes the
     job it is in and exits on the next turn of its loop.
     """
-    from vidkit import _loop
+    from truedemo import _loop
 
     w = _loop.Worker("t-self")
     assert w.submit(w.stop).result() is True, "a self-stop must not deadlock"
@@ -1492,7 +1492,7 @@ def test_session_routes_through_the_worker_when_there_is_one():
     """`session()` is the sync door onto a worker's thread."""
     import threading
 
-    from vidkit import _loop
+    from truedemo import _loop
 
     class Holder:
         worker = None
@@ -1513,7 +1513,7 @@ def test_session_routes_through_the_worker_when_there_is_one():
 
 def test_a_worker_propagates_a_jobs_exception_to_its_caller():
     """A refusal raised on the worker must reach the caller unchanged, not vanish."""
-    from vidkit import _loop
+    from truedemo import _loop
 
     def boom():
         raise SpecError("nope — this shot has no source")
@@ -1536,13 +1536,13 @@ def test_a_worker_propagates_a_jobs_exception_to_its_caller():
 # never fire, and a page opened by one call would be invisible to the next.
 # A sitting is a *running thing*; the record on disk cannot hold it.
 def test_an_open_session_is_held_by_this_process(tmp_path):
-    from vidkit import _loop
+    from truedemo import _loop
 
     sess = st.open_session(tmp_path, session_id="held")
     try:
         assert st.held("held", tmp_path) is sess
         assert isinstance(sess.worker, _loop.Worker)
-        assert sess.worker.name == "vidkit-held"
+        assert sess.worker.name == "truedemo-held"
     finally:
         st.close_session(sess)
 

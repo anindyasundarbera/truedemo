@@ -1,6 +1,6 @@
-# The studio: driving vidkit from an agent
+# The studio: driving truedemo from an agent
 
-vidkit can be driven entirely from an external agent. `vidkit-mcp` runs **separately** from
+truedemo can be driven entirely from an external agent. `truedemo-mcp` runs **separately** from
 the consumer's repo — the story stays in your repo, the tool stays a tool — and exposes a
 **session-oriented** surface over [MCP](https://modelcontextprotocol.io).
 
@@ -10,7 +10,7 @@ one, then build. The studio is that sitting, exposed as tools.
 
 > **This page is the studio workflow.** For wiring the server into a client — transports,
 > auth, the full tool table, the docs resources — read
-> [vidkit as an MCP server](mcp-server.md) first.
+> [truedemo as an MCP server](mcp-server.md) first.
 
 ---
 
@@ -42,10 +42,10 @@ There are **34 tools**, in six groups. (The full argument/return table for each 
 | Takes | `take_list`, `take_record`, `take_select` |
 | Browser | `browser_open`, `browser_act`, `browser_shot`, `browser_status`, `browser_close` |
 | Environments | `env_up`, `env_down`, `env_status` |
-| Render & inspect | `vidkit_build`, `vidkit_plan`, `vidkit_tts`, `vidkit_capture`, `vidkit_verify`, `vidkit_verify_report`, `vidkit_provenance`, `vidkit_doctor` |
-| Authoring | `vidkit_init`, `vidkit_panel_kinds`, `vidkit_capture_plan`, `vidkit_docs`, `vidkit_docs_index`, `vidkit_actions`, `vidkit_run` |
+| Render & inspect | `truedemo_build`, `truedemo_plan`, `truedemo_tts`, `truedemo_capture`, `truedemo_verify`, `truedemo_verify_report`, `truedemo_provenance`, `truedemo_doctor` |
+| Authoring | `truedemo_init`, `truedemo_panel_kinds`, `truedemo_capture_plan`, `truedemo_docs`, `truedemo_docs_index`, `truedemo_actions`, `truedemo_run` |
 
-Resources let an agent read back what it produced: `vidkit://sessions/{id}/status`,
+Resources let an agent read back what it produced: `truedemo://sessions/{id}/status`,
 `.../takes`, and `.../report`. The docs and action resources are listed in
 [MCP server](mcp-server.md#resources).
 
@@ -79,11 +79,11 @@ Not every client can hold a session. The same work is available as a one-shot **
 takes `{action, story, out}` and returns a single manifest:
 
 ```bash
-vidkit --json run plan --story examples/hello-world     # {action, story, out} → one manifest
+truedemo --json run plan --story examples/hello-world     # {action, story, out} → one manifest
 ```
 
-Over MCP the equivalent is the `vidkit_run` tool, whose manifest shape never changes — a
-caller reads `ok` and `failure` without knowing vidkit. The contract, the failure vocabulary,
+Over MCP the equivalent is the `truedemo_run` tool, whose manifest shape never changes — a
+caller reads `ok` and `failure` without knowing truedemo. The contract, the failure vocabulary,
 and the exit codes are on their own page: [job contract](job-contract.md).
 
 ## Where to go next

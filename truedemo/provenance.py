@@ -82,7 +82,7 @@ class Provenance:
     timeframe: dict[str, Any] | None
     started: float
     ended: float
-    vidkit: str = __version__
+    truedemo: str = __version__
     python: str = field(default_factory=lambda: platform.python_version())
     platform: str = field(default_factory=platform.platform)
     machine: str = field(default_factory=lambda: f"{platform.system()} {platform.machine()}")
@@ -115,7 +115,7 @@ class Provenance:
     def to_dict(self) -> dict[str, Any]:
         return {
             "schema": self.schema,
-            "vidkit": self.vidkit,
+            "truedemo": self.truedemo,
             "action": self.action,
             "story": self.story,
             "spec": self.spec,

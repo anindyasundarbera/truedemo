@@ -153,7 +153,7 @@ The unit tests need no binaries; the smoke build needs `ffmpeg` + `rsvg-convert`
 > installed package:
 
 ```bash
-pip install -e /path/to/truedemo            # or, from the repo: pip install "truedemo @ git+https://github.com/anindyasundarbera/truedemo"
+pip install -e /path/to/truedemo            # or, from PyPI: pip install truedemo
 ```
 
 Then the moved story's `video.yaml` and `provider.py` work unchanged, since they import

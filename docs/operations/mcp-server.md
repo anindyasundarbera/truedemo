@@ -160,7 +160,7 @@ tell a slow build from a stuck one.
 }
 ```
 
-If truedemo is **installed** (`pip install "truedemo[mcp] @ git+https://github.com/anindyasundarbera/truedemo"`), drop the `env`/`PYTHONPATH` and use
+If truedemo is **installed** (`pip install "truedemo[mcp]"`), drop the `env`/`PYTHONPATH` and use
 `"command": "truedemo-mcp", "args": []`.
 
 ### HTTP

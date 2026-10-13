@@ -63,10 +63,10 @@ Release bookkeeping is separate from phase completion and remains owner-owned:
   `## [Unreleased]` into `## [1.2.0]`, and the GitHub Release is published. The `v1.0.0` tag
   was **superseded without being pushed** — the version string had drifted behind the code,
   and `1.2.0` is the first release that matches it.
-- PyPI publication remains **deferred, and still unpublished**: publishing under the old name
-  `vidkit` was impossible because it belongs to an unrelated project (`SpyC0der77/vidkit`).
-  The rename to `truedemo` removes that blocker; publishing is now a deliberate, owner-owned
-  step that has not been taken. **PyPI does not reserve names** — re-check availability
-  immediately before any publish.
+- **Published to PyPI: `truedemo 2.0.0`** (2026-10-13). `pip install truedemo` works, with
+  the extras `[capture]` / `[tts]` / `[mcp]` / `[dev]`. Verified end to end: a clean venv
+  installs from PyPI, and `truedemo build examples/hello-world` passes all 13 checks. The
+  earlier blocker (the name `vidkit` belonging to an unrelated project) was removed by the
+  rename. Publishing the *next* release is now a routine step, not an open decision.
 
 Do not publish a release or tag until those visible release choices are settled.

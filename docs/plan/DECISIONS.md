@@ -1950,5 +1950,7 @@ scheme. `2.0.0` states that plainly rather than hiding it in a minor.
    never taken ([AGENTS.md](../../AGENTS.md) §5). The rename is recorded as a new entry.
 2. **GitHub redirects.** `github.com/anindyasundarbera/vidkit` continues to resolve to the
    renamed repository, so existing clones and links are not broken — they are only redirected.
-3. **PyPI is still unpublished.** The rename removes the *name* blocker; publishing remains a
-   separate, owner-owned step (it needs credentials and a deliberate release).
+3. **PyPI published on the same day.** The rename removed the *name* blocker, and the release
+   was published as `truedemo 2.0.0` — dry-run on TestPyPI first, then PyPI, then verified by
+   installing from PyPI in a clean venv and building hello-world. Publishing the *next*
+   release is now routine rather than an open decision.

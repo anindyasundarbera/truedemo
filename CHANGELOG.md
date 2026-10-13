@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0] - 2026-10-13
 
+**Published to PyPI:** `pip install truedemo` — <https://pypi.org/project/truedemo/2.0.0/>
+
 ### Changed — BREAKING: the project is renamed `vidkit` → `truedemo`
 
 The name `vidkit` was taken on PyPI by an unrelated project (`SpyC0der77/vidkit`), so a
@@ -32,6 +34,13 @@ unchanged. `2.0.0` is the honest number, not a patch.
 `OPENMONTAGE.md`, and every released CHANGELOG section keep the name they were written under:
 the project genuinely *was* called vidkit through M0–M10, and rewriting that record would be
 the same class of error as claiming a measurement that was never taken (AGENTS.md §5).
+
+### Added
+
+- **`pip install truedemo`.** The package is on PyPI, with the extras `[capture]`, `[tts]`,
+  `[mcp]`, and `[dev]`. Verified from a clean venv: installs, both console scripts resolve,
+  and a hello-world build passes all 13 checks. The release metadata (author, project URLs,
+  classifiers, README description) was completed in the same pass.
 
 ### Added
 

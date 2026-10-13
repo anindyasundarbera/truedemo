@@ -2170,3 +2170,58 @@ git status                                   -> package dir shows as R (rename),
 grep -rn "vidkit" (excl. frozen history/_build) -> no source reference remains
 gh repo view --json name                     -> truedemo
 ```
+
+---
+
+## 2026-10-13 — Published to PyPI: `truedemo 2.0.0`
+
+The rename removed the blocker; this is the publish. The artifact was built from the merged
+`main` (`1573ccd`), dry-run on TestPyPI, and then uploaded to PyPI.
+
+### The sequence, and why it was that sequence
+
+A PyPI upload **cannot be deleted** — it can only be *yanked*, and yanking still serves the
+file to a pinned requirement while burning the version number permanently. So the order was:
+build → `twine check` → **TestPyPI dry run** → clean-venv install of the *TestPyPI* artifact →
+only then PyPI.
+
+```
+twine check dist/*              -> PASSED (both artifacts)
+TestPyPI upload                 -> https://test.pypi.org/project/truedemo/2.0.0/
+pip install (from TestPyPI)     -> truedemo 2.0.0, both console scripts, MCP entry imports
+name re-checked with a control  -> truedemo free; requests TAKEN 2.34.2
+PyPI upload                     -> https://pypi.org/project/truedemo/2.0.0/
+pip install truedemo (from PyPI) -> truedemo 2.0.0
+truedemo build hello-world      -> 13 checks, 0 failures
+```
+
+Published artifacts (built from `1573ccd`):
+
+```
+ccde2ff3d2e78ebe811e6e772f2772a3e98a103b47251b8e31e4971439f2d87c  truedemo-2.0.0-py3-none-any.whl
+839c042a09c2f7c07e9e41343625abec5bf1086d9df8112dbe2c0691ce70b6bc  truedemo-2.0.0.tar.gz
+```
+
+### Two things the release needed first
+
+1. **The PEP 621 metadata was bare.** The first build warned that `license-files` had moved and
+   produced no author, no project URLs, and no classifiers — a blank PyPI page. Fixed in
+   PR #34 (author, four URLs, 11 classifiers, the README as the long description), and the
+   deprecation that would have stopped the build by 2027-02-18 was cleared at the same time.
+2. **`~/.pypirc` was written wrong.** The heredoc was pasted into the shell *as the file*, so
+   the first `twine` run failed with `Malformed configuration`. The tokens were real and were
+   preserved; only the wrapper lines were wrong. Its mode was also `664` and is now `600` —
+   a credential file readable by a group is not a credential file.
+
+### Evidence
+
+```
+curl pypi.org/pypi/truedemo/json   -> 200; author, license, 4 project URLs, 11 classifiers
+curl pypi.org/simple/truedemo/     -> lists truedemo-2.0.0-*.whl with the sha256 above
+pip install truedemo (clean venv)  -> truedemo 2.0.0; truedemo + truedemo-mcp on PATH
+truedemo build examples/hello-world -> 13 checks, 0 failures
+```
+
+**Next-release note:** PyPI does not reserve names and the publish is one-shot per version, so
+every future release re-checks availability, re-runs the TestPyPI dry run, and bumps the
+version — never re-uploads an existing one.

@@ -101,12 +101,14 @@ outputs, and failure conditions.
 ## Install
 
 ```bash
-pip install -e .              # the engine — YAML/JSON specs
-pip install -e ".[capture]"   # + Playwright, to film a real browser UI
-pip install -e ".[tts]"       # + Piper, for a local voice
-pip install -e ".[mcp]"       # + the MCP server (`truedemo-mcp`)
-pip install -e ".[dev]"       # + pytest
+pip install truedemo              # the engine — YAML/JSON specs
+pip install "truedemo[capture]"   # + Playwright, to film a real browser UI
+pip install "truedemo[tts]"       # + Piper, for a local voice
+pip install "truedemo[mcp]"       # + the MCP server (`truedemo-mcp`)
+pip install "truedemo[dev]"       # + pytest
 ```
+
+Or from a clone, if you want to work on the engine itself: `pip install -e ".[dev]"`.
 
 Required external binaries are **`ffmpeg`** and **`rsvg-convert`** (Debian/Ubuntu:
 `sudo apt-get install ffmpeg librsvg2-bin`). Optional: `ffprobe` (durations are read from

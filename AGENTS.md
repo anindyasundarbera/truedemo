@@ -485,8 +485,10 @@ Use exactly these, so they are greppable:
   the project, because the name `vidkit` belongs on PyPI to an unrelated project
   (`SpyC0der77/vidkit`). The import package, both console scripts, the 15 MCP tool names, the
   7 resource URIs, and the environment variables all changed; the repository was renamed too.
-  **PyPI is still unpublished** — the rename removed the blocker, and publishing remains a
-  separate owner-owned step. See [DECISIONS.md](DECISIONS.md) D66.
+  **Published to PyPI: `truedemo 2.0.0`** — `pip install truedemo` installs it, with the
+  `[capture]` / `[tts]` / `[mcp]` / `[dev]` extras. The rename removed the name blocker, and
+  the publish was verified end to end (clean-venv install, then a 13/13 hello-world build).
+  See [DECISIONS.md](DECISIONS.md) D66.
 - **Host-safety contract (M8).** A container may never mount the Docker socket, runs
   unprivileged, has a hard timeout, and is torn down in a `finally` on every exit path.
   Teardown is *reported*, not assumed (`facts.environments[].teardown`). Do not weaken this

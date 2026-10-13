@@ -2277,43 +2277,62 @@ curl pypi.org/pypi/truedemo/json | grep 'pip install -e'    -> still present on 
 
 The **PyPI page** is immutable per version: its README is a copy taken at upload. The fix
 above reaches `main` and the repository README, but the PyPI page will keep showing the
-pre-fix quickstart until the **next publish** regenerates it from the current `main`. That
-publish is a version bump plus an upload — the same dry-run-first sequence D66/HISTORY
-recorded — and is deliberately left to the owner.
+pre-fix quickstart until the next publish regenerates it from the current `main`. That publish
+became `2.0.1` — the entry immediately below, which records it.
 
 ---
 
-## 2026-10-13 — Prepared the `2.0.1` docs-only patch
+## 2026-10-13 — Published `2.0.1`: the docs describe the installed package
 
-The docs fix above reaches `main`, but the **PyPI page** is a copy of the README taken at
-upload, so it kept showing the pre-fix `pip install -e .` quickstart. Regenerating it requires
-a publish, and a publish needs a new version (PyPI will not accept a re-upload of `2.0.0`).
-So `2.0.1` is prepared here as a **docs-only patch**:
+A **docs-only patch** whose purpose is the PyPI page: the page is a copy of the README taken
+at upload, so it kept serving the pre-fix `pip install -e .` quickstart until a new version
+regenerated it (PyPI will not accept a re-upload of `2.0.0`).
 
 - `truedemo/_version.py` bumped `2.0.0 → 2.0.1` (the single source of truth; `pyproject.toml`
   reads the attribute, so no second literal is introduced and
   `test_version_is_single_sourced` still holds).
 - The `## [Unreleased]` docs-fix section in `CHANGELOG.md` closed as `## [2.0.1] - 2026-10-13`,
   with the release link added.
-- `docs/plan/PLAN.md` updated: `2.0.0` published, `2.0.1` prepared and awaiting upload.
+- `docs/plan/PLAN.md` updated.
 
-The **upload and the `v2.0.1` tag are the owner's** — this entry records only the preparation,
-not a publish. Sequence when the owner runs it (D66): build → `twine check` → TestPyPI dry run
-→ clean-venv install of the *TestPyPI* artifact → PyPI → tag.
+### History hygiene: a duplicate commit was flattened
 
-### Evidence (build, not publish)
+The change had ended up committed **twice** — once on the `release/v2.0.1-publish` branch
+(`710a5b9`, atop the old `main`) and once directly on `main` atop the CodeQL bump (`12a84b5`)
+— then merged (`f67d135`). The two had **identical patch-ids** (`cb1c3c4b…`) and `main`'s tree
+already equalled `12a84b5`'s, so the branch and the merge were redundant. The tag had been
+created from the branch commit, which **lacked the CodeQL bump**. All of it was unpushed, so
+before publishing: `main` was reset to `12a84b5` (the version carrying the CodeQL bump), the
+duplicate branch was deleted, the tag was re-pointed, and the artifacts were rebuilt from the
+pushed commit. No content was lost — the trees were byte-identical.
+
+### The publish
 
 ```
-python -m build                      -> truedemo-2.0.1.tar.gz + truedemo-2.0.1-py3-none-any.whl
-twine check dist/*                   -> PASSED (both)
-metadata                             -> Version: 2.0.1; README has "pip install truedemo",
-                                        no "pip install -e .", no examples/ quickstart
-pip install <2.0.1 wheel> (clean venv) -> truedemo 2.0.1; truedemo docs -> published-URL message
-truedemo init/plan/build my-story    -> my-story.mp4 + narration.srt; verify.json ok, 9 checks
-python3 -m pytest tests -q           -> 791 passed in 640.37s
-sha256 (2.0.1 whl)                   -> ccf2af524cafcd0bed92c0db4e9548c2a32320d18e5bf1b9cd978d163fecd004
-sha256 (2.0.1 tar.gz)                -> 85a5dcbb92f3cfd815f2c1eb61ad96c75331f9e6e9326ccb899c19a99661d8bf
+git push origin main                    -> 0d6e1c8..12a84b5  (fast-forward)
+python -m build                         -> truedemo-2.0.1.{tar.gz,whl}
+twine check dist/*                      -> PASSED (both)
+twine upload --repository testpypi      -> https://test.pypi.org/project/truedemo/2.0.1/
+pip install truedemo==2.0.1 (TestPyPI)  -> truedemo 2.0.1; docs -> published-URL message
+twine upload dist/*                     -> https://pypi.org/project/truedemo/2.0.1/
+curl pypi.org/pypi/truedemo/json        -> latest 2.0.1; README has "pip install truedemo",
+                                           NOT "pip install -e ."  (the page is fixed)
+pip install truedemo (PyPI, fresh venv) -> truedemo 2.0.1
+truedemo init/plan/build my-story       -> my-story.mp4 + narration.srt; verify.json ok, 9 checks
+git tag -a v2.0.1 && git push --tags    -> annotated, points at 12a84b5
+gh release create v2.0.1                -> https://github.com/anindyasundarbera/truedemo/releases/tag/v2.0.1
+gh run view <CI on 12a84b5>             -> success (11 jobs: pytest 3.10/3.12/3.13/3.14,
+                                           six probes, advisory lint)
 ```
 
-`dist/` is gitignored, so these artifacts are local build output; the owner rebuilds from the
-merged commit at publish time (the same sequence as `2.0.0`).
+Published artifacts (built from `12a84b5`):
+
+```
+a32e3b47a181cdee1b1bd6b67df101988eb2e8ad711b04c455ca7e6e45066f4e  truedemo-2.0.1-py3-none-any.whl
+17335474c74da4e27ca9cd3674a092946de75e7517b6f6d43ecd059a523208f5  truedemo-2.0.1.tar.gz
+```
+
+**Note:** `pypi.org/pypi/<name>/json` lagged the upload by a couple of minutes and `pip` can
+hold a stale simple-index page; both showed `2.0.0` immediately after the upload and resolved
+to `2.0.1` once the CDN caught up. The simple index (`/simple/truedemo/`) listed both files
+before the JSON API did.

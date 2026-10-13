@@ -74,13 +74,13 @@ Release bookkeeping is separate from phase completion and remains owner-owned:
   and `1.2.0` is the first release that matches it.
 - **Published to PyPI: `truedemo 2.0.0`** (2026-10-13). `pip install truedemo` works, with
   the extras `[capture]` / `[tts]` / `[mcp]` / `[dev]`. The earlier blocker (the name `vidkit`
-  belonging to an unrelated project) was removed by the rename. Publishing the *next* release
-  is now a routine step, not an open decision.
-- **`truedemo 2.0.1` is prepared and awaiting upload** (2026-10-13). This is a **docs-only
-  patch**: it refreshes the PyPI page's description, which is a copy taken at upload and still
-  shows the pre-fix `pip install -e .` quickstart. Prepared here: `_version.py` bumped
-  `2.0.0 → 2.0.1`, the `## [Unreleased]` docs-fix section closed as `## [2.0.1]`, and the
-  release link added. The upload itself (build → `twine check` → TestPyPI dry run → clean-venv
-  install → PyPI) and the `v2.0.1` tag are the **owner's**, per the D66 sequence.
+  belonging to an unrelated project) was removed by the rename. Publishing a release is now a
+  routine step, not an open decision.
+- **Published to PyPI: `truedemo 2.0.1`** (2026-10-13) — a **docs-only patch** that
+  regenerated the PyPI page, which had been serving the pre-fix `pip install -e .` quickstart.
+  The README now leads with the installed-package flow, `examples/` references are labelled
+  repository-only, and `truedemo docs` points at the published copy when the tree is absent.
+  Tagged `v2.0.1`, GitHub Release published, CI green on the release commit. No engine
+  behaviour changed. Recorded in [HISTORY.md](HISTORY.md) and [DECISIONS.md](DECISIONS.md) D67.
 
 Do not publish a release or tag until those visible release choices are settled.

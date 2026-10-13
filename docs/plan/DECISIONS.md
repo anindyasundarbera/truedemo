@@ -1994,8 +1994,7 @@ result that reads like an absence of documentation.
 1. **Docs are graded in the CI `build-example` / lean jobs from a checkout, but read from
    PyPI.** The PyPI page is regenerated only on the next publish, so **the page's README is
    refreshed by republishing** the current `main` (a version bump + upload); it is not edited
-   in place. `2.0.1` is that republish: a docs-only patch whose only purpose is to regenerate
-   the page from the corrected `main`.
+   in place. `2.0.1` is that republish, and it is done: the page now serves the corrected README.
 2. **`truedemo docs` is honest about its own absence.** `mcp_server.DOCS_URL` /
    `_docs_installed()` gate the message and the `docs_url` key, pinned by
    `tests/test_mcp.py::test_docs_tools_degrade_honestly_without_the_docs_tree`.

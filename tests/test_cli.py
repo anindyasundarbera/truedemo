@@ -214,7 +214,8 @@ def test_plain_provenance_verb_prints_the_build_record(capsys, tmp_path):
     text = capsys.readouterr().out
 
     assert code == 0
-    assert text.startswith("vidkit 1.0.0 built build at")
+    import vidkit
+    assert text.startswith(f"vidkit {vidkit.__version__} built build at")
     assert text.count("spec hash") == 1
     assert "[yes] ffmpeg" in text or "[NO ] ffmpeg" in text
 

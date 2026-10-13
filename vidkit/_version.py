@@ -6,4 +6,4 @@ job manifests — imports the same string from here. Bump it in exactly one plac
 or the distribution and the reported version drift apart.
 """
 
-__version__ = "1.0.0"
+__version__ = "1.2.0"

@@ -160,7 +160,7 @@ tell a slow build from a stuck one.
 }
 ```
 
-If vidkit is **installed** (`pip install vidkit[mcp]`), drop the `env`/`PYTHONPATH` and use
+If vidkit is **installed** (`pip install "vidkit[mcp] @ git+https://github.com/anindyasundarbera/vidkit"`), drop the `env`/`PYTHONPATH` and use
 `"command": "vidkit-mcp", "args": []`.
 
 ### HTTP

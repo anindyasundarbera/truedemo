@@ -5,7 +5,23 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] - 2026-10-13
+
+### Fixed
+
+- **The docs no longer tell anyone to `pip install vidkit`.** That command fails — and the
+  name `vidkit` on PyPI belongs to an **unrelated project** (`SpyC0der77/vidkit`), so it could
+  have installed someone else's package. The MCP and extraction docs now install from the git
+  URL.
+- **`tests/test_cli.py` reads the version instead of asserting a literal.** It pinned
+  `"vidkit 1.0.0 built build at"`, so every version bump broke a test that was really checking
+  provenance output.
+
+### Release
+
+- **`v1.2.0`** — the first release whose version string matches the code. `_version.py` said
+  `1.0.0` while M7–M10 sat under `## [Unreleased]`; the `v1.0.0` tag was never pushed and is
+  superseded. PyPI remains **unpublished and blocked** by the name collision.
 
 ### Added
 
@@ -490,6 +506,6 @@ report:
   resources.
 - CLIs: `vidkit doctor`, `plan`, `build`, `tts`, `capture`, `verify`, `docs`.
 
-[Unreleased]: https://github.com/anindyasundarbera/vidkit/compare/v1.0.0...HEAD
+[1.2.0]: https://github.com/anindyasundarbera/vidkit/releases/tag/v1.2.0
 [1.0.0]: https://github.com/anindyasundarbera/vidkit/releases/tag/v1.0.0
 [0.1.0]: https://github.com/anindyasundarbera/vidkit/releases/tag/v0.1.0

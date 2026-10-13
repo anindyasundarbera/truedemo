@@ -4,7 +4,7 @@
 > For the phase-wise plan see [FEATURE-ROADMAP.md](FEATURE-ROADMAP.md). For what already
 > happened see [HISTORY.md](HISTORY.md). For why, see [DECISIONS.md](DECISIONS.md).
 >
-> Last updated: **2026-10-13** (README reframed as a landing page; docs split).
+> Last updated: **2026-10-13** (README reframed as a landing page; docs split; v1.2.0 released).
 
 ## Where we are
 
@@ -59,9 +59,13 @@ and (a separate, unowned scope) the compositor.
 
 Release bookkeeping is separate from phase completion and remains owner-owned:
 
-- The `v1.0.0` tag has not been pushed.
-- M7–M10 remain in `## [Unreleased]`; the recorded default for their release version is
-  `1.2.0`, pending the owner's version decision.
-- PyPI publication remains deferred.
+- **`v1.2.0` is released** (2026-10-13): `_version.py` bumped to `1.2.0`, M7–M10 moved out of
+  `## [Unreleased]` into `## [1.2.0]`, and the GitHub Release is published. The `v1.0.0` tag
+  was **superseded without being pushed** — the version string had drifted behind the code,
+  and `1.2.0` is the first release that matches it.
+- PyPI publication remains **deferred, and now blocked**: the name `vidkit` is taken on PyPI
+  by an unrelated project (`SpyC0der77/vidkit`). A future publish needs a different
+  distribution name. The docs no longer tell anyone to `pip install vidkit`; they point at
+  the git URL.
 
 Do not publish a release or tag until those visible release choices are settled.

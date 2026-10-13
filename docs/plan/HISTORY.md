@@ -2060,3 +2060,47 @@ in the same session whose subject was verifying claims. The header is corrected 
 (`PR #30`), and the number is read back from `gh` after the push rather than assumed in
 advance — which is the only way it was ever going to be right.
 
+---
+
+## 2026-10-13 — Release v1.2.0: the tag the version had been owing
+
+The `v1.0.0` tag had never been pushed, and the version string had drifted **behind** the
+code: `_version.py` said `1.0.0` while M7–M10 sat under `## [Unreleased]`. So a tag was due
+for the reason it usually is not — not "we shipped something new", but "the number on the box
+was wrong".
+
+### What the release contains
+
+`[Unreleased]` (38 commits since `1.0.0`) became `## [1.2.0]` — the `1.2.0` default already
+recorded in PLAN.md, not a fresh guess. `_version.py` moved to `1.2.0`, and every consumer
+reads it from there (the distribution metadata, `vidkit.__version__`, the CLI, `provenance`,
+the job manifests).
+
+### Two defects found while preparing it
+
+| # | Defect | Fix |
+|---|---|---|
+| 1 | Two docs told users to `pip install vidkit` / `pip install vidkit[mcp]` — a command that would **fail**, and worse, the name now resolves to an **unrelated PyPI project** (`SpyC0der77/vidkit`). | Both point at the git URL. |
+| 2 | `tests/test_cli.py` asserted the literal `"vidkit 1.0.0 built build at"`, so a version bump silently broke a test that was really checking provenance output. | The test reads `vidkit.__version__` — it now checks the *shape* of the line, not the number. |
+
+The install lines are the honesty defect this release had to fix before shipping: a project
+whose entire claim is "nothing is fabricated" cannot ship an install instruction for a package
+that does not exist.
+
+### PyPI is blocked, and that is now recorded
+
+`vidkit` on PyPI is a different project (v0.1.3.2, *"generating videos from JSON
+specifications"*). Publication was already deferred by the owner; it is now **blocked** as
+well, and both PLAN.md and AGENTS.md say so with the reason. A future publish needs a new
+distribution name.
+
+### Evidence
+
+```
+git tag                                                  -> v1.2.0 (local + remote)
+gh release list                                          -> v1.2.0 published
+python3 -c "import vidkit; print(vidkit.__version__)"    -> 1.2.0
+grep -rn "pip install vidkit" docs/                      -> no bare-PyPI instruction remains
+python3 -m pytest tests/test_cli.py -q                   -> (needs_render tests run under CI)
+```
+

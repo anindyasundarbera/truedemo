@@ -28,7 +28,7 @@ four false claims the docs would otherwise have repeated (tool names, the `score
 `session_browser` tool that does not exist, and the probe count). Recorded in
 [HISTORY.md](HISTORY.md).
 
-The **front door was then reframed** (2026-10-13): feedback was that the README still
+The **front door was then reframed** (2026-10-13, PR #30): feedback was that the README still
 read as if written for someone who already knew the project. It now opens on *what it is /
 who it is for / see it run*, with the argument demoted below the premise and the deep
 reference material moved into `docs/`. Two new docs carry the material the README had nowhere

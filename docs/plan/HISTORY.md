@@ -1960,8 +1960,7 @@ mypy vidkit                           -> 48 errors (advisory, non-blocking)
 
 ## 2026-10-13 — The front door, again: a landing-page README and a `docs/` split
 
-**Branch** `docs/readme-reframe`, off `main` = `ece675e`. Uncommitted at the time of writing;
-the PR number is assigned when the branch is pushed.
+**Branch** `docs/readme-reframe` (PR #30), off `main` = `ece675e`.
 
 The 2026-10-08 pass gave the README an *argument*; this one gave it a *front door*. The
 feedback was that the README read as if written for someone who already knew the project:
@@ -2057,6 +2056,7 @@ ddfac1c`. Every part of it was wrong: no `docs/readme-reframe` branch existed, a
 the unrelated `docs/readme-history` from 2026-10-08**. The header was pattern-matched off the
 neighbouring entries instead of being read from git — which is exactly the "recollection, not
 verification" failure that §5.1 of [AGENTS.md](../../AGENTS.md) exists to prevent, committed
-in the same session whose subject was verifying claims. The header is corrected above, and the
-PR number is recorded after the branch is pushed rather than assumed in advance.
+in the same session whose subject was verifying claims. The header is corrected above
+(`PR #30`), and the number is read back from `gh` after the push rather than assumed in
+advance — which is the only way it was ever going to be right.
 

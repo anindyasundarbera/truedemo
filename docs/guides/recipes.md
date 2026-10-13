@@ -195,16 +195,24 @@ truedemo verify SPEC --out ./dist
 
 Any non-zero exit fails the job.
 
-## 15. Reuse the hello-world example as a starting template
+## 15. Start a new story
 
 ```bash
-cp -r examples/hello-world my-video
+truedemo init my-video --title "My video" --days 14
 # then edit my-video/video.yaml, narration.md, provider.py
 ```
 
-Keep `provider.py` aliasing the panels import (`from truedemo import panels as panel_lib`).
-`examples/hello-world` is host-free and self-contained, so it is the safest starting point:
-it declares no `captures[]` and needs no browser, network, or TTS model.
+`init` writes a runnable story — spec, narration, and a working provider — so it builds
+before you edit anything. Keep `provider.py` aliasing the panels import
+(`from truedemo import panels as panel_lib`).
+
+If you have the repository checked out, `examples/hello-world` is a second, equally
+host-free starting point — it declares no `captures[]` and needs no browser, network, or TTS
+model:
+
+```bash
+cp -r examples/hello-world my-video      # from a clone of the repo only
+```
 
 ## 16. Film a real download, then film the file
 

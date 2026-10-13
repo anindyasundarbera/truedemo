@@ -83,7 +83,7 @@ Every field, default, and constraint lives in the
 
 | You want to… | Read |
 |---|---|
-| Go from an empty clone to a verified `.mp4` | [your first video](first-video.md) |
+| Go from `pip install` to a verified `.mp4` | [your first video](first-video.md) |
 | Copy a working pattern for a common task | [recipes](recipes.md) |
 | Write or validate a `video.yaml` | [spec reference](../authoring/spec-reference.md) |
 | Connect truedemo to your data | [provider guide](../authoring/provider-guide.md) |

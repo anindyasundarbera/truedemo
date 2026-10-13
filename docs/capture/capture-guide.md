@@ -278,7 +278,7 @@ truedemo build SPEC --only capture
 
 ## A worked example in this repo
 
-[`examples/capture-kit/`](../../examples/capture-kit/) is a small product page — stdlib only,
+[`examples/capture-kit/`](https://github.com/anindyasundarbera/truedemo/tree/main/examples/capture-kit) (repository only) is a small product page — stdlib only,
 no network — built to exercise the whole feature: a table that is **empty at first paint** and
 fills in after a beat (`wait_for`), a period selector that changes the numbers (an action that
 is then asserted), a real CSV and a real PDF endpoint (`download`), and two captures that film

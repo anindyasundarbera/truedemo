@@ -256,6 +256,11 @@ truedemo docs authoring/spec-reference
 truedemo docs --index              # the machine-readable route table (JSON)
 ```
 
+The docs ship with the **repository**, not the installed package. In a checkout every name
+above resolves; after `pip install` the tree is absent, so `truedemo docs` says so and prints
+the published URL rather than an empty route table, and `truedemo docs --index` returns
+`{"routes": {}, "installed": false, "docs_url": …}`.
+
 ## Environment variables
 
 truedemo reads none by itself, but your **provider** might (e.g. `MYAPP_API_URL`). Keep such

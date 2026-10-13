@@ -5,6 +5,44 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-10-13
+
+**Published to PyPI:** `pip install truedemo` — <https://pypi.org/project/truedemo/2.0.1/>
+
+### Fixed — the docs described the repository, not the installed package
+
+The `2.0.0` release is on PyPI, but its documentation was written by and for a source
+checkout. Installing from PyPI and following the README failed: the "See it run" quickstart
+ran `truedemo build examples/hello-world/video.yaml`, and a wheel ships the **engine only** —
+no `examples/`, no `docs/`. A clean-venv install reproduced it:
+
+```
+truedemo build examples/hello-world/video.yaml
+  -> truedemo: error: spec not found: …/examples/hello-world/video.yaml
+
+truedemo docs        -> no doc named None; available: (none)
+truedemo docs --index -> {"version": 1, "routes": {}}
+```
+
+The published PyPI **page** was worse: its description still carried `pip install -e .` (the
+editable, from-a-clone form) because the fix landed after the upload.
+
+- The README quickstart now leads with `pip install truedemo` →
+  `truedemo init … ` → `plan` → `build` — a path that needs no clone and works as written.
+  The clone-based example quickstart is kept, but demoted into a "working on the engine
+  itself" disclosure.
+- `examples/` references in the README and the docs are labelled **repository only**, and the
+  ones that were instructions (the `--story examples/hello-world` snippets, the
+  `cp -r examples/hello-world` recipe) now show a scaffolded path instead.
+- `docs/guides/first-video.md` installs with `pip install truedemo` rather than
+  `git clone` + `-e`.
+- The MCP page no longer claims an `examples/*/video.yaml` default as if it applied after
+  install — that default only exists in a checkout.
+- `truedemo docs` and `truedemo docs --index` now **degrade honestly** when the `docs/` tree
+  is absent: the CLI reports the docs are not installed and prints the published URL, and
+  `--index` returns `{"routes": {}, "installed": false, "docs_url": …}` instead of a
+  silently empty table.
+
 ## [2.0.0] - 2026-10-13
 
 **Published to PyPI:** `pip install truedemo` — <https://pypi.org/project/truedemo/2.0.0/>
@@ -549,6 +587,7 @@ report:
   resources.
 - CLIs: `vidkit doctor`, `plan`, `build`, `tts`, `capture`, `verify`, `docs`.
 
+[2.0.1]: https://github.com/anindyasundarbera/truedemo/releases/tag/v2.0.1
 [2.0.0]: https://github.com/anindyasundarbera/truedemo/releases/tag/v2.0.0
 [1.2.0]: https://github.com/anindyasundarbera/vidkit/releases/tag/v1.2.0
 [1.0.0]: https://github.com/anindyasundarbera/vidkit/releases/tag/v1.0.0

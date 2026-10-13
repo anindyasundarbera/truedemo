@@ -34,22 +34,44 @@ You declare shots, and truedemo builds the film and checks it.
 
 ## See it run
 
-Thirty seconds, with no browser, no network, and no voice model — every number in this
-example is counted from the files in this repository at the moment of the build:
+Thirty seconds, with no browser, no network, and no voice model. Install the package, then
+scaffold a runnable story and build it — every number on screen is measured from disk, not
+typed:
+
+```bash
+pip install truedemo                                      # ffmpeg + rsvg-convert required; see Install
+
+truedemo doctor                                           # is this machine ready?
+truedemo init  my-story --title "My first video" --days 14
+truedemo plan  my-story/video.yaml                       # scenes, timings, guards — render nothing
+truedemo build my-story/video.yaml                       # → my-story.mp4 + .srt + verify.json
+```
+
+`init` writes a story that builds as written — a spec, a narration script, and a working
+provider, with no asset or network to wire up first. `plan` is the cheap one: the whole scene
+plan and the estimated runtime, without touching a pixel. `build` is the real thing, and the
+`verify.json` it writes is the report this project exists to produce.
+
+<details>
+<summary>Working on the engine itself? The same loop from a clone</summary>
+
+The bundled examples live in the repository, **not** in the installed package, so this path is
+for a checkout of the source:
 
 ```bash
 git clone https://github.com/anindyasundarbera/truedemo
 cd truedemo
-pip install -e ".[dev]"     # ffmpeg and rsvg-convert are required; see Install below
+pip install -e ".[dev]"
 
 truedemo doctor examples/hello-world/video.yaml   # is this machine ready?
-truedemo plan   examples/hello-world/video.yaml   # scenes, timings, guards — render nothing
+truedemo plan   examples/hello-world/video.yaml
 truedemo build  examples/hello-world/video.yaml   # → hello-world.mp4 + .srt + verify.json
 ```
 
-`plan` is the cheap one: it prints the whole scene plan and the estimated runtime without
-touching a pixel. `build` is the real thing, and the `verify.json` it writes is the report
-this project exists to produce. This example is the fixture CI builds on every push.
+`examples/hello-world` is the offline CI fixture — no browser, no network, no voice model. CI
+builds it on every push.
+
+</details>
 
 ## Why it is honest
 
@@ -109,6 +131,12 @@ pip install "truedemo[dev]"       # + pytest
 ```
 
 Or from a clone, if you want to work on the engine itself: `pip install -e ".[dev]"`.
+
+The package installs the **engine**; the examples, the `docs/` tree, and the test suite live
+in the [repository](https://github.com/anindyasundarbera/truedemo) and are not part of a
+`pip install`. Everything in the docs is readable after install via `truedemo docs` — and,
+when the tree is not present, `truedemo docs` points you at the published copy rather than
+failing.
 
 Required external binaries are **`ffmpeg`** and **`rsvg-convert`** (Debian/Ubuntu:
 `sudo apt-get install ffmpeg librsvg2-bin`). Optional: `ffprobe` (durations are read from
@@ -184,7 +212,7 @@ is in the [MCP server](docs/operations/mcp-server.md) page.
 For a transport-independent integration, the same work is available as a job:
 
 ```bash
-truedemo --json run plan --story examples/hello-world     # {action, story, out} → one manifest
+truedemo --json run plan --story my-story      # {action, story, out} → one manifest
 ```
 
 ## Verification — the part that makes it worth using
@@ -213,6 +241,9 @@ and the tool versions that made it ([provenance](docs/verification/provenance.md
 
 ## Examples in this repo
 
+The packages on PyPI ship the **engine only** — no examples, docs, or tests. These live in the
+repository and are built from a checkout:
+
 | Example | Proves |
 |---|---|
 | [`hello-world`](examples/hello-world/) | The smallest complete build: offline, silent, every number measured from disk. The CI fixture. |
@@ -222,7 +253,8 @@ and the tool versions that made it ([provenance](docs/verification/provenance.md
 | [`movie-demo`](examples/movie-demo/) | A film with **no capture, no provider, no browser**: drawn cards, a moving camera, a score. |
 
 CI builds each of these as an end-to-end probe on a clean runner, and one more probe drives
-the MCP server through a whole sitting — on top of the unit suite.
+the MCP server through a whole sitting — on top of the unit suite. For your own first story,
+`truedemo init` is the installed equivalent — it needs no clone.
 
 ## Extending
 

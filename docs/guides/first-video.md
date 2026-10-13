@@ -1,8 +1,8 @@
-# Your first video from a fresh clone
+# Your first video
 
-This walkthrough starts with nothing but a clone and ends with a verified `.mp4` that
+This walkthrough starts with nothing but `pip install` and ends with a verified `.mp4` that
 reports its own provenance. It uses only the CLI and the MCP server, in that order, and it
-never touches the bundled example.
+never touches a bundled example — there is nothing to clone.
 
 **Time:** about five minutes, most of it `pip` and the first render. **Network:** none after
 the install, unless your provider fetches something.
@@ -12,10 +12,8 @@ the install, unless your provider fetches something.
 ## 1. Install
 
 ```bash
-git clone https://github.com/anindyasundarbera/truedemo
-cd truedemo
 python3 -m venv .venv && . .venv/bin/activate
-pip install -e ".[dev]"
+pip install truedemo
 ```
 
 `python3`, not `python` — the engine only ever needs the interpreter, and `python` does not
@@ -30,6 +28,11 @@ sudo apt-get install ffmpeg librsvg2-bin
 The extras are additive and independent: `[capture]` adds Playwright (for filming a real
 UI), `[tts]` adds Piper (for a voice), `[mcp]` adds the MCP server. You need none of them
 for this walkthrough.
+
+> Working on the engine itself, rather than using it? Clone the repository and install it
+> editable — `pip install -e ".[dev]"` — and read
+> [CONTRIBUTING](https://github.com/anindyasundarbera/truedemo/blob/main/CONTRIBUTING.md).
+> Everything below still applies; only step 1 changes.
 
 ## 2. Check the machine
 
@@ -214,4 +217,4 @@ machine-readable route table — so an agent can teach itself without a human in
 | to understand the stages | [pipeline.md](../foundations/pipeline.md) |
 | a known-good pattern to copy | [recipes.md](../guides/recipes.md) |
 | to wire an agent in | [mcp-server.md](../operations/mcp-server.md) |
-| the bundled offline example | `examples/hello-world/` |
+| the bundled offline example (repo only) | [`examples/hello-world/`](https://github.com/anindyasundarbera/truedemo/tree/main/examples/hello-world) |

@@ -4,7 +4,7 @@
 > For the phase-wise plan see [FEATURE-ROADMAP.md](FEATURE-ROADMAP.md). For what already
 > happened see [HISTORY.md](HISTORY.md). For why, see [DECISIONS.md](DECISIONS.md).
 >
-> Last updated: **2026-10-13** (README reframed; docs split; v1.2.0 released; renamed to truedemo as v2.0.0).
+> Last updated: **2026-10-13** (docs corrected to describe the *installed* package; README reframed; docs split; v1.2.0 released; renamed to truedemo as v2.0.0).
 
 ## Where we are
 
@@ -15,11 +15,20 @@ The final CI run passed both test-matrix jobs and all six end-to-end probes. The
 passed nine checks and decoded the selected take from the delivered film.
 
 The lean local suite reports **681 passed, 101 skipped**. A later full local run reported
-**782 passed in 609.57 s** with every toolchain present. (An earlier full run had one Chromium
+**791 passed in 643.91 s** with every toolchain present. (An earlier full run had one Chromium
 screenshot failure that passed in isolation; it has not recurred.) Detailed evidence and M10's
 final defect ledger are in [HISTORY.md](HISTORY.md).
 
 ## Recently landed
+
+The **docs were corrected to describe the installed package, not the repository**
+(2026-10-13). The `2.0.0` publish was verified against `examples/hello-world` *in the repo*,
+which is a path a `pip install` user does not have — a wheel ships the engine only. A clean
+venv reproduced it: `truedemo build examples/hello-world/video.yaml` fails with *spec not
+found*, and `truedemo docs` returned an empty route table. The README quickstart now leads
+with `pip install truedemo` → `init` → `plan` → `build`, every `examples/` reference is
+labelled **repository only**, and `truedemo docs` points at the published copy when the tree
+is absent. Recorded in [HISTORY.md](HISTORY.md) and [DECISIONS.md](DECISIONS.md) D67.
 
 The **front door** was rewritten (PR #15, `ddfac1c`): the README now leads with the problem
 it solves rather than the artifact it emits, the GitHub About says the same thing in one
@@ -64,9 +73,14 @@ Release bookkeeping is separate from phase completion and remains owner-owned:
   was **superseded without being pushed** — the version string had drifted behind the code,
   and `1.2.0` is the first release that matches it.
 - **Published to PyPI: `truedemo 2.0.0`** (2026-10-13). `pip install truedemo` works, with
-  the extras `[capture]` / `[tts]` / `[mcp]` / `[dev]`. Verified end to end: a clean venv
-  installs from PyPI, and `truedemo build examples/hello-world` passes all 13 checks. The
-  earlier blocker (the name `vidkit` belonging to an unrelated project) was removed by the
-  rename. Publishing the *next* release is now a routine step, not an open decision.
+  the extras `[capture]` / `[tts]` / `[mcp]` / `[dev]`. The earlier blocker (the name `vidkit`
+  belonging to an unrelated project) was removed by the rename. Publishing the *next* release
+  is now a routine step, not an open decision.
+- **`truedemo 2.0.1` is prepared and awaiting upload** (2026-10-13). This is a **docs-only
+  patch**: it refreshes the PyPI page's description, which is a copy taken at upload and still
+  shows the pre-fix `pip install -e .` quickstart. Prepared here: `_version.py` bumped
+  `2.0.0 → 2.0.1`, the `## [Unreleased]` docs-fix section closed as `## [2.0.1]`, and the
+  release link added. The upload itself (build → `twine check` → TestPyPI dry run → clean-venv
+  install → PyPI) and the `v2.0.1` tag are the **owner's**, per the D66 sequence.
 
 Do not publish a release or tag until those visible release choices are settled.

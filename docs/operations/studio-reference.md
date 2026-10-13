@@ -79,7 +79,7 @@ Not every client can hold a session. The same work is available as a one-shot **
 takes `{action, story, out}` and returns a single manifest:
 
 ```bash
-truedemo --json run plan --story examples/hello-world     # {action, story, out} → one manifest
+truedemo --json run plan --story my-story      # {action, story, out} → one manifest
 ```
 
 Over MCP the equivalent is the `truedemo_run` tool, whose manifest shape never changes — a

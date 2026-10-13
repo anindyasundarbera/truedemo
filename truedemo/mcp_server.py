@@ -1103,6 +1103,17 @@ def _docs_root() -> Path:
     return Path(__file__).resolve().parent.parent / "docs"
 
 
+#: Where the docs live when they are not shipped beside the package. A wheel installs
+#: the engine only — the ``docs/`` tree, the examples, and the tests stay in the repo —
+#: so the docs tools answer with a pointer here rather than an empty route table.
+DOCS_URL = "https://github.com/anindyasundarbera/truedemo/tree/main/docs"
+
+
+def _docs_installed() -> bool:
+    """Whether the ``docs/`` tree is present beside the package (true in a checkout)."""
+    return (_docs_root() / "README.md").is_file()
+
+
 def _load_modules() -> dict[str, Any] | None:
     """Parse ``docs/modules.yaml`` (best-effort; PyYAML is optional)."""
     path = _docs_root() / "modules.yaml"
@@ -1172,9 +1183,18 @@ def tool_docs(name: str | None = None) -> str:
     Names are routed through ``docs/modules.yaml``, so a bare stem
     (``concepts``), a module-qualified name (``authoring/spec-reference``), or a
     path all resolve. No name returns the module router (``docs/README.md``).
+
+    A wheel installs the engine only, so the ``docs/`` tree is absent there; rather
+    than an empty route table, this points at the published copy.
     """
     path = _doc_path(name)
     if path is None:
+        if not _docs_installed():
+            label = f"the document {name!r}" if name else "the documentation index"
+            raise ToolError(
+                f"{label} is not installed with the package — the docs ship with the "
+                f"repository, not the wheel. See {DOCS_URL}"
+            )
         routes = sorted(_doc_routes())
         raise ToolError(
             f"no doc named {name!r}; available: {', '.join(routes) or '(none)'}"
@@ -1183,10 +1203,17 @@ def tool_docs(name: str | None = None) -> str:
 
 
 def tool_docs_index() -> dict[str, Any]:
-    """The machine-readable module route table (``docs/modules.yaml``)."""
+    """The machine-readable module route table (``docs/modules.yaml``).
+
+    Absent from a wheel install, where the whole ``docs/`` tree is; the returned
+    table then carries a ``docs_url`` pointing at the published copy instead of an
+    empty ``routes`` map.
+    """
     mods = _load_modules()
     if mods is not None:
         return mods
+    if not _docs_installed():
+        return {"version": 1, "routes": {}, "installed": False, "docs_url": DOCS_URL}
     return {"version": 1, "routes": _doc_routes()}
 
 

@@ -46,7 +46,7 @@ docs/
 | Record the product UI | [capture/capture-guide.md](capture/capture-guide.md) |
 | Read a failing `verify.json` | [verification/verification.md](verification/verification.md) |
 | Find out what a `.mp4` on disk was built from | [verification/provenance.md](verification/provenance.md) |
-| Go from an empty clone to a verified video | [guides/first-video.md](guides/first-video.md) |
+| Go from `pip install` to a verified video | [guides/first-video.md](guides/first-video.md) |
 | Run it from a shell | [operations/cli-reference.md](operations/cli-reference.md) |
 | Drive it from an IDE/agent (MCP) | [operations/mcp-server.md](operations/mcp-server.md) |
 | Run an agent session (takes, budgets) | [operations/studio-reference.md](operations/studio-reference.md) |
@@ -76,6 +76,12 @@ docs/
 
 Calling with **no name** returns this index. Module-qualified names
 (`authoring/spec-reference`) and explicit paths also resolve.
+
+These tools read the `docs/` tree **beside the package**, which exists in a source checkout
+but not in a `pip install` (a wheel ships the engine only). After `pip install`, `truedemo
+docs` reports that the docs are not installed and prints the published URL;
+`truedemo docs --index` returns `{"routes": {}, "installed": false, "docs_url": …}` — a
+pointer rather than a silently empty table.
 
 ## What truedemo is, in one paragraph
 

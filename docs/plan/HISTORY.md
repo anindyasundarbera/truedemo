@@ -2225,3 +2225,95 @@ truedemo build examples/hello-world -> 13 checks, 0 failures
 **Next-release note:** PyPI does not reserve names and the publish is one-shot per version, so
 every future release re-checks availability, re-runs the TestPyPI dry run, and bumps the
 version — never re-uploads an existing one.
+
+---
+
+## 2026-10-13 — The docs described the repo; the package is what users install
+
+The `2.0.0` publish was verified against an artifact *in the repo* — `truedemo build
+examples/hello-world` — which is exactly the path a PyPI user does not have. A wheel ships
+the **engine only**: 37 files under `truedemo/`, no `examples/`, no `docs/`, no `tests/`.
+Reproduced in a clean venv (`/tmp/tdvenv`, installed from the built wheel):
+
+```
+truedemo doctor --examples/hello-world/video.yaml
+   -> [NO ] spec  spec not found: /tmp/pipuser/examples/hello-world/video.yaml   exit 1
+truedemo build examples/hello-world/video.yaml
+   -> truedemo: error: spec not found: /tmp/pipuser/examples/hello-world/video.yaml  exit 1
+truedemo docs                       -> error: no doc named None; available: (none)
+truedemo docs --index               -> {"version": 1, "routes": {}}
+curl pypi.org/pypi/truedemo/json    -> description still contains "pip install -e ."
+```
+
+The PyPI page was stale too: the description it serves is generated at upload, and the
+`pip install -e .` → `pip install truedemo` fix (#35) merged *after* the artifact was built,
+so the published page still told readers to install from a clone.
+
+### What changed (docs only; no engine behaviour touched)
+
+| Surface | Was | Now |
+|---|---|---|
+| README "See it run" | `git clone` → `pip install -e` → build `examples/hello-world` | `pip install truedemo` → `init … ` → `plan` → `build` on the scaffolded story |
+| README clone path | the headline | a collapsed "working on the engine itself" disclosure |
+| README "Examples in this repo" | unlabelled | labelled repository-only |
+| `guides/first-video.md` | titled "from a fresh clone"; `git clone` + `-e` | titled "Your first video"; `pip install truedemo` |
+| `recipes.md` §15 | `cp -r examples/hello-world` as the way to start | `truedemo init`; the `cp` kept as a repo-only aside |
+| `--story examples/hello-world` snippets (README, studio-ref) | a runnable command for any reader | `--story my-story` |
+| `examples/` links (provider/capture/architecture/first-video) | relative, implied local | GitHub URLs, marked repo-only |
+| `mcp-server.md` default-spec claim | "defaults to `examples/*/video.yaml`" | only a checkout has an `examples/`; an installed user passes `spec`/`story` |
+| `truedemo docs` (no tree) | empty route table | reports not-installed + the published URL |
+
+### Evidence
+
+```
+python3 -m pytest tests -q                                  -> 791 passed in 643.91s
+pip install <wheel> (clean venv) ; truedemo init my-story && truedemo build my-story/video.yaml
+                                                            -> my-story.mp4 + narration.srt + verify.json, all checks pass
+truedemo docs (from the installed package)                  -> points at the GitHub docs URL
+curl pypi.org/pypi/truedemo/json | grep 'pip install -e'    -> still present on 2.0.0 (the page is regenerated only on the next publish)
+```
+
+### What this does *not* fix
+
+The **PyPI page** is immutable per version: its README is a copy taken at upload. The fix
+above reaches `main` and the repository README, but the PyPI page will keep showing the
+pre-fix quickstart until the **next publish** regenerates it from the current `main`. That
+publish is a version bump plus an upload — the same dry-run-first sequence D66/HISTORY
+recorded — and is deliberately left to the owner.
+
+---
+
+## 2026-10-13 — Prepared the `2.0.1` docs-only patch
+
+The docs fix above reaches `main`, but the **PyPI page** is a copy of the README taken at
+upload, so it kept showing the pre-fix `pip install -e .` quickstart. Regenerating it requires
+a publish, and a publish needs a new version (PyPI will not accept a re-upload of `2.0.0`).
+So `2.0.1` is prepared here as a **docs-only patch**:
+
+- `truedemo/_version.py` bumped `2.0.0 → 2.0.1` (the single source of truth; `pyproject.toml`
+  reads the attribute, so no second literal is introduced and
+  `test_version_is_single_sourced` still holds).
+- The `## [Unreleased]` docs-fix section in `CHANGELOG.md` closed as `## [2.0.1] - 2026-10-13`,
+  with the release link added.
+- `docs/plan/PLAN.md` updated: `2.0.0` published, `2.0.1` prepared and awaiting upload.
+
+The **upload and the `v2.0.1` tag are the owner's** — this entry records only the preparation,
+not a publish. Sequence when the owner runs it (D66): build → `twine check` → TestPyPI dry run
+→ clean-venv install of the *TestPyPI* artifact → PyPI → tag.
+
+### Evidence (build, not publish)
+
+```
+python -m build                      -> truedemo-2.0.1.tar.gz + truedemo-2.0.1-py3-none-any.whl
+twine check dist/*                   -> PASSED (both)
+metadata                             -> Version: 2.0.1; README has "pip install truedemo",
+                                        no "pip install -e .", no examples/ quickstart
+pip install <2.0.1 wheel> (clean venv) -> truedemo 2.0.1; truedemo docs -> published-URL message
+truedemo init/plan/build my-story    -> my-story.mp4 + narration.srt; verify.json ok, 9 checks
+python3 -m pytest tests -q           -> 791 passed in 640.37s
+sha256 (2.0.1 whl)                   -> ccf2af524cafcd0bed92c0db4e9548c2a32320d18e5bf1b9cd978d163fecd004
+sha256 (2.0.1 tar.gz)                -> 85a5dcbb92f3cfd815f2c1eb61ad96c75331f9e6e9326ccb899c19a99661d8bf
+```
+
+`dist/` is gitignored, so these artifacts are local build output; the owner rebuilds from the
+merged commit at publish time (the same sequence as `2.0.0`).

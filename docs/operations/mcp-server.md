@@ -52,7 +52,7 @@ returns JSON.
 | `truedemo_verify_report` | `spec?`, `out?` | the persisted `verify.json` (no re-check) |
 | `truedemo_provenance` | `spec?`, `out?` | the persisted `provenance.json`: spec hash, window, provider, tools, when |
 | `truedemo_panel_kinds` | — | the built-in panel kinds a chart may use |
-| `truedemo_docs` | `name?` | the docs **module router**, or a named document's Markdown (module-routed) |
+| `truedemo_docs` | `name?` | the docs **module router**, or a named document's Markdown (module-routed); with no `docs/` tree installed, points at the published copy |
 | `truedemo_docs_index` | — | the machine-readable module route table (`docs/modules.yaml`) |
 
 ### Which call should an agent use?
@@ -175,9 +175,12 @@ Start `truedemo-mcp --transport streamable-http --port 8765`, then point the cli
   via the SDK's `FastMCP` high-level server.
 - Tool schemas are inferred from type hints, so function signatures are the single
   source of truth.
-- All paths are resolved to absolute paths; `spec` is optional, defaulting to the
-  alphabetically first `examples/*/video.y*ml` under the repo root (`examples/hello-world`
-  today).
+- All paths are resolved to absolute paths; `spec` is optional. With no `spec`, the default is
+  the first `video.yaml`/`spec.yaml` in the working directory, then the alphabetically first
+  `examples/*/video.y*ml` under the project root (the bundled `examples/hello-world` — and so
+  a default only in a source checkout, never in a `pip install`), and finally any spec-looking
+  `*.y*ml`/`*.json` under the current directory. An installed user passes `spec`, or a `story`
+  to `truedemo_run`.
 - Expected failures raise `ToolError`, which the MCP layer reports as a tool error with the
   message — no stack traces reach the client.
 

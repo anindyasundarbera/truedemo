@@ -1954,3 +1954,50 @@ scheme. `2.0.0` states that plainly rather than hiding it in a minor.
    was published as `truedemo 2.0.0` — dry-run on TestPyPI first, then PyPI, then verified by
    installing from PyPI in a clean venv and building hello-world. Publishing the *next*
    release is now routine rather than an open decision.
+
+---
+
+## D67 — The docs are for the *installed* package first, the repo second
+
+**2026-10-13.** Context: the `truedemo 2.0.0` PyPI release.
+
+`2.0.0` went to PyPI, but the documentation around it had been written by and for a source
+checkout. Installing from PyPI and following it failed for a **pip user with no clone**: the
+README quickstart ran `truedemo build examples/hello-world/video.yaml`, and a wheel ships the
+**engine only** — `examples/`, `docs/`, and `tests/` are not in it. The PyPI page's own
+description was still the pre-fix README, still telling a reader to `pip install -e .`.
+
+**Decision.** The documentation's **default reader is someone who ran `pip install truedemo`
+and has no clone.** The install-and-go path (`init` → `plan` → `build`) leads; every reference
+to a repository artifact — the `examples/`, the docs tree, the test suite — is labelled
+**repository only**, and anything that was an *instruction* rather than a *reference* is
+rewritten to a path that works after install. Where a tool can only work with a repo artifact
+(`truedemo docs`), it says so and points at the published copy rather than returning an empty
+result that reads like an absence of documentation.
+
+**Alternatives.**
+
+- *Bundle `docs/` (and a starter example) into the wheel, so `truedemo docs` and an advertised
+  example keep working after install.* Rejected **for now**: it moves a maintenance seam into
+  the package (the docs would ship twice and could drift), it grows every download, and the
+  same content is a `pip install` away from being the repo's. It remains the natural fix if a
+  future, non-doc reason to ship the tree appears.
+- *Make `git clone` the blessed path and call the PyPI page a pointer to the README.*
+  Rejected: the package is the product; a user is entitled to the described workflow from the
+  artifact they installed.
+- *Leave the empty `docs --index` result.* Rejected: an empty route table reads as "there is no
+  documentation", which is the class of defect the project forbids — a result that is not
+  evidence of what it appears to claim.
+
+**Consequences.**
+
+1. **Docs are graded in the CI `build-example` / lean jobs from a checkout, but read from
+   PyPI.** The PyPI page is regenerated only on the next publish, so **the page's README is
+   refreshed by republishing** the current `main` (a version bump + upload); it is not edited
+   in place. `2.0.1` is that republish: a docs-only patch whose only purpose is to regenerate
+   the page from the corrected `main`.
+2. **`truedemo docs` is honest about its own absence.** `mcp_server.DOCS_URL` /
+   `_docs_installed()` gate the message and the `docs_url` key, pinned by
+   `tests/test_mcp.py::test_docs_tools_degrade_honestly_without_the_docs_tree`.
+3. **The rule is now general**, not local to this release: a doc line is written for the
+   installed package unless it explicitly says "repository only".

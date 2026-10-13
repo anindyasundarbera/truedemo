@@ -136,6 +136,30 @@ def test_docs_tool_unknown_name_raises():
         m.tool_docs("does-not-exist")
 
 
+def test_docs_tools_degrade_honestly_without_the_docs_tree(tmp_path, monkeypatch):
+    """A wheel ships the engine only, so ``docs/`` is absent there.
+
+    Without the tree, both tools must point at the published copy rather than report a
+    misleading empty route table — a defect found by installing the real wheel.
+    """
+    monkeypatch.setattr(m, "_docs_root", lambda: tmp_path / "nonexistent-docs")
+
+    index = m.tool_docs_index()
+    assert index["routes"] == {}
+    assert index["installed"] is False
+    assert "truedemo" in index["docs_url"] and "github" in index["docs_url"]
+
+    with pytest.raises(ToolError) as excinfo:
+        m.tool_docs(None)
+    assert "not installed" in str(excinfo.value)
+    assert index["docs_url"] in str(excinfo.value)
+
+    # a checkout still resolves normally (guards against a blanket failure)
+    monkeypatch.undo()
+    assert m.tool_docs(None).startswith("# truedemo")
+    assert m.tool_docs_index()["modules"]
+
+
 def test_resolve_spec_missing_raises():
     with pytest.raises(ToolError):
         m.resolve_spec("/no/such/spec.yaml")

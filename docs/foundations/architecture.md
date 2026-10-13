@@ -129,8 +129,8 @@ tracebacks (a bug, not a user error).
 - **Pure logic is unit-tested** (`tests/test_core.py`): spec validation, narration parsing,
   caption fidelity/readability, all built-in panels, the registry. No external tools needed.
 - **Wrapper logic is injectable** via `Shell(runner=…)` for fake-process tests.
-- **Integration is exercised by the example** (`examples/hello-world`) — a real
-  end-to-end run with verification. `.github/workflows/ci.yml` builds it on every push.
+- **Integration is exercised by the example** (`examples/hello-world`, repository only) — a
+  real end-to-end run with verification. `.github/workflows/ci.yml` builds it on every push.
 
 To add a custom panel kind in a test:
 

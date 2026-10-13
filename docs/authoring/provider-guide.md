@@ -282,4 +282,4 @@ so pass `--refresh` when you have edited the provider itself.
 - Every built-in kind and its dataset shape: [`panels-reference.md`](panels-reference.md)
 - The windows a snapshot is keyed on: [`stories-and-timeframes.md`](stories-and-timeframes.md)
 - What `verify` reports: [`verification.md`](../verification/verification.md)
-- A full real provider: `examples/hello-world/provider.py`
+- A full real provider (repo only): [`examples/hello-world/provider.py`](https://github.com/anindyasundarbera/truedemo/blob/main/examples/hello-world/provider.py)

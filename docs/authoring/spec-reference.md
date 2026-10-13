@@ -1,14 +1,43 @@
 # Spec reference
 
 A spec is a plain-data document in **YAML** (`.yaml`/`.yml`, needs PyYAML) or **JSON**
-(`.json`, always works). It has five sections plus three optionals. Nothing in a spec
-executes code.
+(`.json`, always works). It has exactly **fourteen** legal top-level keys and nothing else —
+the loader refuses any other key by name (`_SPEC_KEYS`) rather than dropping it silently.
+Nothing in a spec executes code; the only code that runs is the provider module you name.
 
 **Validation happens at load time** (`spec.load_spec` → `_validate`). Malformed specs fail
 before any rendering, with a message naming the offending scene/field.
 
 Path resolution: any relative path in a spec is resolved against `ROOT` (the spec's folder),
 then `ROOT/..`, then the current directory.
+
+## The whole spec at a glance
+
+Every legal top-level key, on one screen. The sections after this one give each its full
+type table.
+
+```yaml
+project:   { title: …, slug: …, output: out.mp4, size: [1920, 1080], fps: 30,
+             min_seconds: 60, max_seconds: 120 }
+story:     { slug: …, title: … }        # optional manifest, or a story.yaml folder
+timeframe: { start: 2026-09-07, end: 2026-10-06 }   # or { days: 90, as_of: … }
+voice:     { engine: piper, model: voice.onnx }    # engine: none → declared silent cut
+
+narration: { source: narration.md }     # "## Scene N — … · mm:ss–mm:ss", spoken lines **bold**
+provider:  provider                     # provider.py: datasets, panels, stills
+
+captures:    [ … ]   # real screen recordings (Playwright)
+exec:        { steps: [ … ] }          # real commands, sandboxed, recorded
+environment: [ … ]   # a real service for those commands to run inside
+charts:      [ … ]   # datasets → panels
+score:       { src: bed.ogg, volume: 0.45, duck_db: -12.0 }   # looped, ducked under narration
+scenes:      [ … ]   # the shot plan
+guard:       { banned: […], required: […], require_live_mode: true }
+style:       { … }
+```
+
+> The captures key is **`captures:`** (plural, top level); the per-shot key is **`capture:`**
+> (singular). A top-level `capture:` is refused, and the error says which key you meant.
 
 ---
 

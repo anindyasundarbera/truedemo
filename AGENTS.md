@@ -480,10 +480,12 @@ Use exactly these, so they are greppable:
   durations as positions in a longer film; and `duck_seconds` printed as a number the mix
   never produced. **A check that cannot fail is worse than no check, because it reads as
   assurance** (D49); **an absent measurement is not a negative measurement** (D52).
-- **The one item needing an owner decision:** the public **`v1.0.0` tag** — the code is at
-  `1.0.0` and merged, but the tag itself is a visible release and has not been pushed. M7–M10
-  sit under `## [Unreleased]` in the CHANGELOG; whether that becomes `1.1.0` or `1.2.0` at
-  release time is a second owner call (PLAN.md records `1.2.0` as the default).
+- **Released: `v1.2.0` (2026-10-13).** This was the item that needed an owner decision, and it
+  is now closed. The version string had drifted behind the code (`1.0.0` while M7–M10 sat under
+  `## [Unreleased]`); `1.2.0` is the first release that matches, and the `v1.0.0` tag was
+  superseded without ever being pushed. **PyPI remains unpublished and is now blocked** — the
+  name `vidkit` belongs to an unrelated project (`SpyC0der77/vidkit`), so a publish would need
+  a different distribution name; the docs install from the git URL.
 - **Host-safety contract (M8).** A container may never mount the Docker socket, runs
   unprivileged, has a hard timeout, and is torn down in a `finally` on every exit path.
   Teardown is *reported*, not assumed (`facts.environments[].teardown`). Do not weaken this

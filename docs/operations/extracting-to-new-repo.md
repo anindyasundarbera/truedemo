@@ -153,7 +153,7 @@ The unit tests need no binaries; the smoke build needs `ffmpeg` + `rsvg-convert`
 > installed package:
 
 ```bash
-pip install -e /path/to/vidkit            # or: pip install vidkit
+pip install -e /path/to/vidkit            # or, from the repo: pip install "vidkit @ git+https://github.com/anindyasundarbera/vidkit"
 ```
 
 Then the moved story's `video.yaml` and `provider.py` work unchanged, since they import

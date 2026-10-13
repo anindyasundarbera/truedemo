@@ -281,7 +281,7 @@ class Ffmpeg:
           showing a neighbouring part of a frame that was cropped out for a reason.
 
         ``motion`` is an object with ``kind``/``direction``/``amount``/``span``/``at``
-        (the spec's :class:`~vidkit.spec.Motion`), duck-typed so this module stays
+        (the spec's :class:`~truedemo.spec.Motion`), duck-typed so this module stays
         free of the spec's types. When it is given, ``effect`` is not consulted —
         the caller has already refused a spec that declares both.
 

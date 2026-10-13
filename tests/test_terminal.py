@@ -1,4 +1,4 @@
-"""Unit tests for `vidkit.terminal` — the PTY replayer and renderer.
+"""Unit tests for `truedemo.terminal` — the PTY replayer and renderer.
 
 Pure Python: no PTY, no ffmpeg, no rsvg. A recording is just a byte stream, so a
 test can synthesise one and assert what the screen makes of it. That is the right
@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from vidkit import terminal
+from truedemo import terminal
 
 _SCRATCH = Path(__file__).resolve().parent.parent / ".pytest-tmp"
 
@@ -164,7 +164,7 @@ def test_cast_round_trips_through_the_file():
     header, *rest = p.read_text().splitlines()
     assert json.loads(header)["version"] == 2
     assert json.loads(header)["width"] == 80
-    assert json.loads(header)["vidkit"]["label"] == "demo"
+    assert json.loads(header)["truedemo"]["label"] == "demo"
     assert len(rest) == 3
     assert terminal.read_cast(p.read_bytes()) == [("o", 0.0, b"a"),
                                                   ("o", 1.25, b"bb"),

@@ -33,10 +33,10 @@ from pathlib import Path
 
 import pytest
 
-from vidkit import exec as ex
-from vidkit import spec as sp
-from vidkit.errors import SpecError, ToolError
-from vidkit.secrets import Secrets
+from truedemo import exec as ex
+from truedemo import spec as sp
+from truedemo.errors import SpecError, ToolError
+from truedemo.secrets import Secrets
 
 
 # --------------------------------------------------------------------------- #
@@ -573,14 +573,14 @@ def test_redaction_masks_the_longest_secret_first():
 def _span_ctx(tmp_path, fps: int = 30):
     spec = sp.load_spec(_yaml(tmp_path, steps=[{"label": "a", "cmd": "ls"}]))
     spec.project.fps = fps
-    from vidkit.context import Context
+    from truedemo.context import Context
     ctx = Context(spec=spec, root=spec.root, out_dir=tmp_path / "_out")
     ctx.ensure_dirs()
     return ctx
 
 
 def _frames(*times):
-    from vidkit.assembler import Assets
+    from truedemo.assembler import Assets
     a = Assets()
     a.exec_frames["a"] = [(t, Path(f"f{i}.png")) for i, t in enumerate(times)]
     return a
@@ -588,7 +588,7 @@ def _frames(*times):
 
 @pytest.mark.needs_sandbox
 def test_span_needs_two_frames_or_the_shot_is_a_still(tmp_path):
-    from vidkit.assembler import _exec_span
+    from truedemo.assembler import _exec_span
     ctx = _span_ctx(tmp_path)
     assert _exec_span(ctx, _frames(0.0), sp.Shot(kind="exec", ref="a"), 5.0) is None
     assert _exec_span(ctx, _frames(), sp.Shot(kind="exec", ref="a"), 5.0) is None
@@ -598,7 +598,7 @@ def test_span_needs_two_frames_or_the_shot_is_a_still(tmp_path):
 def test_interior_frames_keep_their_measured_pace(tmp_path):
     """A command that paused for two seconds paused for two seconds. Re-timing it
     to look brisk would be the recording lying about how long the work took."""
-    from vidkit.assembler import _exec_span
+    from truedemo.assembler import _exec_span
     ctx = _span_ctx(tmp_path)
     paths, held, speed = _exec_span(
         ctx, _frames(0.0, 2.0, 2.5, 3.0), sp.Shot(kind="exec", ref="a"), 10.0)
@@ -612,7 +612,7 @@ def test_the_final_frame_takes_whatever_time_is_left(tmp_path):
     """The common case: a command prints its result and exits, so its final screen
     has a measured span of exactly zero. A shot that held it for zero seconds would
     end on a frame nobody could read."""
-    from vidkit.assembler import _exec_span
+    from truedemo.assembler import _exec_span
     ctx = _span_ctx(tmp_path)
     paths, held, speed = _exec_span(
         ctx, _frames(0.0, 0.5, 0.9), sp.Shot(kind="exec", ref="a"), 6.0)
@@ -623,7 +623,7 @@ def test_the_final_frame_takes_whatever_time_is_left(tmp_path):
 @pytest.mark.needs_sandbox
 def test_at_chooses_the_moment_the_shot_is_about(tmp_path):
     """`at:` is how a spec films a step of a long command rather than its end."""
-    from vidkit.assembler import _exec_span
+    from truedemo.assembler import _exec_span
     ctx = _span_ctx(tmp_path)
     paths, held, _ = _exec_span(
         ctx, _frames(0.0, 1.0, 2.0, 3.0, 4.0), sp.Shot(kind="exec", ref="a", at=2.0), 8.0)
@@ -633,7 +633,7 @@ def test_at_chooses_the_moment_the_shot_is_about(tmp_path):
 
 @pytest.mark.needs_sandbox
 def test_at_before_the_first_moment_still_shows_something(tmp_path):
-    from vidkit.assembler import _exec_span
+    from truedemo.assembler import _exec_span
     ctx = _span_ctx(tmp_path)
     paths, held, _ = _exec_span(
         ctx, _frames(1.0, 2.0), sp.Shot(kind="exec", ref="a", at=0.2), 4.0)
@@ -643,7 +643,7 @@ def test_at_before_the_first_moment_still_shows_something(tmp_path):
 
 @pytest.mark.needs_sandbox
 def test_no_frame_is_ever_held_for_zero_seconds(tmp_path):
-    from vidkit.assembler import _exec_span
+    from truedemo.assembler import _exec_span
     ctx = _span_ctx(tmp_path)
     for seconds in (0.5, 1.0, 6.0):
         _, held, _ = _exec_span(
@@ -655,7 +655,7 @@ def test_no_frame_is_ever_held_for_zero_seconds(tmp_path):
 def test_a_recording_that_overruns_its_take_is_compressed_and_says_so(tmp_path, capsys):
     """Honest re-timing. A screencast at 2x is fine as long as the build says 2x;
     quietly claiming a four-second build took half a second is not."""
-    from vidkit.assembler import _exec_span
+    from truedemo.assembler import _exec_span
     ctx = _span_ctx(tmp_path)
     paths, held, speed = _exec_span(
         ctx, _frames(0.0, 2.0, 4.0, 6.0), sp.Shot(kind="exec", ref="a"), 1.0)
@@ -667,7 +667,7 @@ def test_a_recording_that_overruns_its_take_is_compressed_and_says_so(tmp_path, 
 
 @pytest.mark.needs_sandbox
 def test_a_recording_that_fits_is_not_reported_as_re_timed(tmp_path, capsys):
-    from vidkit.assembler import _exec_span
+    from truedemo.assembler import _exec_span
     ctx = _span_ctx(tmp_path)
     _, _, speed = _exec_span(
         ctx, _frames(0.0, 0.5, 1.0), sp.Shot(kind="exec", ref="a"), 30.0)
@@ -679,7 +679,7 @@ def test_a_recording_that_fits_is_not_reported_as_re_timed(tmp_path, capsys):
 def test_the_frames_are_index_aligned_with_their_durations(tmp_path):
     """The bug this pins: the older form returned `paths` and `held` with different
     lengths, so ffmpeg was handed a duration for a frame that did not exist."""
-    from vidkit.assembler import _exec_span
+    from truedemo.assembler import _exec_span
     ctx = _span_ctx(tmp_path)
     paths, held, _ = _exec_span(
         ctx, _frames(0.0, 1.0, 2.0), sp.Shot(kind="exec", ref="a"), 5.0)
@@ -791,7 +791,7 @@ def test_bwrap_sandbox_cannot_write_to_the_read_only_system_roots(tmp_path):
     read-only, so the refusal there is a permission failure rather than a missing
     directory."""
     root = _root(tmp_path)
-    target = "/usr/share/vidkit-should-not-exist"
+    target = "/usr/share/truedemo-should-not-exist"
     result = ex.run(ex.ExecRequest(
         cmd=["/bin/sh", "-c", f"echo changed > {target}; echo status=$?"],
         backend="bubblewrap"), root=root)
@@ -841,10 +841,10 @@ def test_a_sandboxed_command_may_write_inside_the_bound_directory(tmp_path):
 def test_the_environment_a_command_sees_is_the_declared_one(tmp_path, monkeypatch):
     """A recorded environment is a published environment, so the sandbox gets the
     declared environment rather than the builder's."""
-    monkeypatch.setenv("VIDKIT_LEAKY_SECRET", "should-not-appear")
+    monkeypatch.setenv("TRUEDEMO_LEAKY_SECRET", "should-not-appear")
     root = _root(tmp_path)
     result = ex.run(ex.ExecRequest(
-        cmd=["/bin/sh", "-c", "echo [${VIDKIT_LEAKY_SECRET-unset}]"],
+        cmd=["/bin/sh", "-c", "echo [${TRUEDEMO_LEAKY_SECRET-unset}]"],
         backend="bubblewrap"), root=root)
     assert "should-not-appear" not in result.stdout
     assert "[unset]" in result.stdout
@@ -871,8 +871,8 @@ def test_a_declared_read_root_is_visible_inside_the_sandbox(tmp_path):
 # --------------------------------------------------------------------------- #
 def _exec_verified(tmp_path, steps, *, playback=None, frames=None, casts=None):
     """Run ``verify_output`` over hand-built exec assets, with no render."""
-    from vidkit.assembler import Assets, _exec_request, make_context
-    from vidkit.verify import verify_output
+    from truedemo.assembler import Assets, _exec_request, make_context
+    from truedemo.verify import verify_output
 
     spec = sp.load_spec(_yaml(tmp_path, steps=steps))
     ctx = make_context(tmp_path / "video.yaml", tmp_path / "out")
@@ -908,8 +908,8 @@ def test_a_command_in_the_spec_that_never_recorded_is_an_actual_failure(tmp_path
     be able to fail. A declared command with no result is the one thing this
     check is for."""
     steps = [{"label": "a", "cmd": "ls"}, {"label": "b", "cmd": "true"}]
-    from vidkit.assembler import Assets, _exec_request, make_context
-    from vidkit.verify import verify_output
+    from truedemo.assembler import Assets, _exec_request, make_context
+    from truedemo.verify import verify_output
 
     spec = sp.load_spec(_yaml(tmp_path, steps=steps))
     ctx = make_context(tmp_path / "video.yaml", tmp_path / "out")
@@ -958,8 +958,8 @@ def test_a_docker_step_that_was_never_started_reports_no_container(tmp_path):
     forbids. A host-backed step, and a docker step whose environment never came
     up, must both report no container rather than a plausible one.
     """
-    from vidkit.assembler import Assets, _exec_request, make_context
-    from vidkit.verify import verify_output
+    from truedemo.assembler import Assets, _exec_request, make_context
+    from truedemo.verify import verify_output
 
     steps = [{"label": "a", "cmd": "ls"}]
     spec = sp.load_spec(_yaml(tmp_path, steps=steps))

@@ -11,7 +11,7 @@ A *provider* is a plain Python module named in the spec. It may supply:
 * ``secrets() -> dict[str, str | bool]`` — the environment variables it reads,
   so ``doctor`` can report a missing one before a render starts (R-B4).
 
-Only ``datasets`` is usually needed. vidkit loads the module from the spec's
+Only ``datasets`` is usually needed. truedemo loads the module from the spec's
 folder without installing anything; the module may import the host project's
 libraries freely (that is the point — providers are the bridge to your data).
 """
@@ -25,10 +25,10 @@ from types import ModuleType
 from typing import Any
 
 from .context import Context
-from .errors import ProviderError, VidkitError
+from .errors import ProviderError, TruedemoError
 
 
-class SourceUnavailable(VidkitError):
+class SourceUnavailable(TruedemoError):
     """A provider's data source could not be reached (R-B5).
 
     Raise this — from ``datasets()`` or from inside a provider's own helpers —
@@ -89,7 +89,7 @@ def load_provider(name: str, root: Path) -> tuple[ModuleType, bool]:
         path = root / name
     if not path.exists():
         raise ProviderError(f"provider module not found: {path}")
-    mod_name = f"vidkit_provider_{path.stem}"
+    mod_name = f"truedemo_provider_{path.stem}"
     spec = importlib.util.spec_from_file_location(mod_name, path)
     if spec is None or spec.loader is None:
         raise ProviderError(f"cannot load provider: {path}")

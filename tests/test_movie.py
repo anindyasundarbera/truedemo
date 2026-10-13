@@ -15,7 +15,7 @@ from.
 to say so. The rule that decides a shot's length lives in exactly one function,
 ``assembler.plan_shots``, and both the renderer and the planner read it. The test that
 matters is the last one in that group: the plan and the built clips are the same
-numbers, which is the only thing that stops ``vidkit plan`` from lying again — it
+numbers, which is the only thing that stops ``truedemo plan`` from lying again — it
 promised a 32.1s film for one that built at 16.0s.
 
 **Score.** ``amix`` is not used and the reason is a test, not a note: it has no level
@@ -35,14 +35,14 @@ from pathlib import Path
 import pytest
 import yaml
 
-from vidkit import card
-from vidkit import spec as sp
-from vidkit import verify as vf
-from vidkit.assembler import _plan_scripts, _spans, plan_audio, plan_shots
-from vidkit.errors import SpecError
-from vidkit.ffmpeg import Ffmpeg, Shell, _duck_expr, _move, _move_filters
-from vidkit.spec import Motion, load_spec
-from vidkit.svg import Theme, document
+from truedemo import card
+from truedemo import spec as sp
+from truedemo import verify as vf
+from truedemo.assembler import _plan_scripts, _spans, plan_audio, plan_shots
+from truedemo.errors import SpecError
+from truedemo.ffmpeg import Ffmpeg, Shell, _duck_expr, _move, _move_filters
+from truedemo.spec import Motion, load_spec
+from truedemo.svg import Theme, document
 
 REPO = Path(__file__).resolve().parents[1]
 MOVIE_DEMO = REPO / "examples" / "movie-demo" / "video.yaml"
@@ -631,7 +631,7 @@ def test_every_declared_length_is_named_in_one_place(tmp_path):
 # the clock: what the plan says must be what the build does
 # --------------------------------------------------------------------------- #
 def test_plan_audio_reads_words_out_of_a_narration_file(tmp_path):
-    """The regression that made `vidkit plan` lie. ``narration.inline`` is empty for
+    """The regression that made `truedemo plan` lie. ``narration.inline`` is empty for
     any spec that keeps its words in a markdown file, so a planner that only read
     ``inline`` divided 0 words by 2.5 and planned every scene at ``0.0s`` while the
     film built 98.8s long."""
@@ -666,7 +666,7 @@ def test_plan_audio_uses_the_fallback_rate_the_audio_stage_uses(tmp_path):
     """``tts._FALLBACK_WPS`` is 2.5 and ``reports.WORDS_PER_SECOND`` is 2.78, and the
     two have disagreed since M0. Only one of them describes what a build *does*, and
     a plan built on the other one is wrong by 10% on every scene."""
-    from vidkit import tts
+    from truedemo import tts
 
     spec = load_spec(_yaml(tmp_path, narration={"inline": {0: "a " * 25}}))
     audio = plan_audio(spec)
@@ -700,8 +700,8 @@ def test_the_movie_demo_builds_to_the_length_its_plan_promises(tmp_path):
     must say 16.0s; the render must come back within a frame or two of 16.0s. When
     these three disagreed the plan was the one that was wrong, and nobody noticed for
     a whole milestone."""
-    from vidkit.assembler import run
-    from vidkit.job import run_job
+    from truedemo.assembler import run
+    from truedemo.job import run_job
 
     planned = run_job("plan", story=str(MOVIE_DEMO))["plan"]
     manifest = run_job("build", story=str(MOVIE_DEMO), out=str(tmp_path))
@@ -719,7 +719,7 @@ def test_the_movie_demo_verifies_green_and_names_its_sources(tmp_path):
     """Every picture declared, every move declared, the clock expressed — and the score
     in the mix. A film with no captures and no provider is exactly the case that had no
     facts block at all before M9."""
-    from vidkit.job import run_job
+    from truedemo.job import run_job
 
     report = run_job("build", story=str(MOVIE_DEMO), out=str(tmp_path))["report"]
     facts = report["facts"]
@@ -748,10 +748,10 @@ def test_a_declared_camera_move_is_measured_not_restated(tmp_path):
     declares a pan over a flat field and so cannot move, and one that holds — and the
     measurement must separate all three.
     """
-    from vidkit.card import solid_svg
-    from vidkit.ffmpeg import Rsvg
-    from vidkit.spec import Motion
-    from vidkit.verify import MOVE_MAE, _measure_move
+    from truedemo.card import solid_svg
+    from truedemo.ffmpeg import Rsvg
+    from truedemo.spec import Motion
+    from truedemo.verify import MOVE_MAE, _measure_move
 
     ff = Ffmpeg(Shell())
 
@@ -812,8 +812,8 @@ def test_a_silent_cut_never_publishes_its_word_estimates_as_spans(tmp_path):
     no words to seek to, so the per-scene durations the audio stage models from the
     word count must be reported as the estimate they are, under a name that says so.
     """
-    from vidkit.tts import SceneAudio
-    from vidkit.verify import _narration_facts
+    from truedemo.tts import SceneAudio
+    from truedemo.verify import _narration_facts
 
     silent = [SceneAudio(1, None, 6.8, 17), SceneAudio(2, None, 13.6, 34)]
     assert _narration_facts(silent) == {

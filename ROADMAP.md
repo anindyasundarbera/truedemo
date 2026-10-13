@@ -1,18 +1,18 @@
-# vidkit — Requirements, Current State & Roadmap
+# truedemo — Requirements, Current State & Roadmap
 
-**Status:** baseline complete · M0 published · updated 2026-10-06 · <https://github.com/anindyasundarbera/vidkit>
+**Status:** baseline complete · M0 published · updated 2026-10-06 · <https://github.com/anindyasundarbera/truedemo>
 **Decision of record:**
 
-1. vidkit is a **standalone project in its own repository**. No vidkit source lives inside
+1. truedemo is a **standalone project in its own repository**. No truedemo source lives inside
    OneAquaHealth.
 2. Its job is to let an **agent** produce a demo video from a **given story** and a **given
    timeframe**.
-3. OneAquaHealth (and any other product) consumes vidkit as an **external tool** — wired in
+3. OneAquaHealth (and any other product) consumes truedemo as an **external tool** — wired in
    **only via MCP**. The coupling is a URL/config reference, never a vendored copy.
 4. The **OneAquaHealth story lives in the OneAquaHealth repo** (it is OAH's own data and
-   assets), not inside vidkit. The copy that was in this repo has been **removed**; it is
+   assets), not inside truedemo. The copy that was in this repo has been **removed**; it is
    preserved locally at `~/Projects/oneaquahealth-story-backup/` pending its move into the
-   OAH repo (R-H1). vidkit ships only the host-free `examples/hello-world`.
+   OAH repo (R-H1). truedemo ships only the host-free `examples/hello-world`.
 
 This document is the contract for that work: what is *required*, what *exists today* (each
 claim verified on disk), the *gap*, and the *path* to close it.
@@ -38,8 +38,8 @@ claim verified on disk), the *gap*, and the *path* to close it.
 - Being a general-purpose NLE (no timeline UI, no keyframe editing).
 - Rendering anything that is **not** sourced from the target product, its data, or declared
   graphic assets — the "no fabricated UI" guarantee is a feature.
-- Acting as the target application's data layer. vidkit *reads*; providers own the data.
-- A hosted service. vidkit runs locally, offline-capable, with ffmpeg + rsvg-convert.
+- Acting as the target application's data layer. truedemo *reads*; providers own the data.
+- A hosted service. truedemo runs locally, offline-capable, with ffmpeg + rsvg-convert.
 - Being vendored into a consuming repo. Consumers integrate by pointing at the standalone
   server (MCP) or the CLI; the story stays in the consumer's repo.
 
@@ -50,9 +50,9 @@ claim verified on disk), the *gap*, and the *path* to close it.
 | D1 | What is a "story"? | **Decided: both** — a folder convention *plus* an optional `story.yaml` manifest | Shapes R-A1, R-G4 |
 | D2 | How does the agent talk to it? | **Decided: MCP is the consumer integration**; keep a headless JSON CLI as the transport-independent fallback | Shapes R-G1/G2 |
 | D3 | Timeframe forms | **Decided: both** — `{days, as_of}` and `{start, end}`; the resolved value is recorded in the provenance manifest | Shapes R-A3 |
-| D4 | Where does the OAH example live? | **Decided: in the OneAquaHealth repo**, pointing at the standalone vidkit. Removed from here. | Shapes M0 |
+| D4 | Where does the OAH example live? | **Decided: in the OneAquaHealth repo**, pointing at the standalone truedemo. Removed from here. | Shapes M0 |
 | D5 | Where does a story live? | In the **consuming product's repo** (story = that product's data + assets + provider) | Shapes R-A1, M0 |
-| D6 | How is vidkit pinned? | `uvx`/`pipx` from a tag vs. a pinned git ref; document both | Shapes R-H2, R-H9 |
+| D6 | How is truedemo pinned? | `uvx`/`pipx` from a tag vs. a pinned git ref; document both | Shapes R-H2, R-H9 |
 
 Full rationale, alternatives considered, and status are in
 [`docs/plan/DECISIONS.md`](docs/plan/DECISIONS.md).
@@ -68,7 +68,7 @@ Priorities: **P0** = required for v1.0, **P1** = strongly expected, **P2** = lat
 | ID | Requirement | Pri |
 |---|---|---|
 | R-A1 | A **story** is a first-class, validated, named artifact (not an implicit folder layout). | P0 |
-| R-A2 | `vidkit init <dir>` scaffolds a runnable story (spec + narration + provider stub). | P0 |
+| R-A2 | `truedemo init <dir>` scaffolds a runnable story (spec + narration + provider stub). | P0 |
 | R-A3 | A **timeframe** is first-class in the spec and available to providers/scenes (e.g. `{days, as_of}` and/or `{start, end}`). | P0 |
 | R-A4 | The timeframe **stated in narration** must match the spec timeframe (guarded). | P0 |
 | R-A5 | Spec validation fails fast, with actionable messages, before any expensive rendering. | P0 |
@@ -148,9 +148,9 @@ Priorities: **P0** = required for v1.0, **P1** = strongly expected, **P2** = lat
 | ID | Requirement | Pri |
 |---|---|---|
 | R-H1 | Standalone repo; the engine imports nothing from a host project. | P0 |
-| R-H2 | Installable (`pip install vidkit`, extras `[capture]`, `[tts]`); console script; launchable without copy (`uvx`/`pipx`/pinned git ref). | P0 |
-| R-H2b | **Consumer integration via MCP**: OneAquaHealth (and others) reference the standalone server; no vidkit source is vendored into a consuming repo. | P0 |
-| R-H2c | A **story owned by a consumer** lives in that consumer's repo; vidkit never bundles a host story. | P0 |
+| R-H2 | Installable (`pip install truedemo`, extras `[capture]`, `[tts]`); console script; launchable without copy (`uvx`/`pipx`/pinned git ref). | P0 |
+| R-H2b | **Consumer integration via MCP**: OneAquaHealth (and others) reference the standalone server; no truedemo source is vendored into a consuming repo. | P0 |
+| R-H2c | A **story owned by a consumer** lives in that consumer's repo; truedemo never bundles a host story. | P0 |
 | R-H3 | A self-contained **`examples/hello-world`** (no host deps) used as the CI fixture. | P0 |
 | R-H4 | CI: lint + unit tests + a hello-world build (headless-safe). | P0 |
 | R-H5 | Docs set: concepts, spec reference, provider guide, panels reference, capture guide, verification, CLI, troubleshooting, recipes. | P0 |
@@ -174,34 +174,34 @@ authoritative "what is done now" record is
 
 | Item | State today |
 |---|---|
-| Package | `vidkit/` — **21 modules**, incl. `secrets`, `snapshot`, `scaffold`, `reports`, `timeframe` |
+| Package | `truedemo/` — **21 modules**, incl. `secrets`, `snapshot`, `scaffold`, `reports`, `timeframe` |
 | Tests | `test_core`, `test_mcp`, `test_timeframe`, `test_providers`, `test_capture` — **198 passing** (1.7 s) |
 | Examples | `examples/hello-world/` (host-free, offline) and `examples/capture-kit/` (a local server, a real CSV and PDF; needs Chromium) |
 | `docs/` | **21 docs in 7 modules** under `docs/`, routed by `docs/README.md` + `docs/modules.yaml` |
-| MCP server | **present** — `vidkit/mcp_server.py`; 10 tools + 3 resources |
+| MCP server | **present** — `truedemo/mcp_server.py`; 10 tools + 3 resources |
 | `LICENSE` | **present** (Apache-2.0) |
 | `CHANGELOG.md` | **present** (Keep a Changelog) |
 | `py.typed` | **present**, and ships in the built wheel |
 | CI | **present** — `.github/workflows/ci.yml` (`test` + `build-example` + `capture-probe`) |
-| Host coupling in engine | **0** — `grep -rniE "oneaquahealth\|oah_\|fhir" vidkit/*.py` → 0 |
+| Host coupling in engine | **0** — `grep -rniE "oneaquahealth\|oah_\|fhir" truedemo/*.py` → 0 |
 | OAH story | **removed** from this repo; preserved at `~/Projects/oneaquahealth-story-backup/` pending its move into the OAH repo |
-| Git history | **published** — first commit `87b7435` on `main`, pushed to <https://github.com/anindyasundarbera/vidkit> (public) |
+| Git history | **published** — first commit `87b7435` on `main`, pushed to <https://github.com/anindyasundarbera/truedemo> (public) |
 
 ### 3.1 Inventory (pre-extraction snapshot, 2026-10-04)
 
 | Item | State |
 |---|---|
-| Package | `vidkit/vidkit/` — 15 modules (`spec, context, provider, capture, narration, panels, svg, tts, ffmpeg, assembler, verify, cli, errors, __init__, __main__`) |
-| Tests | `vidkit/tests/test_core.py` only — **18 tests**, pure-Python core |
-| Packaging | `pyproject.toml`: `vidkit` 0.1.0, `requires-python >=3.10`, core dep `PyYAML>=6`, extras `capture`/`tts`/`dev`, script `vidkit = vidkit.cli:main` |
+| Package | `truedemo/truedemo/` — 15 modules (`spec, context, provider, capture, narration, panels, svg, tts, ffmpeg, assembler, verify, cli, errors, __init__, __main__`) |
+| Tests | `truedemo/tests/test_core.py` only — **18 tests**, pure-Python core |
+| Packaging | `pyproject.toml`: `truedemo` 0.1.0, `requires-python >=3.10`, core dep `PyYAML>=6`, extras `capture`/`tts`/`dev`, script `truedemo = truedemo.cli:main` |
 | Examples | `examples/oneaquahealth/` only — **host-coupled** (needs gateway :8000, dashboard :8090) |
 | Docs | `README.md` only |
-| Console script | `vidkit` |
+| Console script | `truedemo` |
 | `LICENSE` | **absent** |
 | `py.typed` | **absent** |
 | CI | **absent** |
-| MCP server | **absent** — `vidkit/vidkit/mcp_server.py` does not exist and was never committed |
-| MCP wiring | `.mcp.json` and `.vscode/mcp.json` in OneAquaHealth both `run -m vidkit.mcp_server` → **dangling** |
+| MCP server | **absent** — `truedemo/truedemo/mcp_server.py` does not exist and was never committed |
+| MCP wiring | `.mcp.json` and `.vscode/mcp.json` in OneAquaHealth both `run -m truedemo.mcp_server` → **dangling** |
 | `docs/` | **landed** — 14 docs in 6 modules under `docs/`, routed by `docs/README.md` + `docs/modules.yaml` (see §3.5) |
 | `reports.py` | absent |
 
@@ -217,7 +217,7 @@ authoritative "what is done now" record is
 - TTS: per-scene piper WAVs; measured duration is the clock; silent fallback.
 - ffmpeg/rsvg wrappers; duration without ffprobe; `still_to_clip` (hold/zoom); `mux_captioned`; `mean_volume`.
 - Verify: output exists, runtime window, audio present, banned/required phrases, caption readability, live captures present, speech rate, mock-mode leakage.
-- **Host-free in code**: `grep -rniE "oneaquahealth|oah_|yam-|fhir|8080|8090" vidkit/vidkit --include=*.py` → **0 code hits** (2 mentions live in comments/docstrings only).
+- **Host-free in code**: `grep -rniE "oneaquahealth|oah_|yam-|fhir|8080|8090" truedemo/truedemo --include=*.py` → **0 code hits** (2 mentions live in comments/docstrings only).
 
 ### 3.3 Engine capability — absent *(as of 2026-10-04; several are now closed — see §3.0)*
 
@@ -260,7 +260,7 @@ authoritative "what is done now" record is
 
 The 14-file docs set landed and was reorganised into modules. `docs/README.md` is the
 **router** and `docs/modules.yaml` is the machine-readable route table; `tool_docs`/
-`vidkit_docs` resolve a bare name to a module path through it.
+`truedemo_docs` resolve a bare name to a module path through it.
 
 | Module | Docs |
 |---|---|
@@ -284,13 +284,13 @@ Move the engine to the new repo **without** the host example; make it prove its 
 standalone-ness. Move the OneAquaHealth story **into the OAH repo**, where it becomes an
 MCP consumer.
 
-**In the new vidkit repo**
+**In the new truedemo repo**
 
-- [x] Create the repo. *(Done: `gh repo create anindyasundarbera/vidkit --public`.)*
+- [x] Create the repo. *(Done: `gh repo create anindyasundarbera/truedemo --public`.)*
 - [x] Add `LICENSE` (Apache-2.0), `CHANGELOG.md`, `.github/workflows/ci.yml`, `py.typed`.
 - [x] Add `examples/hello-world/` (engine `none`; only `ffmpeg` + `rsvg-convert`) and wire it as the CI fixture.
 - [x] Make `verify` and `doctor` pass on hello-world with no browser/voice installed.
-- [x] Remove host references from comments/docstrings — `grep` now returns **0** across `vidkit/`, `tests/`, and `examples/`.
+- [x] Remove host references from comments/docstrings — `grep` now returns **0** across `truedemo/`, `tests/`, and `examples/`.
 - [x] **Do not copy `examples/oneaquahealth/`** — removed from this repo and preserved at
       `~/Projects/oneaquahealth-story-backup/` for the OAH repo.
 - [x] Create the GitHub repo and push the first commit — 54 files, commit `87b7435`.
@@ -300,11 +300,11 @@ MCP consumer.
 **In the OneAquaHealth repo** *(tracked here for completeness; executed in that repo)*
 
 - [ ] Move the preserved story into OAH at `video/story/oneaquahealth/`.
-- [ ] Add a `.mcp.json` entry that launches the standalone vidkit MCP server (once M5 lands).
+- [ ] Add a `.mcp.json` entry that launches the standalone truedemo MCP server (once M5 lands).
 - [ ] Decide D6 pinning (tag vs. git ref) and record it in the OAH README.
 
-**Exit:** a fresh clone of the vidkit repo → `pip install -e ".[dev]"` → `pytest` green →
-`vidkit build examples/hello-world/video.yaml` succeeds with only ffmpeg + rsvg-convert;
+**Exit:** a fresh clone of the truedemo repo → `pip install -e ".[dev]"` → `pytest` green →
+`truedemo build examples/hello-world/video.yaml` succeeds with only ffmpeg + rsvg-convert;
 `grep` shows no host terms. **Verified locally:** 44 tests pass; hello-world builds **ALL
 PASS** (8 panels, 12 stills, 87.20 s); the wheel ships `py.typed` + `LICENSE`. **Verified on a
 clean GitHub runner** (run `37513459095`): all three jobs green, including `build hello-world
@@ -318,7 +318,7 @@ The functional gap that blocked the whole premise is closed.
 - [x] Add `timeframe` to the spec: **both** `{days, as_of}` and `{start, end}` (D3); expose as `ctx.timeframe`, and record the resolved window in the provenance manifest.
 - [x] Thread `ctx.timeframe` into `provider.datasets(ctx)`; forbid hard-coded windows in the reference example.
 - [x] Add a **timeframe-consistency verify check** (R-F7): the window stated in narration/captions matches the spec.
-- [x] `vidkit init <dir>` scaffold (R-A2) producing a runnable story, including timeframe placeholders.
+- [x] `truedemo init <dir>` scaffold (R-A2) producing a runnable story, including timeframe placeholders.
 - [x] Update `plan` to print the resolved timeframe.
 
 **Exit:** two builds of the same story with different timeframes produce different, correctly-labelled videos; a story with a mismatched narration window fails `verify`. **Both are now asserted by CI** (a second build with a different window; a mismatched narration that must exit 2 with the timeframe check as its only failure; a scaffolded story that must build and verify clean). Tests 44 → **84** in ~1.5 s.
@@ -330,7 +330,7 @@ The functional gap that blocked the whole premise is closed.
 - [x] Deterministic fallback pattern for model-dependent scenes (R-B5).
 - [x] Provider guide (R-H5 partial).
 
-**Exit:** `vidkit build --only panels,clips,render` works from persisted data with no network.
+**Exit:** `truedemo build --only panels,clips,render` works from persisted data with no network.
 **Met** — and hardened: re-rendering from a snapshot taken for a *different* provider or window
 is now refused with a sentence naming what changed, `--refresh` forces a refetch, `--from STAGE`
 resumes a suffix, and `guard.require_live_data` turns a declared degradation into a verify
@@ -346,7 +346,7 @@ script into the engine.
       rasterised through `pdftoppm`/`gs` (R-C4).
 - [x] `wait_for` action with named states and a timeout (R-C5).
 - [x] Named takes: `take: N` records and promotes explicitly (R-C6).
-- [x] `vidkit auth` records a session once; `storage_state:` reuses it; a login form needs
+- [x] `truedemo auth` records a session once; `storage_state:` reuses it; a login form needs
       `allow_login: true` (R-C7); determinism frozen by default (R-C8).
 
 **Exit met, against a real Chromium**: `examples/capture-kit/video.yaml` films five captures, a
@@ -375,7 +375,7 @@ Rebuild the surface that was lost, on top of M1's contract.
 - [ ] `--json` on all CLI commands (R-G2).
 - [ ] Job contract `{story, timeframe, out}` → artifact manifest (R-G3), reusing `init` (R-G4).
 - [ ] Progress + cancellation for `build` (R-G5); structured errors (R-G6).
-- [ ] Add `vidkit-mcp` console script; ship MCP config examples.
+- [ ] Add `truedemo-mcp` console script; ship MCP config examples.
 
 **Exit:** an MCP client can `init → build → verify` a story purely from tool calls; the same is possible from a shell with `--json`.
 
@@ -399,31 +399,31 @@ Rebuild the surface that was lost, on top of M1's contract.
 ### Target layout (after the split)
 
 ```
-vidkit (new repo)                     OneAquaHealth (this repo)
-  vidkit/         engine                video/story/oneaquahealth/   the OAH story
+truedemo (new repo)                     OneAquaHealth (this repo)
+  truedemo/         engine                video/story/oneaquahealth/   the OAH story
   tests/                                ├─ video.yaml                (now lives here)
   examples/hello-world/                 ├─ narration.md
   docs/                                 ├─ provider.py
   mcp_server.py                         └─ assets/
   pyproject.toml                        dashboard/  gateway/  ...
-  LICENSE  CHANGELOG.md                 .mcp.json  →  points at the vidkit repo
+  LICENSE  CHANGELOG.md                 .mcp.json  →  points at the truedemo repo
 ```
 
 **Copy into the new repo**
 
 ```
-vidkit/vidkit/        # engine (15 modules)
-vidkit/tests/         # test_core.py (18 tests)
-vidkit/pyproject.toml
-vidkit/README.md
-vidkit/.gitignore
+truedemo/truedemo/        # engine (15 modules)
+truedemo/tests/         # test_core.py (18 tests)
+truedemo/pyproject.toml
+truedemo/README.md
+truedemo/.gitignore
 ```
 
 **Do not copy** (extract **this** side into the OAH repo instead)
 
 - `examples/oneaquahealth/` — requires the OneAquaHealth host (gateway :8000, dashboard :8090,
   the `oah_*` panels). It **moves to `video/story/oneaquahealth/` in the OAH repo** and
-  references vidkit as an external tool (D4, D5).
+  references truedemo as an external tool (D4, D5).
 
 **Build fresh in the new repo**
 
@@ -431,24 +431,24 @@ vidkit/.gitignore
 - `examples/hello-world/` — the offline CI fixture.
 - `docs/` — the set listed under R-H5.
 - `.github/workflows/ci.yml` — lint (`ruff`) + `pytest` + hello-world build.
-- `mcp_server.py` + `vidkit-mcp` (rebuilt, not recovered — it never existed in git).
-- **MCP packaging**: a published `vidkit-mcp` entry point so a consumer can reference the
+- `mcp_server.py` + `truedemo-mcp` (rebuilt, not recovered — it never existed in git).
+- **MCP packaging**: a published `truedemo-mcp` entry point so a consumer can reference the
   repo/tag without copying source (D6).
 
 **History-preserving split**
 
 ```bash
-git subtree split -P vidkit -b vidkit-split
+git subtree split -P truedemo -b truedemo-split
 # then, in the new repo:
-git pull ../OneAquaHealth vidkit-split
+git pull ../OneAquaHealth truedemo-split
 ```
 
 **Cleanup in OneAquaHealth**
 
-- Move `vidkit/examples/oneaquahealth/` → `video/story/oneaquahealth/`.
-- Delete `vidkit/` (and the untracked `.out/` scratch if present).
-- Remove the dangling `vidkit` entry from `.mcp.json` and `.vscode/mcp.json`, then add a
-  **new** entry that launches the standalone vidkit MCP server (once M5 lands).
+- Move `truedemo/examples/oneaquahealth/` → `video/story/oneaquahealth/`.
+- Delete `truedemo/` (and the untracked `.out/` scratch if present).
+- Remove the dangling `truedemo` entry from `.mcp.json` and `.vscode/mcp.json`, then add a
+  **new** entry that launches the standalone truedemo MCP server (once M5 lands).
 - Update `README.md` / video docs to point at the standalone repo and the story folder.
 
 ---
@@ -461,7 +461,7 @@ git pull ../OneAquaHealth vidkit-split
 | Timeframe keeps leaking into provider strings → wrong window on screen | High | R-B2 interpolation + R-F7 verify check |
 | Rebuilding MCP reintroduces the stdout-corrupts-JSON-RPC bug | Medium | stdout→stderr guard around printing stages; regression test |
 | Extraction drags host coupling along | Medium | R-H3 hello-world CI fixture; host-term grep in CI |
-| Consumer re-vendors vidkit "just to make it work" | Medium | R-H2b/R-H2c: document the MCP reference + pinned launch; keep the story in the consumer repo |
+| Consumer re-vendors truedemo "just to make it work" | Medium | R-H2b/R-H2c: document the MCP reference + pinned launch; keep the story in the consumer repo |
 | MCP becomes a hard requirement for consumers | Medium | Keep R-G2 (`--json` CLI) as a transport-independent fallback |
 | Full-page capture stretching (silent quality bug) | Medium | R-D5 fix in M4; add a verify/size check |
 | Docs/notes assume capabilities that aren't on disk | Medium | This document's §3 is verified; keep it that way |
@@ -475,16 +475,16 @@ git pull ../OneAquaHealth vidkit-split
 
 ```bash
 # engine is host-free
-grep -rniE "oneaquahealth|oah_|fhir|8080|8090" vidkit/*.py tests/*.py examples/   # → 0
+grep -rniE "oneaquahealth|oah_|fhir|8080|8090" truedemo/*.py tests/*.py examples/   # → 0
 
 # suite
 python3 -m pytest tests -q                                    # → 44 passed
 
 # the offline fixture builds and verifies
-vidkit build examples/hello-world/video.yaml                  # → ALL PASS, 8 panels, 12 stills
+truedemo build examples/hello-world/video.yaml                  # → ALL PASS, 8 panels, 12 stills
 
 # MCP surface
-python3 -c "import vidkit.mcp_server"                         # 10 tools + 3 resources
+python3 -c "import truedemo.mcp_server"                         # 10 tools + 3 resources
 
 # the wheel is complete
 python3 -m pip wheel . --no-deps -w /tmp/wt && \
@@ -495,19 +495,19 @@ python3 -m pip wheel . --no-deps -w /tmp/wt && \
 
 ```bash
 # engine was host-free then too
-grep -rniE "oneaquahealth|oah_|yam-|fhir|8080|8090" vidkit/vidkit --include=*.py
+grep -rniE "oneaquahealth|oah_|yam-|fhir|8080|8090" truedemo/truedemo --include=*.py
 
 # no timeframe concept in the engine
-grep -rniE "timeframe|date_range|window|since|days" vidkit/vidkit/*.py
+grep -rniE "timeframe|date_range|window|since|days" truedemo/truedemo/*.py
 
 # MCP server / docs / reports were never committed
-git log --all --oneline -- vidkit/docs vidkit/vidkit/mcp_server.py vidkit/vidkit/reports.py
+git log --all --oneline -- truedemo/docs truedemo/truedemo/mcp_server.py truedemo/truedemo/reports.py
 
 # dangling MCP wiring
-cat .mcp.json .vscode/mcp.json     # both ran `python -m vidkit.mcp_server`
+cat .mcp.json .vscode/mcp.json     # both ran `python -m truedemo.mcp_server`
 ```
 
-**Note on prior notes.** Earlier internal notes referenced a 14-file `vidkit/docs/`, a
+**Note on prior notes.** Earlier internal notes referenced a 14-file `truedemo/docs/`, a
 `mcp_server.py` "verified 37/37", and `reports.py`. None of those existed on disk or in git at
 the time. They have since been **rebuilt from scratch** — `mcp_server.py` and `reports.py` are
 now real and tested (see §3.0), and the docs set has grown to 20 files in 7 modules.

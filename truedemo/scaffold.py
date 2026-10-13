@@ -1,4 +1,4 @@
-"""``vidkit init`` — scaffold a runnable story.
+"""``truedemo init`` — scaffold a runnable story.
 
 A story is a folder. This module writes the four files that make a folder one:
 a manifest (identity), a spec (the plan), a provider (the numbers), and a
@@ -27,7 +27,7 @@ _WPS = 2.5
 
 _STORY_TEMPLATE = """\
 # The identity of this story. Everything here is optional: with no story.yaml at
-# all, vidkit derives the slug and title from the folder name. Declare it
+# all, truedemo derives the slug and title from the folder name. Declare it
 # explicitly when an agent needs a stable handle for the story (R-A1).
 title: %(title)s
 slug: %(slug)s
@@ -37,9 +37,9 @@ description: %(description)s
 """
 
 _VIDEO_TEMPLATE = """\
-# A vidkit spec. Run it with:
-#   vidkit plan  video.yaml
-#   vidkit build video.yaml
+# A truedemo spec. Run it with:
+#   truedemo plan  video.yaml
+#   truedemo build video.yaml
 #
 # Requires ffmpeg and rsvg-convert. No browser, no voice model, no network.
 
@@ -61,7 +61,7 @@ narration:
 provider: provider            # provider.py - supplies the numbers, measured from disk
 
 # The window this cut is about. Everything the video claims about time has to
-# agree with this, and `vidkit verify` fails the build if it does not.
+# agree with this, and `truedemo verify` fails the build if it does not.
 timeframe: %(timeframe)s
 
 charts:
@@ -160,7 +160,7 @@ def scaffold_story(target: Path | str, *, title: str | None = None,
         "slug": slug,
         "owner": owner,
         "timeframe": "{start: %s, end: %s}" % (tf.start, tf.end),
-        "description": f"Scaffolded by `vidkit init` on {date.today().isoformat()}.",
+        "description": f"Scaffolded by `truedemo init` on {date.today().isoformat()}.",
         "prose": tf.prose(),
     }
     narration = _NARRATION_TEMPLATE % fields
@@ -194,7 +194,7 @@ def scaffold_story(target: Path | str, *, title: str | None = None,
 
 _AUTH_IGNORE = (
     "# a recorded browser session is a live credential; never commit it\n"
-    "# (create one with `vidkit auth <url> --spec video.yaml`)\n"
+    "# (create one with `truedemo auth <url> --spec video.yaml`)\n"
     ".auth/\n"
 )
 

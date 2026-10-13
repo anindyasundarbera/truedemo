@@ -1,4 +1,4 @@
-"""Unit tests for vidkit — pure-Python modules, no external tools required."""
+"""Unit tests for truedemo — pure-Python modules, no external tools required."""
 
 from __future__ import annotations
 
@@ -7,11 +7,11 @@ from pathlib import Path
 
 import pytest
 
-from vidkit import panels
-from vidkit.errors import SpecError
-from vidkit.narration import build_srt, parse_scene_script, word_count, wrap_caption
-from vidkit.spec import load_spec
-from vidkit.svg import PanelDoc, document, esc, text
+from truedemo import panels
+from truedemo.errors import SpecError
+from truedemo.narration import build_srt, parse_scene_script, word_count, wrap_caption
+from truedemo.spec import load_spec
+from truedemo.svg import PanelDoc, document, esc, text
 
 # --------------------------------------------------------------------------- #
 NARRATION = """\
@@ -204,8 +204,8 @@ def test_require_audio_can_be_declared_off(tmp_path):
 
 def test_verify_passes_declared_silent_cut_but_fails_undeclared(tmp_path):
     """The whole point of the flag: silence is allowed only when opted into."""
-    from vidkit.assembler import Assets, make_context
-    from vidkit.verify import verify_output
+    from truedemo.assembler import Assets, make_context
+    from truedemo.verify import verify_output
 
     raw = json.loads(json.dumps(SPEC))
     raw["scenes"] = [{"n": 0, "title": "s", "shots": [{"still": "a.svg"}]}]

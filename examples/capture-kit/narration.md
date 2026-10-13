@@ -2,7 +2,7 @@
 
 ## Scene 0 — The product · 00:00–00:05
 
-**This page is empty when it loads.** **vidkit waits for a row that is not there yet, changes the period, and proves the total followed before it photographs anything.**
+**This page is empty when it loads.** **truedemo waits for a row that is not there yet, changes the period, and proves the total followed before it photographs anything.**
 
 ## Scene 1 — The CSV it gave us · 00:05–00:10
 

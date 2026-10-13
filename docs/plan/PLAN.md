@@ -4,13 +4,13 @@
 > For the phase-wise plan see [FEATURE-ROADMAP.md](FEATURE-ROADMAP.md). For what already
 > happened see [HISTORY.md](HISTORY.md). For why, see [DECISIONS.md](DECISIONS.md).
 >
-> Last updated: **2026-10-13** (README reframed as a landing page; docs split; v1.2.0 released).
+> Last updated: **2026-10-13** (README reframed; docs split; v1.2.0 released; renamed to truedemo as v2.0.0).
 
 ## Where we are
 
 **M0–M10 are complete and merged to `main`.** The M10 studio session, cross-version MCP
-support, and its CI exit proof landed in [PR #13](https://github.com/anindyasundarbera/vidkit/pull/13)
-at merge commit [`b23de00`](https://github.com/anindyasundarbera/vidkit/commit/b23de00c973ed6edd6ebd7a287a9d34a1b54f5f8).
+support, and its CI exit proof landed in [PR #13](https://github.com/anindyasundarbera/truedemo/pull/13)
+at merge commit [`b23de00`](https://github.com/anindyasundarbera/truedemo/commit/b23de00c973ed6edd6ebd7a287a9d34a1b54f5f8).
 The final CI run passed both test-matrix jobs and all six end-to-end probes. The studio probe
 passed nine checks and decoded the selected take from the delivered film.
 
@@ -45,7 +45,7 @@ exit criterion. The standalone MCP server now supports SDK 1.x and 2.x, with 3.x
 outside the declared `mcp>=1.20,<3` range.
 
 The production-readiness **P0** items are landed (2026-10-10): the version is single-sourced
-(`vidkit/_version.py`), every dependency carries an upper bound with dependabot watching the
+(`truedemo/_version.py`), every dependency carries an upper bound with dependabot watching the
 ranges, the HTTP MCP transport refuses a non-loopback bind without `--expose`, and
 `SECURITY.md`/`CONTRIBUTING.md` exist. Recorded in [HISTORY.md](HISTORY.md) and
 [DECISIONS.md](DECISIONS.md) D63.
@@ -63,9 +63,10 @@ Release bookkeeping is separate from phase completion and remains owner-owned:
   `## [Unreleased]` into `## [1.2.0]`, and the GitHub Release is published. The `v1.0.0` tag
   was **superseded without being pushed** — the version string had drifted behind the code,
   and `1.2.0` is the first release that matches it.
-- PyPI publication remains **deferred, and now blocked**: the name `vidkit` is taken on PyPI
-  by an unrelated project (`SpyC0der77/vidkit`). A future publish needs a different
-  distribution name. The docs no longer tell anyone to `pip install vidkit`; they point at
-  the git URL.
+- PyPI publication remains **deferred, and still unpublished**: publishing under the old name
+  `vidkit` was impossible because it belongs to an unrelated project (`SpyC0der77/vidkit`).
+  The rename to `truedemo` removes that blocker; publishing is now a deliberate, owner-owned
+  step that has not been taken. **PyPI does not reserve names** — re-check availability
+  immediately before any publish.
 
 Do not publish a release or tag until those visible release choices are settled.

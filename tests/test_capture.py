@@ -14,10 +14,10 @@ from pathlib import Path
 
 import pytest
 
-from vidkit import capture as _capture
-from vidkit.context import Context
-from vidkit.errors import SpecError, ToolError
-from vidkit.spec import load_spec
+from truedemo import capture as _capture
+from truedemo.context import Context
+from truedemo.errors import SpecError, ToolError
+from truedemo.spec import load_spec
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -354,7 +354,7 @@ def test_one_download_may_be_filmed_by_the_next_capture(tmp_path):
 # Actions (R-C1, R-C5)
 # --------------------------------------------------------------------------- #
 def _action(kind: str, **kw):
-    from vidkit.spec import Action
+    from truedemo.spec import Action
     return Action(kind, **kw)
 
 
@@ -413,7 +413,7 @@ def test_wait_for_passes_the_timeout_through():
 
 def test_a_failed_assert_refuses_to_record_the_wrong_state():
     page = _page({"#summary": "3 rows"})
-    from vidkit.spec import Assert
+    from truedemo.spec import Assert
     with pytest.raises(ToolError) as exc:
         _capture.check(page, Assert(selector="#summary", contains="5 rows"))
     assert "does not contain '5 rows'" in str(exc.value)
@@ -422,7 +422,7 @@ def test_a_failed_assert_refuses_to_record_the_wrong_state():
 
 def test_a_missing_asserted_element_refuses_by_name():
     page = _page({})
-    from vidkit.spec import Assert
+    from truedemo.spec import Assert
     with pytest.raises(ToolError) as exc:
         _capture.check(page, Assert(selector="#gone"), where="after click")
     assert "after click: assertion failed" in str(exc.value)
@@ -430,7 +430,7 @@ def test_a_missing_asserted_element_refuses_by_name():
 
 
 def test_assert_equals_is_exact_after_trimming():
-    from vidkit.spec import Assert
+    from truedemo.spec import Assert
     _capture.check(_page({"#t": "  42  "}), Assert(selector="#t", equals="42"))
     with pytest.raises(ToolError):
         _capture.check(_page({"#t": "42.0"}), Assert(selector="#t", equals="42"))
@@ -438,7 +438,7 @@ def test_assert_equals_is_exact_after_trimming():
 
 def test_an_action_assert_runs_after_the_action():
     page = _page({"#ok": "done"})
-    from vidkit.spec import Assert
+    from truedemo.spec import Assert
     _capture.apply(page, _action("click", selector="#c",
                                  assert_=Assert(selector="#ok", contains="done")))
     assert page.calls.index(("click", "#c")) < page.calls.index(("query_selector", "#ok"))
@@ -499,7 +499,7 @@ def test_a_page_without_expect_download_is_refused():
 
 
 def test_a_download_name_can_never_escape_the_artifact_directory():
-    from vidkit.spec import Action
+    from truedemo.spec import Action
     for suggested in ("../../etc/passwd", "..\\..\\win.ini", "C:\\tmp\\x.csv",
                       "/etc/shadow", "....//x"):
         name = _capture.artifact_name(Action("download"), suggested)
@@ -508,13 +508,13 @@ def test_a_download_name_can_never_escape_the_artifact_directory():
 
 
 def test_save_as_beats_the_servers_suggestion():
-    from vidkit.spec import Action
+    from truedemo.spec import Action
     assert _capture.artifact_name(
         Action("download", save_as="usage.csv"), "../../evil.sh") == "usage.csv"
 
 
 def test_a_name_with_nothing_usable_in_it_falls_back():
-    from vidkit.spec import Action
+    from truedemo.spec import Action
     assert _capture.artifact_name(Action("download", save_as="///"), "") == "download"
 
 
@@ -922,20 +922,20 @@ def test_hello_world_stays_offline():
 # The auth command
 # --------------------------------------------------------------------------- #
 def test_the_default_state_path_sits_beside_the_spec(tmp_path):
-    from vidkit.cli import default_state_path
+    from truedemo.cli import default_state_path
     assert default_state_path(tmp_path / "video.yaml") == tmp_path / ".auth" / "state.json"
     assert default_state_path() == Path.cwd() / ".auth" / "state.json"
 
 
 def test_scaffolding_a_story_ignores_a_recorded_session(tmp_path):
-    from vidkit.scaffold import scaffold_story
+    from truedemo.scaffold import scaffold_story
     target = tmp_path / "story"
     scaffold_story(target, title="T")
     assert ".auth/" in (target / ".gitignore").read_text(encoding="utf-8")
 
 
 def test_an_existing_gitignore_gains_the_auth_entry_only_once(tmp_path):
-    from vidkit.scaffold import _ensure_auth_ignored
+    from truedemo.scaffold import _ensure_auth_ignored
     ignore = tmp_path / ".gitignore"
     ignore.write_text("_build/\n", encoding="utf-8")
     _ensure_auth_ignored(tmp_path)
@@ -946,10 +946,10 @@ def test_an_existing_gitignore_gains_the_auth_entry_only_once(tmp_path):
 
 
 def test_the_auth_command_refuses_clearly_without_playwright(monkeypatch, tmp_path):
-    from vidkit import cli
-    from vidkit.errors import VidkitError
+    from truedemo import cli
+    from truedemo.errors import TruedemoError
     monkeypatch.setattr(_capture, "_playwright_available", lambda: False)
-    with pytest.raises(VidkitError) as exc:
+    with pytest.raises(TruedemoError) as exc:
         cli._auth("http://127.0.0.1:1/", save=str(tmp_path / "s.json"), wait=0.1, spec=None)
     assert "needs Playwright" in str(exc.value)
 
@@ -958,8 +958,8 @@ def test_the_auth_command_refuses_clearly_without_playwright(monkeypatch, tmp_pa
 # The artifact check reaches the report (R-C4)
 # --------------------------------------------------------------------------- #
 def test_verify_refuses_a_declared_artifact_that_never_arrived(tmp_path):
-    from vidkit.assembler import Assets
-    from vidkit.verify import verify_output
+    from truedemo.assembler import Assets
+    from truedemo.verify import verify_output
 
     spec = load_spec(_spec_yaml(tmp_path, [
         {"name": "live", "url": "http://x/",
@@ -974,9 +974,9 @@ def test_verify_refuses_a_declared_artifact_that_never_arrived(tmp_path):
 
 
 def test_verify_passes_when_the_artifact_is_really_there(tmp_path):
-    from vidkit.assembler import Assets
-    from vidkit.spec import Artifact
-    from vidkit.verify import verify_output
+    from truedemo.assembler import Assets
+    from truedemo.spec import Artifact
+    from truedemo.verify import verify_output
 
     spec = load_spec(_spec_yaml(tmp_path, [
         {"name": "live", "url": "http://x/",
@@ -1002,7 +1002,7 @@ def test_a_driver_failure_is_translated_into_a_refusal_not_raised():
     That is precisely the failure an author needs to *read* — which selector,
     how long — so it must surface as a ``ToolError`` naming both, with the
     driver's own exception kept as the cause. A driver exception escaping here
-    becomes a traceback in ``vidkit capture`` and, in the studio, an exception
+    becomes a traceback in ``truedemo capture`` and, in the studio, an exception
     where a failed step belongs.
     """
     class Hostile:
@@ -1076,7 +1076,7 @@ def test_an_action_timeout_is_read_from_the_spec_for_pointer_actions(tmp_path):
     driver's 30-second default — the spec said one thing and the engine did
     another, which is the failure this whole file exists to catch.
     """
-    from vidkit.spec import _action as load_action
+    from truedemo.spec import _action as load_action
 
     for kind, extra in [("click", {}), ("fill", {"value": "v"}),
                         ("press", {"value": "Enter"}), ("select", {"value": "v"})]:

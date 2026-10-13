@@ -3,7 +3,7 @@ requires = ["setuptools>=84.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "vidkit"
+name = "truedemo"
 dynamic = ["version"]
 description = "Create narrated, captioned demo videos of software — a real browser UI, a real terminal command, or a document it produces — from a declarative spec plus your own data; then reopen the .mp4 and verify every promise the spec made. Runs from a shell or an agent over MCP."
 readme = "README.md"
@@ -20,20 +20,20 @@ mcp = ["mcp>=1.30.0,<3"]
 dev = ["pytest>=9.1.1,<10", "pytest-cov>=7.1.0,<8", "ruff>=0.16.10,<1"]
 
 [project.scripts]
-vidkit = "vidkit.cli:main"
-vidkit-mcp = "vidkit.mcp_server:main"
+truedemo = "truedemo.cli:main"
+truedemo-mcp = "truedemo.mcp_server:main"
 
 [tool.setuptools.dynamic]
-version = {attr = "vidkit._version.__version__"}
+version = {attr = "truedemo._version.__version__"}
 
 [tool.setuptools.packages.find]
-include = ["vidkit*"]
+include = ["truedemo*"]
 
 [tool.setuptools]
 license-files = ["LICENSE"]
 
 [tool.setuptools.package-data]
-vidkit = ["py.typed"]
+truedemo = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

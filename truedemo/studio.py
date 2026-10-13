@@ -2,7 +2,7 @@
 
 Why this module exists
 ----------------------
-Every other part of vidkit is a **verb**: load a spec, render it, check it. An
+Every other part of truedemo is a **verb**: load a spec, render it, check it. An
 agent handed *(story, timeframe, environment)* and asked for a demo does not
 work in verbs. It works in a **sitting** — open the set, bring the database up,
 try the capture, look at what came back, try it again, keep the good one, render
@@ -14,7 +14,7 @@ where it is working inside the project, which takes have been tried, which one w
 kept and why. The record is deliberately **data** — nothing in it is a handle to a
 browser or a container. Those already have owners:
 
-* the sandbox and its containers belong to :mod:`vidkit.exec`, which *measures*
+* the sandbox and its containers belong to :mod:`truedemo.exec`, which *measures*
   what became of them, and ``docker`` itself is the register of what is running;
 * browsers belong to Playwright, and are opened for one call at a time.
 
@@ -26,7 +26,7 @@ from ``docker ps`` and not from a field this module wrote.
 The live half
 -------------
 Some things *cannot* be data. A browser a caller opened in one call has to still be
-there in the next one, and a :class:`~vidkit.context.Context` holds the secrets, the
+there in the next one, and a :class:`~truedemo.context.Context` holds the secrets, the
 provider module and the measured facts a *sitting* accumulates. Those live in
 :attr:`Session._live`, which is process-local, never serialised, and deliberately
 absent from :meth:`Session.to_dict`. The rule that keeps this honest is that
@@ -54,7 +54,7 @@ Borrowed as a *concept* from OpenMontage (see ``docs/plan/OPENMONTAGE.md``): a
 session declares what it may spend and refuses when it runs out, rather than
 discovering the ceiling by hitting it. Wall-clock and container counts are
 **measured** against what the work actually did; token budget is recorded but not
-enforced, because vidkit cannot see a client's token meter and a number it cannot
+enforced, because truedemo cannot see a client's token meter and a number it cannot
 measure is not a number it should pretend to police.
 
 The wall-clock budget is a *session* deadline, not a per-call alarm. The MCP
@@ -80,7 +80,7 @@ from . import capture as _capture
 from .errors import SpecError, ToolError
 
 #: Directory name, beside the output, where a project keeps its studio state.
-STATE_DIR = ".vidkit"
+STATE_DIR = ".truedemo"
 
 #: A session id is used in filenames and container names, so it is restricted to
 #: characters that are safe in both. Generated ids satisfy this by construction;
@@ -231,7 +231,7 @@ def new_id(prefix: str = "s") -> str:
 class Session:
     """One sitting: what it is about, what it tried, what it kept.
 
-    Serialised whole to ``<out>/.vidkit/sessions/<id>.json`` after every mutation,
+    Serialised whole to ``<out>/.truedemo/sessions/<id>.json`` after every mutation,
     so the record and the work cannot diverge if the process dies mid-sitting.
     """
 
@@ -267,7 +267,7 @@ class Session:
 
     #: The thread that owns this session's browser. Not serialised, and not created
     #: until something needs it, because Playwright's sync objects belong to the
-    #: thread that made them — see :mod:`vidkit._loop`.
+    #: thread that made them — see :mod:`truedemo._loop`.
     worker: "_loop.Worker | None" = field(default=None, repr=False, compare=False)
 
     # -- lifecycle -------------------------------------------------------- #
@@ -537,7 +537,7 @@ def select_take(session: Session, capture_name: str, take: int) -> dict:
     """Promote one take so a build uses it. Never draws a new picture.
 
     The promotion itself is the capture stage's own rule
-    (:func:`vidkit.capture.choose_take`), reused rather than reimplemented, so a
+    (:func:`truedemo.capture.choose_take`), reused rather than reimplemented, so a
     film assembled from a selected take is built by exactly the code path that
     builds one from a first take.
     """
@@ -594,7 +594,7 @@ def takes_summary(session: Session) -> dict:
 class EnvRef:
     """The session's memory of one sandbox it started.
 
-    Deliberately *thinner* than :class:`vidkit.exec.EnvState`: it holds only what
+    Deliberately *thinner* than :class:`truedemo.exec.EnvState`: it holds only what
     is needed to find the container again and to hand a caller something to read.
     What became of it — health, logs, teardown — is asked of Docker when it is
     asked for, never replayed from here. A session that cached "ready: true" from
@@ -620,7 +620,7 @@ class EnvRef:
     teardown: dict = field(default_factory=dict)
 
     def to_state(self, state=None):
-        """The runtime :class:`~vidkit.exec.EnvState` this record stands for.
+        """The runtime :class:`~truedemo.exec.EnvState` this record stands for.
 
         ``state`` (an ``EnvSpec``) is required to build a fresh one; it is passed
         in rather than stored because the environment's declaration belongs to the
@@ -672,8 +672,8 @@ def start_environment(session: Session, spec, name: str) -> EnvRef:
     """Bring a declared environment up for this session, and prove it is up.
 
     The **stamp** is the session id, which is what makes the container
-    attributable: ``docker ps`` on a machine that has run vidkit shows
-    ``vidkit-studio-<session>`` rather than an anonymous hash, and a leak can be
+    attributable: ``docker ps`` on a machine that has run truedemo shows
+    ``truedemo-studio-<session>`` rather than an anonymous hash, and a leak can be
     traced back to the sitting that made it.
 
     A session may hold one container per environment. Starting an environment it
@@ -772,7 +772,7 @@ def load_spec(session: Session):
 
 
 def environments_in_use() -> list[dict]:
-    """Every vidkit sandbox running on this host, whoever started it.
+    """Every truedemo sandbox running on this host, whoever started it.
 
     Asked of the host rather than of a session, because the question a reader has
     when a build misbehaves is "what is *actually* up right now?", and the answer
@@ -1078,7 +1078,7 @@ def browser_shot(session: Session, name: str, *, take: int = 1,
     """Photograph the open page into ``_capture/`` — and record what was shot.
 
     Deliberately writes through the capture stage's own naming rule
-    (:func:`vidkit.capture.take_name`) so a screenshot taken here is
+    (:func:`truedemo.capture.take_name`) so a screenshot taken here is
     indistinguishable from one the pipeline would have taken, and a take selected
     here is a take the build can use.
     """
@@ -1166,7 +1166,7 @@ def _next_step(session: Session, takes, picked: set, artifacts: dict) -> str:
         return "a render and a report exist — read the report before believing the video"
     if artifacts["output"]:
         return "a render exists but has not been verified"
-    return "nothing rendered yet — run the build with vidkit_run"
+    return "nothing rendered yet — run the build with truedemo_run"
 
 
 # --------------------------------------------------------------------------- #
@@ -1179,7 +1179,7 @@ def _next_step(session: Session, takes, picked: set, artifacts: dict) -> str:
 # says out loud when they are missing instead of silently starting a second copy.
 # --------------------------------------------------------------------------- #
 def session_context(session: Session):
-    """The live :class:`~vidkit.context.Context` for this session, or a refusal.
+    """The live :class:`~truedemo.context.Context` for this session, or a refusal.
 
     Built once per session and kept. Rebuilding it would re-read the spec and
     re-announce the story on every call, and — worse — would give the pipeline a
@@ -1207,7 +1207,7 @@ def session_context(session: Session):
 
 
 def session_assets(session: Session):
-    """The live :class:`~vidkit.assembler.Assets` for this session.
+    """The live :class:`~truedemo.assembler.Assets` for this session.
 
     ``Assets`` is where measured facts accumulate across stages: captures, stills,
     panels, scene audio, the environments that were brought up. Created once and
@@ -1346,7 +1346,7 @@ def read_report(session: Session) -> dict:
     path = report_path(session)
     if not path.is_file():
         raise ToolError(
-            f"there is no report at {path} — run the build (vidkit_run or "
+            f"there is no report at {path} — run the build (truedemo_run or "
             "session_build), which writes one, before asking what it proved")
     try:
         report = json.loads(path.read_text(encoding="utf-8"))
@@ -1418,7 +1418,7 @@ def _live_key(session_id: str, out_dir: Path | str | None) -> str:
 def hold(session: Session) -> Session:
     """Adopt a session into this process, giving it a browser thread."""
     if session.worker is None:
-        session.worker = _loop.Worker(name=f"vidkit-{session.id}")
+        session.worker = _loop.Worker(name=f"truedemo-{session.id}")
     _LIVE[_live_key(session.id, session.out_dir)] = session
     return session
 

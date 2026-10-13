@@ -1,8 +1,8 @@
 # Provider guide
 
 A **provider** is a plain Python module named in the spec (`provider: provider` → `provider.py`
-in `ROOT`). It is the bridge between vidkit and your project. It is the *only* place
-project-specific knowledge lives, which is what keeps vidkit itself generic.
+in `ROOT`). It is the bridge between truedemo and your project. It is the *only* place
+project-specific knowledge lives, which is what keeps truedemo itself generic.
 
 ## The interface
 
@@ -15,18 +15,18 @@ A provider may define any of these module-level callables. All are optional.
 | `panels()` | `panels` stage | `dict[str, PanelSpec]` | define named panels |
 | `stills(ctx)` | `stills` stage | `dict[str, Path]` | supply pre-rendered images |
 
-`ctx` is a [`Context`](../../vidkit/context.py): `ctx.root`, `ctx.out_dir`, `ctx.build`,
+`ctx` is a [`Context`](../../truedemo/context.py): `ctx.root`, `ctx.out_dir`, `ctx.build`,
 `ctx.captures`, `ctx.stills`, `ctx.panels_dir`, `ctx.clips`, `ctx.wavs`, `ctx.data_dir`,
 `ctx.info(msg)`, `ctx.warn(msg)`, `ctx.shell`, `ctx.ffmpeg`, `ctx.rsvg`, `ctx.spec`.
 
 ### `datasets(ctx) -> dict`
 
-Return a mapping of name → JSON-able value. vidkit persists each to
+Return a mapping of name → JSON-able value. truedemo persists each to
 `OUT/_build/data/<name>.json` and hands the value to any panel whose `dataset` matches.
 
 **Rules**
 - It must be pure with respect to the repo: **read-only**. Never mutate source data.
-- It may raise; vidkit wraps the exception as `ProviderError` and aborts with context.
+- It may raise; truedemo wraps the exception as `ProviderError` and aborts with context.
 - It must return a dict (else `ProviderError`).
 
 ```python
@@ -61,7 +61,7 @@ Usually unnecessary — `still:` accepts a path directly. Use this when a still 
 
 ### `secrets() -> dict | list | str`
 
-Declare the environment variables the provider reads, so `vidkit doctor` can report a
+Declare the environment variables the provider reads, so `truedemo doctor` can report a
 missing one *before* a render starts rather than in the middle of one. Any of these shapes
 is accepted:
 
@@ -84,23 +84,23 @@ hanging a render or inventing a number (see [When the source is down](#when-the-
 
 ### `register()`
 
-Call `vidkit.panels.register(name, fn)` for each custom renderer. See
+Call `truedemo.panels.register(name, fn)` for each custom renderer. See
 [`panels-reference.md`](panels-reference.md).
 
 ```python
-from vidkit import panels as panel_lib   # ALIAS IT — see the naming trap below
+from truedemo import panels as panel_lib   # ALIAS IT — see the naming trap below
 
 def register():
     panel_lib.register("myapp_trend", _trend)   # a kind name you own
 ```
 
 > **Naming trap (real, easy to hit).** If your module defines a function called `panels`,
-> it shadows a bare `from vidkit import panels`. Always alias the import
-> (`from vidkit import panels as panel_lib`). This exact bug has bitten this project.
+> it shadows a bare `from truedemo import panels`. Always alias the import
+> (`from truedemo import panels as panel_lib`). This exact bug has bitten this project.
 
 ## Secrets and redaction
 
-A provider that talks to a real system usually needs a credential. vidkit treats those values
+A provider that talks to a real system usually needs a credential. truedemo treats those values
 as the one thing in a build that must never reach a screen, a log, a snapshot, or a report,
 and makes that the *engine's* job rather than a rule you have to remember:
 
@@ -122,7 +122,7 @@ provider:
   write_back: false           # must stay false — see below
 ```
 
-`write_back: true` is **refused at load time**. vidkit is read-only by contract: a provider
+`write_back: true` is **refused at load time**. truedemo is read-only by contract: a provider
 may read from a source system and report on it, and nothing else. That is what makes a
 second run of the same spec safe.
 
@@ -133,7 +133,7 @@ the honest outcomes are "show what you declared" or "fail", never "hang" and nev
 number". Raise `SourceUnavailable` from `datasets()` and return a *declared* fallback:
 
 ```python
-from vidkit.provider import SourceUnavailable, fallback
+from truedemo.provider import SourceUnavailable, fallback
 
 def fallbacks(ctx):
     return {"forecast": {"points": [0.0] * 12, "note": "offline"}}
@@ -150,7 +150,7 @@ def datasets(ctx):
 `fallback_for(name, ctx)` is the alternative spelling when one dataset at a time is easier.
 Either way the dataset is recorded as **degraded**, with your reason, and:
 
-- `vidkit build` logs it and keeps going, so one dead source does not stop a render;
+- `truedemo build` logs it and keeps going, so one dead source does not stop a render;
 - `verify.json` records the reason in `facts.degraded`;
 - `guard.require_live_data` turns any degraded dataset into a **verification failure**.
 
@@ -171,8 +171,8 @@ can quietly lie. Re-render from a snapshot taken for a *different window* and th
 its own request against the record and refuses when they disagree:
 
 ```console
-$ vidkit build video.yaml --only panels --timeframe 2026-08-01..2026-09-30
-vidkit: error: dataset snapshot is stale: the window changed (2026-09-07 to 2026-10-06
+$ truedemo build video.yaml --only panels --timeframe 2026-08-01..2026-09-30
+truedemo: error: dataset snapshot is stale: the window changed (2026-09-07 to 2026-10-06
 (30 days) -> 2026-08-01 to 2026-09-30 (61 days)) — re-run the `data` stage (drop it from
 --only, or pass --refresh) to fetch it again
 ```
@@ -190,8 +190,8 @@ import json
 import urllib.request
 from pathlib import Path
 
-from vidkit import panels as panel_lib
-from vidkit.svg import PanelDoc, text, rect, THEME
+from truedemo import panels as panel_lib
+from truedemo.svg import PanelDoc, text, rect, THEME
 
 GATEWAY = "http://127.0.0.1:8000"
 
@@ -207,7 +207,7 @@ def _trend(data, options, doc: PanelDoc):
     xy = [(x + i / n * 1200, y1 - p["y"] / ymax * (y1 - y0))
           for i, p in enumerate(pts)]
     doc.add(rect(x, y0, 1200, y1 - y0, fill="#FFFFFF00"))
-    from vidkit.svg import polyline
+    from truedemo.svg import polyline
     doc.add(polyline(xy, stroke=t.accent))
 
 
@@ -243,7 +243,7 @@ scenes:
 1. **Read-only.** The provider must not modify application code, config, fixtures, or data.
    If it must exercise a pipeline (as a story provider does to run a sample), do it
    in a way that writes nothing (e.g. disable uploads).
-2. **Fail loudly.** Let exceptions propagate; vidkit reports them with the provider name and
+2. **Fail loudly.** Let exceptions propagate; truedemo reports them with the provider name and
    the message redacted. A silent empty dataset produces an empty chart, which is worse than
    a crash. The one exception is a source that is genuinely *down*: raise
    `SourceUnavailable` and declare a fallback, so the outage is recorded rather than hidden.
@@ -257,19 +257,19 @@ scenes:
 
 ```bash
 # only the data stage — fast, catches fetch/compute errors
-vidkit build SPEC --only data
+truedemo build SPEC --only data
 
 # data + panels — catches renderer errors, produces PNGs
-vidkit build SPEC --only data,panels
+truedemo build SPEC --only data,panels
 
 # from a stage onwards — same as listing every later stage
-vidkit build SPEC --from panels
+truedemo build SPEC --from panels
 
 # re-render from the snapshot, without touching the source again
-vidkit build SPEC --only panels,clips,render
+truedemo build SPEC --only panels,clips,render
 
 # ...and force a refetch even though the snapshot would do
-vidkit build SPEC --only panels,clips,render --refresh
+truedemo build SPEC --only panels,clips,render --refresh
 ```
 
 The persisted datasets in `_build/data/*.json` are exactly what the panels received, so you

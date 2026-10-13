@@ -4,7 +4,7 @@ __pycache__/
 *.pyo
 .pytest_cache/
 
-# generated render output (safe to delete; `vidkit build` recreates it)
+# generated render output (safe to delete; `truedemo build` recreates it)
 .out/
 _build/
 _capture/
@@ -16,7 +16,7 @@ _frames/
 *.log
 
 # scratch directories used by the CI assertions (`_alt` = second window,
-# `_scaffold` = `vidkit init` output); recreate with the commands in ci.yml
+# `_scaffold` = `truedemo init` output); recreate with the commands in ci.yml
 _alt/
 _scaffold/
 # scratch story the capture probe builds with a deliberately false assertion

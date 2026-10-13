@@ -397,7 +397,7 @@ def _exec_request(step, ctx: Context) -> _exec.ExecRequest:
 
     Two types on purpose: ``Exec`` is the surface an author writes and carries
     what a *shot* needs (``cols``/``rows``/``at``); ``ExecRequest`` is what
-    :func:`vidkit.exec.run` executes and carries nothing that cannot be honoured.
+    :func:`truedemo.exec.run` executes and carries nothing that cannot be honoured.
     Keeping them apart means the spec cannot reach into the runner.
     """
     return _exec.ExecRequest(
@@ -425,7 +425,7 @@ def _exec_stage(ctx: Context, assets: Assets) -> None:
     The recording is written *before* the frames are drawn, and both are drawn
     from the same in-memory events, so the picture and the ``.cast`` cannot tell
     different stories. Every byte is redacted as it arrives — see
-    :meth:`vidkit.secrets.Secrets.redact_bytes`.
+    :meth:`truedemo.secrets.Secrets.redact_bytes`.
 
     Declared environments are started before the first command and torn down in a
     ``finally``, so the container is removed on every exit path — a successful
@@ -930,7 +930,7 @@ def _overlay_graphic(ctx: Context, assets: Assets, sc, ov) -> tuple[Path, tuple[
             if size is None:
                 raise SpecError(
                     f"scene {sc.n}: overlay SVG {src.name} does not declare a "
-                    "width and height, so vidkit cannot know how large to draw it")
+                    "width and height, so truedemo cannot know how large to draw it")
             png = ctx.stills / f"overlay-{sc.n:02d}.png"
             ctx.rsvg.render(src, png, size)
         else:
@@ -1035,7 +1035,7 @@ def plan_transitions(spec: Spec, plan) -> list[str]:
     a transition, and it lives here because three callers need it and they must not
     disagree: the renderer, which pads the outgoing take and tells ffmpeg to xfade,
     and ``reports.plan_report``, which tells the author how long the film will be.
-    When those were separate, `vidkit plan` promised a length the build did not make.
+    When those were separate, `truedemo plan` promised a length the build did not make.
 
     A junction belongs to the **outgoing** shot: a dissolve is time the outgoing
     picture lends to the one after it, which is why the pad and the xfade have to come

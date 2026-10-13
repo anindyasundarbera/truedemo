@@ -1,7 +1,7 @@
 """Render a recorded terminal faithfully — as data, from the real byte stream.
 
 The only honest way to show a terminal in a video is to show the one that was
-actually there. So vidkit records the PTY's bytes (see :mod:`vidkit.exec`) and this
+actually there. So truedemo records the PTY's bytes (see :mod:`truedemo.exec`) and this
 module turns them back into what a person would have seen.
 
 Two consumers, one implementation:
@@ -306,7 +306,7 @@ def write_cast(events: list[tuple[float, bytes]], out: Path, *, cols: int, rows:
     """
     header = {"version": 2, "width": cols, "height": rows,
               "env": {"TERM": "xterm-256color", "SHELL": "/bin/sh"},
-              "vidkit": meta or {}}
+              "truedemo": meta or {}}
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("w", encoding="utf-8") as fh:
         fh.write(json.dumps(header) + "\n")

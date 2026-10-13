@@ -13,11 +13,11 @@ from pathlib import Path
 import pytest
 from conftest import arun
 
-from vidkit import provider as _provider
-from vidkit.context import Context
-from vidkit.errors import SpecError, ToolError, VidkitError
-from vidkit.secrets import REDACTED, Secrets
-from vidkit.snapshot import (
+from truedemo import provider as _provider
+from truedemo.context import Context
+from truedemo.errors import SpecError, ToolError, TruedemoError
+from truedemo.secrets import REDACTED, Secrets
+from truedemo.snapshot import (
     SNAPSHOT_FILE,
     Snapshot,
     describe_difference,
@@ -28,8 +28,8 @@ from vidkit.snapshot import (
     request_key,
     verify_fresh,
 )
-from vidkit.spec import load_spec
-from vidkit.timeframe import from_relative
+from truedemo.spec import load_spec
+from truedemo.timeframe import from_relative
 
 
 # --------------------------------------------------------------------------- #
@@ -103,7 +103,7 @@ def test_a_secret_entry_without_a_module_is_refused(tmp_path):
 
 
 def test_a_short_provider_spelling_is_accepted():
-    from vidkit.spec import _provider_spec
+    from truedemo.spec import _provider_spec
     assert _provider_spec("acme").module == "acme"
     assert _provider_spec("acme").secrets == {}
     assert _provider_spec("  ") is None
@@ -301,7 +301,7 @@ def test_source_unavailable_names_the_source():
     exc = _provider.SourceUnavailable("the model endpoint", "DNS failure")
     assert "the model endpoint" in str(exc)
     assert "DNS failure" in str(exc)
-    assert isinstance(exc, VidkitError)
+    assert isinstance(exc, TruedemoError)
 
 
 def test_fallback_without_a_declaration_explains_itself(tmp_path):
@@ -353,7 +353,7 @@ def test_a_provider_that_raises_is_wrapped_and_redacted(tmp_path):
 
 def test_source_unavailable_is_not_wrapped_as_a_provider_bug(tmp_path):
     module = _write_provider(tmp_path, (
-        "from vidkit.provider import SourceUnavailable\n"
+        "from truedemo.provider import SourceUnavailable\n"
         "def datasets(ctx):\n"
         "    raise SourceUnavailable('the API', '503')\n"))
     ctx = _ctx(load_spec(_spec(tmp_path)), tmp_path / "data")
@@ -402,7 +402,7 @@ def test_datasets_must_return_a_mapping(tmp_path):
 # The MCP surface must expose the same stage contract (R-B3, M5 groundwork)
 # --------------------------------------------------------------------------- #
 def test_the_mcp_build_tool_refuses_only_together_with_from():
-    from vidkit import mcp_server as m
+    from truedemo import mcp_server as m
 
     # `tool_build` runs off the event loop, so it is a coroutine. Calling it bare
     # leaves a coroutine object behind and `pytest.raises` sees nothing — the test
@@ -413,8 +413,8 @@ def test_the_mcp_build_tool_refuses_only_together_with_from():
 
 
 def test_the_mcp_build_tool_passes_the_stage_contract_through(monkeypatch, tmp_path):
-    from vidkit import assembler
-    from vidkit import mcp_server as m
+    from truedemo import assembler
+    from truedemo import mcp_server as m
 
     spec = _spec(tmp_path)
     seen: dict = {}

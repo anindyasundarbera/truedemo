@@ -1,6 +1,6 @@
 # Executing real commands
 
-vidkit can film **real work in a real terminal**. You declare a command, the build runs it
+truedemo can film **real work in a real terminal**. You declare a command, the build runs it
 inside a bounded sandbox, records the terminal byte-for-byte, and the finished video shows
 what actually happened — not an animation of what would have happened.
 
@@ -23,7 +23,7 @@ scenes:
       - {exec: test, effect: hold}
 ```
 
-`vidkit build video.yaml` runs `pytest -q` under `bwrap(1)`, records it, and renders the
+`truedemo build video.yaml` runs `pytest -q` under `bwrap(1)`, records it, and renders the
 recording. `verify.json` gains an `exec` section naming the command, its exit code, its
 duration, and the backend it ran in.
 
@@ -31,15 +31,15 @@ duration, and the backend it ran in.
 
 ## 2. What "recorded" means
 
-vidkit opens a **real PTY**, not a pipe. The distinction is not cosmetic. A program that
+truedemo opens a **real PTY**, not a pipe. The distinction is not cosmetic. A program that
 calls `isatty()` changes what it prints — progress bars collapse, colours vanish, prompts
 are suppressed, `git` stops paginating. Recording a pipe would produce a transcript **no
 terminal ever displayed**, which is a fabrication in the sense I7 forbids. The recording is
 what a human at that terminal would have seen.
 
 The recording is stored as an **asciinema cast** (`.cast`) beside the spec's other build
-output, and redacted before it lands on disk. `vidkit` replays it through
-[`vidkit.terminal`](../modules.yaml), a small CSI parser that reconstructs the screen at
+output, and redacted before it lands on disk. `truedemo` replays it through
+[`truedemo.terminal`](../modules.yaml), a small CSI parser that reconstructs the screen at
 each moment and renders it to SVG. Nothing about the screen is authored by you.
 
 ---
@@ -87,7 +87,7 @@ environment:
 
 `cmd:` has exactly two forms, and the difference is deliberate:
 
-| You write | vidkit runs | What it means |
+| You write | truedemo runs | What it means |
 |---|---|---|
 | `cmd: "pytest -q"` | `["/bin/sh", "-c", "pytest -q"]` | **You are declaring a shell script.** Pipes, `&&`, globs and `$VAR` all work. |
 | `cmd: ["pytest", "-q"]` | `["pytest", "-q"]` | **You are declaring an argv.** No shell, no expansion, no quoting bugs. |
@@ -118,7 +118,7 @@ A shot may name a moment:
 - {exec: test, effect: hold, at: 6.0}
 ```
 
-vidkit keeps the recorded frames up to that second and holds the one the screen had settled
+truedemo keeps the recorded frames up to that second and holds the one the screen had settled
 on. With no `at:`, the shot ends on the final screen.
 
 ---
@@ -132,7 +132,7 @@ on. With no `at:`, the shot ends on the final screen.
 | `local` | none — the command runs unconfined on this host | when you genuinely need the host, and say so |
 
 `bubblewrap` is the default because it is a single unprivileged binary. If the sandbox
-cannot run, `vidkit plan` says so at **load time** rather than failing once the camera is
+cannot run, `truedemo plan` says so at **load time** rather than failing once the camera is
 rolling. There are two ways it can fail, and they are not the same failure:
 
 ```
@@ -151,7 +151,7 @@ a: the spec declares `backend: bubblewrap`, but the sandbox cannot run on this h
 
 The second is the one worth knowing about, because it looks like a broken install and is
 not: `bubblewrap` is present and correct, and the kernel will not let it make a namespace.
-`vidkit doctor` reports it directly, along with the workaround, and **`available: false` in
+`truedemo doctor` reports it directly, along with the workaround, and **`available: false` in
 its `backends` block means "cannot run", not "not found"** — the check actually starts a
 sandbox around `/bin/true` rather than looking for the binary.
 
@@ -222,7 +222,7 @@ it was torn down. See §10.
 
 ## 8. What this is not
 
-- **Not a shell tool.** vidkit does not accept a command at build time from an agent. Every
+- **Not a shell tool.** truedemo does not accept a command at build time from an agent. Every
   command is written in the spec, reviewed like any other line of the spec, and re-checked
   at load.
 - **Not a general job runner.** The output caps (256 KiB per stream) and the `max_timeout`
@@ -247,7 +247,7 @@ it was torn down. See §10.
 | `docker(1) is not on PATH` | no Docker client | install it; the error names the rung that failed |
 | `the docker daemon does not answer` | Docker installed, no daemon | start it — this is a service to start, not an install |
 | `the image could not be pulled` | the image name is wrong, or there is no network | check the tag; a digest is recorded in the report |
-| `is not a terminal` / exit 125 | Docker was asked for a TTY with no stdin to attach it to | a vidkit bug, not a spec bug — please report it |
+| `is not a terminal` / exit 125 | Docker was asked for a TTY with no stdin to attach it to | a truedemo bug, not a spec bug — please report it |
 
 ---
 
@@ -293,14 +293,14 @@ sharing is visible rather than assumed.
 
 ### Readiness must *hold*
 
-`ready:` is an argv (never a shell line) that vidkit runs inside the container until it
+`ready:` is an argv (never a shell line) that truedemo runs inside the container until it
 succeeds. One success is **not** enough. A container that has just started often answers
 before it is actually serving — Postgres is the canonical example: `pg_isready` returns 0 at
 ~1.3 s against the *bootstrap* server, which is shut down at ~1.45 s, and a real `SELECT 1`
 only succeeds from ~1.84 s. A readiness gate that sampled once would declare the database up
 and hand the next command a server on its way down.
 
-vidkit therefore requires the command to succeed **and keep succeeding for 0.75 s**
+truedemo therefore requires the command to succeed **and keep succeeding for 0.75 s**
 (`READY_HOLD`). The report distinguishes the two failure shapes, because they mean different
 things:
 
@@ -314,7 +314,7 @@ things:
 
 - **The environment's own environment is the environment's.** A container does **not**
   inherit the host's `PATH`, `HOME`, `LANG` or `PS1`; it gets the image's, plus exactly what
-  the spec declared. vidkit removes `HOME` from the *client's* environment for the same
+  the spec declared. truedemo removes `HOME` from the *client's* environment for the same
   reason in reverse — otherwise the client's unreadable `~/.docker/config.json` prints a
   warning, and that warning would be filmed as if the container had said it.
 - **A command, its readiness probe, and its logs all address the same container.** Otherwise
@@ -340,7 +340,7 @@ backends from the engine rather than spelling one name, precisely so that a Dock
 not reported as a lie.
 
 Docker is probed by **running** a container, never by looking for the binary: a client on
-`PATH` with a dead daemon is a client that cannot confine anything. `vidkit doctor` reports
+`PATH` with a dead daemon is a client that cannot confine anything. `truedemo doctor` reports
 the three Docker questions separately, because they have three different fixes:
 
 ```
@@ -351,7 +351,7 @@ docker       client:  /usr/bin/docker
 
 ### What this is not, again
 
-- **Not a Docker socket on the sandbox.** vidkit drives Docker from the *host* side; nothing
+- **Not a Docker socket on the sandbox.** truedemo drives Docker from the *host* side; nothing
   it films ever sees `/var/run/docker.sock`.
 - **Not a compose replacement.** There is no dependency graph, no scaling, no healthcheck
   DSL. One environment is one container, and the commands that name it share it.

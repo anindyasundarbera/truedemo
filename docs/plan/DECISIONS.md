@@ -1901,3 +1901,54 @@ floor that depends on which tools a machine has).
 **Consequences.** CI now runs `ruff check` (blocking), `mypy` (advisory), and
 `pytest --cov-fail-under=40` (blocking). Tightening any of these is a future, separate scope
 (see the roadmap), not a silent bump of a default.
+
+---
+
+## D66 — The project is renamed `vidkit` → `truedemo`
+
+**2026-10-13.** Context: the `v1.2.0` release.
+
+The release could not be published to PyPI: the name `vidkit` belongs to an **unrelated
+project** there (`SpyC0der77/vidkit`, v0.1.3.2, *"A Python package for generating videos from
+JSON specifications"*). Verified by asking PyPI directly, with controls (`requests` → taken,
+a nonsense name → free) so a check that reported everything free could not be mistaken for
+availability.
+
+**Decision.** Rename the project to **`truedemo`** — the distribution, the import package,
+the console scripts, the MCP tool prefix, the resource scheme, the environment variables, and
+the GitHub repository — and release it as **`2.0.0`**.
+
+`truedemo` was chosen because it says what the project *is* (a demo-maker) and names the one
+thing that distinguishes it (the demo is **true** — nothing fabricated, every claim reopened
+and checked). It was confirmed free on PyPI at decision time.
+
+**Why now.** The project has **zero external users**. A rename is nearly free today and
+increasingly expensive after it: every published URL, every `pip install` line in a blog post,
+every MCP client config would become stale. There is no cheaper moment than this one.
+
+**Why a major version.** A rename is breaking by definition. No caller survives it unchanged:
+`import vidkit` stops working, `vidkit_run` is no longer a tool, `vidkit://` is no longer a
+scheme. `2.0.0` states that plainly rather than hiding it in a minor.
+
+**Alternatives.**
+
+- *Keep the name, publish under a different distribution name* (e.g. `pip install vidkit-x`,
+  `import vidkit`) — rejected: the two would disagree forever, and the first question any
+  reader asks ("why is the package called one thing and the import another?") has no good
+  answer. A project whose thesis is that names should mean what they say cannot start there.
+- *Rename later* — rejected: strictly more expensive, and the repository would accumulate
+  links to a name that was about to change.
+- *Pick a more "brandable" name* (`proofreel`, `demoreel`) — rejected: `truedemo` is what the
+  thing does, which is what a newcomer needs more than a brand.
+
+**Consequences.**
+
+1. **The past is frozen, not rewritten.** `HISTORY.md`, `DECISIONS.md`, `FEATURE-ROADMAP.md`,
+   `OPENMONTAGE.md`, and the released CHANGELOG sections keep the name they were written
+   under. The project *was* called vidkit through M0–M10; that is a true statement about
+   history, and rewriting it is the same class of error as recording a measurement that was
+   never taken ([AGENTS.md](../../AGENTS.md) §5). The rename is recorded as a new entry.
+2. **GitHub redirects.** `github.com/anindyasundarbera/vidkit` continues to resolve to the
+   renamed repository, so existing clones and links are not broken — they are only redirected.
+3. **PyPI is still unpublished.** The rename removes the *name* blocker; publishing remains a
+   separate, owner-owned step (it needs credentials and a deliberate release).

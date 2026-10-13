@@ -1,7 +1,7 @@
 # Verification
 
-`verify.py` turns a spec's promises into mechanical checks. `vidkit build` runs them at the
-end and returns exit code **2** if any check fails; `vidkit verify` re-runs them on the last
+`verify.py` turns a spec's promises into mechanical checks. `truedemo build` runs them at the
+end and returns exit code **2** if any check fails; `truedemo verify` re-runs them on the last
 render. The report is written to `OUT/_build/verify.json`.
 
 ## The checks
@@ -145,7 +145,7 @@ timeframes](../authoring/stories-and-timeframes.md)
               "duck_seconds": 0.0, "duck_db": -12.0, "volume_db": -6.9, "spans": []},
     "exec": [
       {"label": "write", "cmd": ["psql", "-c", "…"], "backend": "docker",
-       "container": "vidkit-db-10e98a0eb4e", "exit_code": 0, "expect_exit": [0],
+       "container": "truedemo-db-10e98a0eb4e", "exit_code": 0, "expect_exit": [0],
        "expected": true, "seconds": 0.088, "cast": "write.cast",
        "frames": null, "playback": null}
     ],
@@ -155,7 +155,7 @@ timeframes](../authoring/stories-and-timeframes.md)
        "ready_detail": "`docker exec` of the declared readiness command answered for 0.98s without a single failure: … accepting connections",
        "seconds": 2.663,
        "teardown": {"attempted": true, "stopped": true, "removed": true,
-                    "detail": "container vidkit-db-10e98a0eb4e stopped and removed"}}
+                    "detail": "container truedemo-db-10e98a0eb4e stopped and removed"}}
     ]
   },
   "checks": [
@@ -211,14 +211,14 @@ Be explicit about this — over-trusting a green report is the main risk.
 ## Using it as a gate
 
 ```bash
-vidkit build SPEC          # exit 0 = all checks pass; 2 = a check failed; 1 = a hard error
-vidkit verify SPEC         # re-check without re-rendering
+truedemo build SPEC          # exit 0 = all checks pass; 2 = a check failed; 1 = a hard error
+truedemo verify SPEC         # re-check without re-rendering
 ```
 
 In CI:
 
 ```bash
-vidkit build SPEC || { echo "video failed verification"; exit 1; }
+truedemo build SPEC || { echo "video failed verification"; exit 1; }
 ```
 
 ## Reading a failure

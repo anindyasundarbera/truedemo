@@ -5,9 +5,9 @@ Why this module exists
 A screencast about software shows a product *and* the work done with it. The work
 happens in a terminal, and a terminal that was drawn rather than typed is a
 plausible terminal — which is precisely the fabrication invariant I7 forbids. So
-vidkit has to be able to run a real command and film the real result.
+truedemo has to be able to run a real command and film the real result.
 
-The owner's instinct was "give vidkit shell access". That is not the primitive.
+The owner's instinct was "give truedemo shell access". That is not the primitive.
 Shell access is unbounded, unauditable, and invisible to ``verify``. The primitive
 is a **declared, bounded, auditable execution environment**: every command is
 written down in the spec, every boundary (working directory, environment,
@@ -127,8 +127,8 @@ DOCKER_INFO_TIMEOUT = 5.0
 DOCKER_STOP_TIMEOUT = 15.0
 
 #: Every container the engine creates is named with this prefix, so a leaked one
-#: is identifiable as vidkit's and can be reaped without guessing.
-DOCKER_PREFIX = "vidkit-"
+#: is identifiable as truedemo's and can be reaped without guessing.
+DOCKER_PREFIX = "truedemo-"
 
 #: The mount point inside a container that the project directory is bound to.
 #: Containers do not have the host's paths, so a declared ``cwd`` is relative to
@@ -138,7 +138,7 @@ DOCKER_WORKDIR = "/work"
 #: Labels every container carries. A leaked container can be found by them, and
 #: a reader can tell what story it belonged to without reading the spec again.
 DOCKER_LABELS = {
-    "vidkit.role": "exec",
+    "truedemo.role": "exec",
 }
 
 #: The backends that actually confine a command — as opposed to `local`, which runs
@@ -754,7 +754,7 @@ _CONTAINER_FOR_RUN: dict[str, str] = {}
 def _env_for(req: ExecRequest, cwd: Path, backend: str) -> dict[str, str]:
     env = dict(BASE_ENV)
     env.update(req.env)                  # what the spec declared it needs
-    env["VIDKIT_SANDBOX"] = backend
+    env["TRUEDEMO_SANDBOX"] = backend
     if backend == "bubblewrap":
         env["HOME"] = BASE_ENV["HOME"]
         env["PWD"] = "/work"
@@ -783,7 +783,7 @@ def _env_for(req: ExecRequest, cwd: Path, backend: str) -> dict[str, str]:
 def _container_name(env: EnvSpec, stamp: str) -> str:
     """A name that says whose container it is, so a leak is identifiable.
 
-    ``docker ps`` on a machine that has run vidkit must not show a wall of
+    ``docker ps`` on a machine that has run truedemo must not show a wall of
     anonymous ``thirsty_einstein`` containers with no way to tell which build
     abandoned them.
     """
@@ -1145,15 +1145,15 @@ def environment_down(state: EnvState) -> EnvState:
 def environments_running() -> list[dict]:
     """Every *live* container this engine is responsible for, by its label.
 
-    Used by the tests and by a future `vidkit doctor` to notice a leak. It is
-    scoped to vidkit's own label rather than to every container on the machine,
+    Used by the tests and by a future `truedemo doctor` to notice a leak. It is
+    scoped to truedemo's own label rather than to every container on the machine,
     because a tool that lists containers it did not create is a tool that will
     eventually remove one it did not create.
     """
     if docker_client() is None:
         return []
     try:
-        proc = _docker_run("ps", "--filter", "label=vidkit.role=exec",
+        proc = _docker_run("ps", "--filter", "label=truedemo.role=exec",
                            "--format", "{{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}",
                            timeout=DOCKER_INFO_TIMEOUT)
     except (subprocess.TimeoutExpired, OSError):
@@ -1331,7 +1331,7 @@ def check_policy(requests: Sequence[ExecRequest], *, root: Path,
                  allow_network: bool) -> list[str]:
     """Refuse a spec whose commands could not run as declared. Returns reasons.
 
-    Load-time is the right place for this: an author should learn from ``vidkit
+    Load-time is the right place for this: an author should learn from ``truedemo
     plan`` that a working directory is missing or a backend is unavailable, not
     from a stack trace halfway through a render.
     """

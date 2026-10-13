@@ -12,8 +12,8 @@ the install, unless your provider fetches something.
 ## 1. Install
 
 ```bash
-git clone https://github.com/anindyasundarbera/vidkit
-cd vidkit
+git clone https://github.com/anindyasundarbera/truedemo
+cd truedemo
 python3 -m venv .venv && . .venv/bin/activate
 pip install -e ".[dev]"
 ```
@@ -34,7 +34,7 @@ for this walkthrough.
 ## 2. Check the machine
 
 ```bash
-vidkit doctor
+truedemo doctor
 ```
 
 `doctor` with no argument checks the environment and nothing else. It prints one line per
@@ -43,13 +43,13 @@ and rsvg-convert are required; ffprobe, pdftoppm, gs, Playwright, and Piper are 
 their absence is reported as such.
 
 ```bash
-vidkit --json doctor | jq '.ok, .tools[] | select(.required==false)'
+truedemo --json doctor | jq '.ok, .tools[] | select(.required==false)'
 ```
 
 ## 3. Scaffold a story
 
 ```bash
-vidkit init my-story --title "My first video" --days 14 --as-of 2026-10-06
+truedemo init my-story --title "My first video" --days 14 --as-of 2026-10-06
 ```
 
 That writes five files:
@@ -59,7 +59,7 @@ my-story/
   video.yaml     the spec
   story.yaml     the story's identity: title, slug, timeframe, owner
   provider.py    a working provider that measures a few real numbers
-  narration.md   the script, with the scene headers vidkit parses
+  narration.md   the script, with the scene headers truedemo parses
   (nothing else — no assets, no cache)
 ```
 
@@ -69,14 +69,14 @@ next two commands need no edits at all.
 ## 4. Look before you render
 
 ```bash
-vidkit plan my-story/video.yaml
+truedemo plan my-story/video.yaml
 ```
 
 `plan` prints every scene, its shots, the guards that apply, and the estimated runtime —
 without rendering a frame. This is where you catch a spec mistake, not after a render.
 
 ```bash
-vidkit --json plan my-story/video.yaml | jq '.plan | {scenes, est_seconds}'
+truedemo --json plan my-story/video.yaml | jq '.plan | {scenes, est_seconds}'
 ```
 
 ## 5. Make it yours
@@ -93,13 +93,13 @@ timeframe: {start: 2026-09-23, end: 2026-10-06}
 owner: you
 ```
 
-**`narration.md`** is the script. Each scene is a header vidkit parses, with spoken lines in
+**`narration.md`** is the script. Each scene is a header truedemo parses, with spoken lines in
 `**bold**` and `[stage directions]` that are ignored:
 
 ```markdown
 ## Scene 0 — A title · 0:00–0:04
 
-**This is my first vidkit video.**
+**This is my first truedemo video.**
 
 [hold on the card]
 
@@ -108,7 +108,7 @@ owner: you
 **Every number on screen came from `provider.py`, not from my typing.**
 ```
 
-The header's times are a *claim* about the window. `vidkit verify` fails the build if the
+The header's times are a *claim* about the window. `truedemo verify` fails the build if the
 narration states something the declared timeframe cannot support — see
 [stories-and-timeframes.md](../authoring/stories-and-timeframes.md).
 
@@ -126,13 +126,13 @@ and name it in the spec's `charts:` with a matching `dataset:`. See the
 ## 6. Build
 
 ```bash
-vidkit build my-story/video.yaml
+truedemo build my-story/video.yaml
 ```
 
 or, with an explicit output directory:
 
 ```bash
-vidkit build my-story/video.yaml --out ./renders/first
+truedemo build my-story/video.yaml --out ./renders/first
 ```
 
 You get:
@@ -154,8 +154,8 @@ exits non-zero, `verify.json` says which check and
 ## 7. Read what it says about itself
 
 ```bash
-vidkit verify my-story/video.yaml       # re-run the checks
-vidkit provenance my-story/video.yaml   # what made this render
+truedemo verify my-story/video.yaml       # re-run the checks
+truedemo provenance my-story/video.yaml   # what made this render
 ```
 
 `provenance` is the one to keep: it names the spec and its hash, the window, the provider and
@@ -168,20 +168,20 @@ see [provenance.md](../verification/provenance.md).
 Start the server and point a client at it:
 
 ```bash
-vidkit-mcp --transport stdio          # or: python3 -m vidkit.mcp_server
+truedemo-mcp --transport stdio          # or: python3 -m truedemo.mcp_server
 ```
 
-Then everything above is available as one contract. `vidkit_run` takes `{action, story, out}`
+Then everything above is available as one contract. `truedemo_run` takes `{action, story, out}`
 and returns a manifest whose keys never change, so a caller branches on `ok` rather than on
 which command it happened to invoke.
 
 ```
-vidkit_run(action="doctor")
-vidkit_run(action="init",   story="./my-story", title="My first video", timeframe="14d")
-vidkit_run(action="plan",   story="./my-story")
-vidkit_run(action="build",  story="./my-story", out="./renders/first")
-vidkit_run(action="verify", story="./my-story", out="./renders/first")
-vidkit_run(action="provenance", story="./my-story", out="./renders/first")
+truedemo_run(action="doctor")
+truedemo_run(action="init",   story="./my-story", title="My first video", timeframe="14d")
+truedemo_run(action="plan",   story="./my-story")
+truedemo_run(action="build",  story="./my-story", out="./renders/first")
+truedemo_run(action="verify", story="./my-story", out="./renders/first")
+truedemo_run(action="provenance", story="./my-story", out="./renders/first")
 ```
 
 A failure is **data**, never an exception:
@@ -198,8 +198,8 @@ A failure is **data**, never an exception:
 }
 ```
 
-`vidkit_actions` lists the vocabulary; `vidkit://actions` is the same list as a resource.
-`vidkit_docs` fetches any document by name, and `vidkit_docs_index` returns the
+`truedemo_actions` lists the vocabulary; `truedemo://actions` is the same list as a resource.
+`truedemo_docs` fetches any document by name, and `truedemo_docs_index` returns the
 machine-readable route table — so an agent can teach itself without a human in the loop. See
 [mcp-server.md](../operations/mcp-server.md) and the
 [job contract](../operations/job-contract.md).

@@ -1,7 +1,7 @@
 # Security
 
-This document tells you how to report a security issue in vidkit, and what we
-promise to do about it. vidkit renders videos and drives browsers, terminals,
+This document tells you how to report a security issue in truedemo, and what we
+promise to do about it. truedemo renders videos and drives browsers, terminals,
 and Docker containers on your behalf, so a vulnerability here can mean a
 vulnerability on the machine that runs it. We take that seriously.
 
@@ -21,7 +21,7 @@ release, upgrade first; a fix will not be backported to an unsupported line.
 can land before the details are public.
 
 1. Email <anindyasundarbera@gmail.com> (or the maintainer address in the git
-   history) with the subject `[vidkit] security report`.
+   history) with the subject `[truedemo] security report`.
 2. Include: the affected version, a minimal reproduction (a spec, a provider, a
    command line), and what you believe an attacker could do with it.
 3. You will receive an acknowledgement within 5 business days and a substantive
@@ -48,7 +48,7 @@ We will credit the reporter unless you ask not to be.
 - A malicious **provider** module. Providers are imported Python code (invariant
   I8 limits code execution to the named provider, and no further). If you can
   run arbitrary code as a provider, you already have arbitrary code.
-- Denial of service by requesting a very long or very expensive render. vidkit
+- Denial of service by requesting a very long or very expensive render. truedemo
   is a batch tool; resource limits are a deployment concern.
 - Sandbox escapes that require root or an already-compromised kernel.
 

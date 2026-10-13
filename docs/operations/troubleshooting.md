@@ -1,12 +1,12 @@
 # Troubleshooting
 
-Diagnose from the error text outward. Start with `vidkit doctor`.
+Diagnose from the error text outward. Start with `truedemo doctor`.
 
 ## First moves
 
 ```bash
-vidkit doctor SPEC.yaml     # environment + spec sanity
-vidkit plan SPEC.yaml       # catch spec problems before rendering
+truedemo doctor SPEC.yaml     # environment + spec sanity
+truedemo plan SPEC.yaml       # catch spec problems before rendering
 ```
 
 `doctor` reports missing tools. `plan` prints the scene plan and estimates runtime.
@@ -40,15 +40,15 @@ vidkit plan SPEC.yaml       # catch spec problems before rendering
 | `capture 'x' films artifact 'y', but no such file is in …` | the `download` that makes it did not run | the producing capture failed, or its `save_as` name differs |
 | `cannot show y.csv: its bytes are not recognisable as a csv` | the URL returned an error page, not the file | check the download URL and any session it needs |
 | `cannot show y.pdf: no PDF rasteriser is installed …` | neither `pdftoppm` nor `gs` | install `poppler-utils` or `ghostscript` |
-| `capture 'x' fills a password field — record a session first` | a login form is being filmed | run `vidkit auth`, set `storage_state:`, or declare `allow_login: true` || `assertion failed: …, contains 'live' (saw 'Mock dataset')` | wrong app state — guard working | fix URL/state; do not remove the assert |
-| `playwright not installed — skipping capture` | no Playwright | `pip install "vidkit[capture]"`, or use `still:` |
+| `capture 'x' fills a password field — record a session first` | a login form is being filmed | run `truedemo auth`, set `storage_state:`, or declare `allow_login: true` || `assertion failed: …, contains 'live' (saw 'Mock dataset')` | wrong app state — guard working | fix URL/state; do not remove the assert |
+| `playwright not installed — skipping capture` | no Playwright | `pip install "truedemo[capture]"`, or use `still:` |
 | `TTS failed for scene N …; estimating duration` | voice model missing/broken | fix `voice.model` |
 | `no TTS engine available … silent cut` | engine off/unavailable | install piper or accept the silent cut |
 | `no clips to concatenate` | `clips` produced nothing | usually a downstream symptom — check earlier stage logs |
 | `caption cue N is not readable: …` | token > 42 chars | shorten it or move it to a panel |
 | `caption fidelity check failed` | text mismatch | report as a bug; do not disable `strict` |
 | `unknown stage(s): x` | bad `--only` | use stage names from `pipeline.md` |
-| `command failed (1): rsvg-convert … EntityRef: expecting ';'` | unescaped `&` in an SVG you authored by hand | escape it (`&amp;`); vidkit's `text()` escapes automatically |
+| `command failed (1): rsvg-convert … EntityRef: expecting ';'` | unescaped `&` in an SVG you authored by hand | escape it (`&amp;`); truedemo's `text()` escapes automatically |
 | `[FAIL] runtime within window` | script too long/short | adjust `length_scale` or trim |
 | `[FAIL] audio present — no audio stream` | silent cut | set up TTS, or accept if intended |
 | `[FAIL] required phrase present: 'x' — missing` | disclosure absent | add it to the script |
@@ -63,7 +63,7 @@ Rendering is staged. `--only panels` refreshes PNGs but existing **clips** still
 frames. Push the change through:
 
 ```bash
-vidkit build SPEC --only clips,concat,render
+truedemo build SPEC --only clips,concat,render
 ```
 
 ### "The video is the wrong length"
@@ -71,12 +71,12 @@ vidkit build SPEC --only clips,concat,render
 Runtime = sum of measured narration. Change the script or the pace, then:
 
 ```bash
-vidkit build SPEC --only narration,clips,concat,render,verify
+truedemo build SPEC --only narration,clips,concat,render,verify
 ```
 
 ### "Captions are huge or overlapping"
 
-The libass style must know the frame size. vidkit sets `PlayResX/PlayResY` from
+The libass style must know the frame size. truedemo sets `PlayResX/PlayResY` from
 `project.size`; if you hand-rolled an ffmpeg call, do the same, or the font/margins are scaled
 against libass's default 384×288 canvas.
 
@@ -91,14 +91,14 @@ message names exactly what was waited for. Verify the selector against the real 
 Do not fill the login form in the spec. Record the session once:
 
 ```bash
-vidkit auth https://staging.example.com/login --spec video.yaml
+truedemo auth https://staging.example.com/login --spec video.yaml
 ```
 
 then point the capture at the storage state it wrote. See [`capture-guide.md`](../capture/capture-guide.md).
 
 ### "I filmed a PDF and got a blank frame"
 
-vidkit rasterises a PDF through `pdftoppm` or `gs`; if neither is installed it refuses rather
+truedemo rasterises a PDF through `pdftoppm` or `gs`; if neither is installed it refuses rather
 than film a placeholder. Install `poppler-utils` (or `ghostscript`), or capture the document
 from the product's own viewer instead.
 
@@ -109,7 +109,7 @@ are in `OUT/_build/data/*.json` — diff them across runs to see what moved.
 
 ### "`Connection refused` from the provider"
 
-The upstream service is not running. Start it (or point the provider at another host). vidkit
+The upstream service is not running. Start it (or point the provider at another host). truedemo
 correctly refuses to build a video whose numbers it cannot fetch.
 
 ## Inspecting a failed run
@@ -132,7 +132,7 @@ Delete `OUT` (or just `OUT/_build`, `OUT/_capture`) to start clean. There is no 
 
 ## Platform notes
 
-vidkit is developed and CI-tested on **Linux**, and works on **macOS**. Windows is
+truedemo is developed and CI-tested on **Linux**, and works on **macOS**. Windows is
 best-effort: the code has no POSIX-only calls on the build path, but it is not tested there.
 
 | Concern | Linux | macOS | Windows |

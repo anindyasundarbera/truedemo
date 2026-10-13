@@ -2,12 +2,12 @@
 
 A **panel** is a full-frame SVG drawn from data. Renderers are pure functions
 `fn(data, options, doc)` that append SVG fragments to a `PanelDoc`. Built-in kinds live in
-`vidkit/panels.py`; providers add more via `panels.register()`.
+`truedemo/panels.py`; providers add more via `panels.register()`.
 
 ## The PanelDoc API
 
 Every renderer receives a `PanelDoc` sized `(project.width, project.height)`. Use these
-helpers from `vidkit.svg` (all return strings; `doc.add(*fragments)` appends):
+helpers from `truedemo.svg` (all return strings; `doc.add(*fragments)` appends):
 
 | Helper | Signature (abbrev.) |
 |---|---|
@@ -161,8 +161,8 @@ will not draw one.
 ## Registering a custom kind
 
 ```python
-from vidkit import panels as panel_lib
-from vidkit.svg import PanelDoc, rect, polyline, text, THEME
+from truedemo import panels as panel_lib
+from truedemo.svg import PanelDoc, rect, polyline, text, THEME
 
 def my_kind(data, options, doc: PanelDoc):
     t = THEME
@@ -196,7 +196,7 @@ Then reference it by name in a chart: `{name: x, kind: my_kind, dataset: d}`.
 ## Checking a panel visually
 
 ```bash
-vidkit build SPEC --only data,panels
+truedemo build SPEC --only data,panels
 rsvg-convert -w 1440 -h 810 -o /tmp/peek.png OUT/_build/panels/<name>.svg
 ```
 

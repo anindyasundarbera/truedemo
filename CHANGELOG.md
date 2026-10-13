@@ -5,6 +5,40 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-10-13
+
+### Changed — BREAKING: the project is renamed `vidkit` → `truedemo`
+
+The name `vidkit` was taken on PyPI by an unrelated project (`SpyC0der77/vidkit`), so a
+publish was impossible under it. Renaming at zero users is nearly free; renaming after the
+first announcement is not, and this project has no users yet.
+
+Everything a consumer names changes:
+
+| Surface | Before | After |
+|---|---|---|
+| Distribution / import | `vidkit` | `truedemo` |
+| Console scripts | `vidkit`, `vidkit-mcp` | `truedemo`, `truedemo-mcp` |
+| MCP tools (15) | `vidkit_run`, `vidkit_build`, … | `truedemo_run`, `truedemo_build`, … |
+| MCP resources (7) | `vidkit://…` | `truedemo://…` |
+| Env vars | `VIDKIT_RUN_TIMEOUT`, `VIDKIT_SANDBOX` | `TRUEDEMO_RUN_TIMEOUT`, `TRUEDEMO_SANDBOX` |
+| Docker labels | `vidkit.role`, `vidkit-` | `truedemo.role`, `truedemo-` |
+| Repository | `github.com/anindyasundarbera/vidkit` | `github.com/anindyasundarbera/truedemo` |
+
+**Why a major version.** A rename is breaking by definition — no existing caller survives it
+unchanged. `2.0.0` is the honest number, not a patch.
+
+**The past is not rewritten.** `docs/plan/HISTORY.md`, `DECISIONS.md`, `FEATURE-ROADMAP.md`,
+`OPENMONTAGE.md`, and every released CHANGELOG section keep the name they were written under:
+the project genuinely *was* called vidkit through M0–M10, and rewriting that record would be
+the same class of error as claiming a measurement that was never taken (AGENTS.md §5).
+
+### Added
+
+- **A DECISIONS entry recording the rename** — the alternatives considered, and the reason the
+  change is breaking (D66).
+- **A HISTORY entry** for the rename, with the availability check as its evidence.
+
 ## [1.2.0] - 2026-10-13
 
 ### Fixed
@@ -506,6 +540,7 @@ report:
   resources.
 - CLIs: `vidkit doctor`, `plan`, `build`, `tts`, `capture`, `verify`, `docs`.
 
+[2.0.0]: https://github.com/anindyasundarbera/truedemo/releases/tag/v2.0.0
 [1.2.0]: https://github.com/anindyasundarbera/vidkit/releases/tag/v1.2.0
 [1.0.0]: https://github.com/anindyasundarbera/vidkit/releases/tag/v1.0.0
 [0.1.0]: https://github.com/anindyasundarbera/vidkit/releases/tag/v0.1.0

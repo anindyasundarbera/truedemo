@@ -7,13 +7,13 @@ rather than a rule every provider has to remember:
 
 * a need is **declared** — by the spec's ``provider:`` block, by the provider
   module's ``secrets()``, or both;
-* values are resolved from the environment only, never from a file vidkit
+* values are resolved from the environment only, never from a file truedemo
   writes;
 * anything the engine prints goes through :meth:`Secrets.redact`, so a value
   that leaks out of a provider's exception message is masked before it is
   shown.
 
-vidkit is **read-only** by contract. A provider that declares it writes back to
+truedemo is **read-only** by contract. A provider that declares it writes back to
 its source system is refused at load time (``write_back: true``) — the guarantee
 is worth more than the convenience.
 """

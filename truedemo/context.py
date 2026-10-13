@@ -183,11 +183,11 @@ class Context:
 
     def info(self, message: str) -> None:
         self.log.append(message)
-        print(f"[vidkit] {message}")
+        print(f"[truedemo] {message}")
 
     def warn(self, message: str) -> None:
         self.log.append(f"WARN {message}")
-        print(f"[vidkit] WARN {message}")
+        print(f"[truedemo] WARN {message}")
 
     def get(self, key: str, default: Any = None) -> Any:
         return self.spec.__dict__.get(key, default)

@@ -41,14 +41,14 @@ class Report:
                 "checks": [c.__dict__ for c in self.checks]}
 
     def print(self) -> None:
-        print("\n[vidkit] verification")
+        print("\n[truedemo] verification")
         for c in self.checks:
             mark = "PASS" if c.ok else "FAIL"
             line = f"  [{mark}] {c.name}"
             if c.detail:
                 line += f" — {c.detail}"
             print(line)
-        print(f"[vidkit] verification: {'ALL PASS' if self.ok else 'FAILURES PRESENT'}")
+        print(f"[truedemo] verification: {'ALL PASS' if self.ok else 'FAILURES PRESENT'}")
 
 
 # --------------------------------------------------------------------------- #
@@ -82,7 +82,7 @@ def _container_of(spec, assets, result) -> str:
     return getattr(state, "container_name", "") if state is not None else ""
 
 
-#: The three honest sources a picture in a vidkit film can come from, and the shot
+#: The three honest sources a picture in a truedemo film can come from, and the shot
 #: kinds that draw from each. This table is the honesty rule (I7) written down as
 #: data rather than as a paragraph, so that a new shot kind cannot be added without
 #: someone deciding which of the three it is. A kind in *neither* column is refused
@@ -509,7 +509,7 @@ def verify_output(ctx: Context, assets, scenes_text: dict[int, str]) -> Report:
             "ramp": spec.score.ramp,
             "mixed": str(mixed_path) if mixed_by_build else None,
         }
-        # A build hands over its own mix. A bare `vidkit verify` never mixed anything:
+        # A build hands over its own mix. A bare `truedemo verify` never mixed anything:
         # it re-reads a film somebody else built, so it looks for the mix beside it
         # rather than declaring a promise unmet.
         if result is None and (ctx.build / "mix.wav").exists():
@@ -554,7 +554,7 @@ def verify_output(ctx: Context, assets, scenes_text: dict[int, str]) -> Report:
     record = Provenance.read(ctx.build)
     if record is not None:
         rep.facts["provenance"] = {
-            "vidkit": record.get("vidkit"),
+            "truedemo": record.get("truedemo"),
             "spec": record.get("spec"),
             "spec_sha256": record.get("spec_sha256"),
             "built_at": record.get("built_at"),

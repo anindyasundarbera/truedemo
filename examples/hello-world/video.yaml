@@ -1,4 +1,4 @@
-# vidkit spec — hello-world (the smallest complete build)
+# truedemo spec — hello-world (the smallest complete build)
 #
 # Every number this video shows is counted from the files in this repository at
 # build time by `provider.py`. Nothing is fetched, nothing is hard-coded, and
@@ -6,14 +6,14 @@
 # example usable as a CI fixture.
 #
 # Run from the repo root:
-#   vidkit doctor examples/hello-world/video.yaml
-#   vidkit plan   examples/hello-world/video.yaml
-#   vidkit build  examples/hello-world/video.yaml
+#   truedemo doctor examples/hello-world/video.yaml
+#   truedemo plan   examples/hello-world/video.yaml
+#   truedemo build  examples/hello-world/video.yaml
 #
 # Requires: ffmpeg, rsvg-convert. No browser, no voice model, no network.
 
 project:
-  title: "vidkit hello world — a spec, a provider, a video"
+  title: "truedemo hello world — a spec, a provider, a video"
   slug: hello-world
   output: hello-world.mp4
   size: [1920, 1080]
@@ -26,7 +26,7 @@ project:
 
 # The window this cut is about. Declared here rather than in story.yaml to show
 # the spec-level spelling; the two are mutually redundant, and the spec wins.
-# `vidkit plan`, `vidkit doctor` and every verify report print the resolved value.
+# `truedemo plan`, `truedemo doctor` and every verify report print the resolved value.
 timeframe:
   start: 2026-09-07
   end: 2026-10-06
@@ -91,7 +91,7 @@ scenes:
       - {chart: cli, effect: hold, weight: 0.5}
       - {chart: terminal, effect: hold, weight: 0.5}
   - n: 7
-    title: That is vidkit
+    title: That is truedemo
     shots:
       - {still: assets/07-end.svg, effect: zoom}
 

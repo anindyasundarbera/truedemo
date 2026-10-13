@@ -1,12 +1,12 @@
 """Provider for examples/hello-world — no host dependencies, no network.
 
 Every value below is *measured from files on disk* when the build runs: the
-size of the vidkit package itself, the stage list, and the environment vidkit
+size of the truedemo package itself, the stage list, and the environment truedemo
 found. Nothing is hard-coded, and nothing is fetched. That keeps this example
 useful as a CI fixture — it exercises the provider seam and eight of the
 eleven built-in panel kinds without a browser, a voice model, or a server.
 
-This module intentionally touches only the standard library plus ``vidkit``
+This module intentionally touches only the standard library plus ``truedemo``
 itself.
 """
 
@@ -21,7 +21,7 @@ from typing import Any
 
 # examples/hello-world/provider.py -> repo root
 REPO = Path(__file__).resolve().parents[2]
-PKG = REPO / "vidkit"
+PKG = REPO / "truedemo"
 TESTS = REPO / "tests"
 
 
@@ -61,8 +61,8 @@ def datasets(ctx) -> dict[str, Any]:
     test_files = sorted(TESTS.glob("test_*.py"))
     n_tests = sum(_count(p, "def test_") for p in test_files)
 
-    from vidkit.assembler import STAGES
-    from vidkit.panels import kinds
+    from truedemo.assembler import STAGES
+    from truedemo.panels import kinds
 
     # -- stat_cards: headline counts, all measured -------------------------- #
     overview = {
@@ -97,7 +97,7 @@ def datasets(ctx) -> dict[str, Any]:
         "headline": f"{len(STAGES)} stages, run in order",
         "sub": [
             "each stage writes a file, or stops the build",
-            "selection: vidkit build --only panels,clips,render",
+            "selection: truedemo build --only panels,clips,render",
         ],
     }
 
@@ -111,7 +111,7 @@ def datasets(ctx) -> dict[str, Any]:
         ("verify", "re-run the acceptance checks"),
         ("docs", "print the documentation router"),
     ]
-    cli = [{"method": "CLI", "path": f"vidkit {name}", "note": note}
+    cli = [{"method": "CLI", "path": f"truedemo {name}", "note": note}
            for name, note in commands]
 
     # -- kv_table: the environment this build actually saw ----------------- #
@@ -150,9 +150,9 @@ def datasets(ctx) -> dict[str, Any]:
     terminal = {
         "lines": [
             "$ pip install -e '.[dev]'",
-            "$ vidkit doctor examples/hello-world/video.yaml",
-            "$ vidkit plan   examples/hello-world/video.yaml",
-            "$ vidkit build  examples/hello-world/video.yaml",
+            "$ truedemo doctor examples/hello-world/video.yaml",
+            "$ truedemo plan   examples/hello-world/video.yaml",
+            "$ truedemo build  examples/hello-world/video.yaml",
             f"[ok] {len(STAGES)} stages, {len(modules)} modules, {total_loc:,} lines",
             "[ok] verify.json written next to the render",
         ]

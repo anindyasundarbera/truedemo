@@ -1,6 +1,6 @@
 """A tiny product to film — stdlib only, no network beyond localhost.
 
-`capture-kit` exists so that "vidkit can film a real download" is a claim a
+`capture-kit` exists so that "truedemo can film a real download" is a claim a
 machine can check. It is the smallest thing that behaves like a product page:
 
 * a table that is **empty when the page loads** and fills in after a beat, so a

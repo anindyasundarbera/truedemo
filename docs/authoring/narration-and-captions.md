@@ -70,7 +70,7 @@ The result is written to `OUT/narration.srt` and burned in during `render`.
 - Speech rate is roughly `length_scale × 2.5` words/sec for Piper; at `length_scale: 1.08`
   it is ≈ 2.8 words/sec (≈ 168 wpm).
 - Total runtime ≈ `total_words / 2.8` seconds. Check it against `project.min/max_seconds`
-  before rendering — `vidkit plan` prints this estimate.
+  before rendering — `truedemo plan` prints this estimate.
 
 ## Writing effective narration
 
@@ -121,7 +121,7 @@ To change the pace:
 ```bash
 # regenerate narration at a calmer pace, then rebuild
 # (edit voice.length_scale in the spec, then:)
-vidkit build SPEC --only narration,clips,concat,render
+truedemo build SPEC --only narration,clips,concat,render
 ```
 
 ## Troubleshooting

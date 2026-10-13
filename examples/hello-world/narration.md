@@ -9,7 +9,7 @@ range here can never desynchronise the render.
 
 [Title card.]
 
-**vidkit turns a plain spec into a narrated, captioned video. Here is the smallest complete build.**
+**truedemo turns a plain spec into a narrated, captioned video. Here is the smallest complete build.**
 
 ## Scene 1 — What a spec is · 0:06–0:17
 
@@ -21,13 +21,13 @@ range here can never desynchronise the render.
 
 [Prose panel.]
 
-**A provider is a module beside the spec. It supplies the numbers each panel is drawn from. This cut is about the window 7 September 2026 to 6 October 2026, and this provider counts the vidkit source tree at build time, so every figure you are about to see is measured, not invented.**
+**A provider is a module beside the spec. It supplies the numbers each panel is drawn from. This cut is about the window 7 September 2026 to 6 October 2026, and this provider counts the truedemo source tree at build time, so every figure you are about to see is measured, not invented.**
 
 ## Scene 3 — The shape of the code · 0:31–0:42
 
 [Line chart then bar chart of module sizes.]
 
-**These are the modules that make up vidkit, sorted by size. They are counted, not estimated — the bar chart is the same data the line chart draws.**
+**These are the modules that make up truedemo, sorted by size. They are counted, not estimated — the bar chart is the same data the line chart draws.**
 
 ## Scene 4 — The pipeline · 0:42–0:56
 
@@ -47,7 +47,7 @@ range here can never desynchronise the render.
 
 **This is the whole workflow. Install, then doctor, plan, build. The build prints a report and leaves the mp4, the captions, and the verification beside it.**
 
-## Scene 7 — That is vidkit · 1:20–1:27
+## Scene 7 — That is truedemo · 1:20–1:27
 
 [End card.]
 

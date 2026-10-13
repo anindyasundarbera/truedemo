@@ -1,4 +1,4 @@
-"""Tests for the machine-readable CLI: ``vidkit run`` and ``--json`` (R-G2).
+"""Tests for the machine-readable CLI: ``truedemo run`` and ``--json`` (R-G2).
 
 The contract these tests hold to: stdout carries the manifest and nothing else — not
 a stray progress line, not a warning — so a caller can pipe it straight into ``jq``.
@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from vidkit import cli
+from truedemo import cli
 
 REPO = Path(__file__).resolve().parents[1]
 EXAMPLE = str(REPO / "examples" / "hello-world" / "video.yaml")
@@ -102,7 +102,7 @@ def test_progress_lines_go_to_stderr_not_stdout(capsys):
 
 
 def test_the_flags_are_accepted_after_the_verb_too(capsys):
-    """A user types `vidkit plan SPEC --json`, not only `vidkit --json plan SPEC`."""
+    """A user types `truedemo plan SPEC --json`, not only `truedemo --json plan SPEC`."""
     code, out, _ = call(capsys, "plan", EXAMPLE, "--json")
 
     assert (code, out["ok"]) == (0, True)
@@ -177,7 +177,7 @@ def test_plain_plan_still_prints_prose(capsys):
     text = capsys.readouterr().out
 
     assert code == 0
-    assert text.startswith("vidkit hello world")
+    assert text.startswith("truedemo hello world")
     assert "  scenes:" in text
 
 
@@ -194,11 +194,11 @@ def test_every_advertised_verb_is_actually_dispatched(capsys):
     advertised = set()
     for line in usage.splitlines():
         parts = line.strip().split()
-        if len(parts) >= 2 and parts[0] == "vidkit" and not parts[1].startswith("["):
+        if len(parts) >= 2 and parts[0] == "truedemo" and not parts[1].startswith("["):
             advertised.add(parts[1])
     assert advertised == set(cli._COMMAND_ACTION) | {"run", "auth", "docs"}, advertised
 
-    source = (REPO / "vidkit" / "cli.py").read_text()
+    source = (REPO / "truedemo" / "cli.py").read_text()
     for verb in sorted(advertised - {"run", "auth", "docs"}):
         assert f'args.cmd == "{verb}"' in source, f"{verb} is advertised but not dispatched"
 
@@ -214,8 +214,8 @@ def test_plain_provenance_verb_prints_the_build_record(capsys, tmp_path):
     text = capsys.readouterr().out
 
     assert code == 0
-    import vidkit
-    assert text.startswith(f"vidkit {vidkit.__version__} built build at")
+    import truedemo
+    assert text.startswith(f"truedemo {truedemo.__version__} built build at")
     assert text.count("spec hash") == 1
     assert "[yes] ffmpeg" in text or "[NO ] ffmpeg" in text
 

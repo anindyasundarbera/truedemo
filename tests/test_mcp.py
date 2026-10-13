@@ -16,8 +16,8 @@ from pathlib import Path
 import pytest
 from conftest import arun, mcp_resource_template_uri, mcp_resource_text, mcp_tool_text
 
-from vidkit import mcp_server as m
-from vidkit.errors import ToolError
+from truedemo import mcp_server as m
+from truedemo.errors import ToolError
 
 EXAMPLE = Path(__file__).resolve().parents[1] / "examples" / "hello-world" / "video.yaml"
 
@@ -81,7 +81,7 @@ def test_docs_tool_index_and_named():
 def test_docs_tool_routes_by_module():
     # bare stems resolve regardless of module folder
     assert m.tool_docs("concepts").startswith("# Concepts")
-    assert m.tool_docs("mcp-server").startswith("# vidkit as an MCP server")
+    assert m.tool_docs("mcp-server").startswith("# truedemo as an MCP server")
     assert m.tool_docs("provenance").startswith("# Provenance")
     # module-qualified names resolve too
     assert m.tool_docs("authoring/spec-reference").startswith("# Spec reference")
@@ -197,7 +197,7 @@ def test_verify_report_tool_missing_file(tmp_path):
 @pytest.mark.needs_render
 def test_provenance_tool_reads_what_build_wrote(tmp_path):
     """The MCP surface answers "which build is this?" from the file, not from a wish."""
-    from vidkit.job import run_job
+    from truedemo.job import run_job
 
     built = run_job("build", story=str(EXAMPLE), out=str(tmp_path))
     got = call(m.tool_provenance, str(EXAMPLE), str(tmp_path))
@@ -224,13 +224,13 @@ def test_provenance_tool_before_a_build_refuses_with_a_reason(tmp_path):
 
 
 def test_actions_tool_and_the_job_module_agree():
-    from vidkit.job import actions_help
+    from truedemo.job import actions_help
 
     assert m.tool_actions()["actions"] == actions_help()
 
 
 def test_default_spec_prefers_example():
-    # From the vidkit root, the example spec is the default. Assert the intent
+    # From the truedemo root, the example spec is the default. Assert the intent
     # (a resolvable spec) rather than a specific slug: the repo may ship more
     # than one example, and the pick is alphabetical by design.
     import os
@@ -297,10 +297,10 @@ def test_build_server_registers_toolset():
         return [t.name for t in tools]
 
     names = arun(go)
-    assert {"vidkit_run", "vidkit_actions", "vidkit_init", "vidkit_capture_plan",
-            "vidkit_doctor", "vidkit_plan", "vidkit_build", "vidkit_verify",
-            "vidkit_provenance", "vidkit_docs", "vidkit_docs_index",
-            "vidkit_panel_kinds"} <= set(names)
+    assert {"truedemo_run", "truedemo_actions", "truedemo_init", "truedemo_capture_plan",
+            "truedemo_doctor", "truedemo_plan", "truedemo_build", "truedemo_verify",
+            "truedemo_provenance", "truedemo_docs", "truedemo_docs_index",
+            "truedemo_panel_kinds"} <= set(names)
     # The studio verbs. A sitting is looked at, decided about, and done again, so
     # each of these does one step of that and writes down what happened.
     assert {"session_open", "session_list", "session_status", "session_close",
@@ -324,16 +324,16 @@ def test_build_server_resources():
         return [str(r.uri) for r in res], [mcp_resource_template_uri(t) for t in tmpl]
 
     resources, templates = arun(go)
-    assert "vidkit://actions" in resources
-    assert "vidkit://docs/index" in resources
-    assert "vidkit://docs/modules" in resources
-    assert "vidkit://docs/{name}" in templates
+    assert "truedemo://actions" in resources
+    assert "truedemo://docs/index" in resources
+    assert "truedemo://docs/modules" in resources
+    assert "truedemo://docs/{name}" in templates
     # A session's state has to be readable as a resource, not only as a tool call:
     # a client that can *address* the record can put it in a prompt without a round
     # trip, and the resource is served from the same function the tool is.
-    assert "vidkit://sessions/{session}/status" in templates
-    assert "vidkit://sessions/{session}/takes" in templates
-    assert "vidkit://sessions/{session}/report" in templates
+    assert "truedemo://sessions/{session}/status" in templates
+    assert "truedemo://sessions/{session}/takes" in templates
+    assert "truedemo://sessions/{session}/report" in templates
 
 
 @pytest.mark.needs_mcp
@@ -367,13 +367,13 @@ def test_session_resources_serve_the_same_answer_as_the_tools(tmp_path):
     # The record is not the output. `out_dir` is where the film lands; `record_dir` is
     # the transcript of the sitting, and a session that named the same directory for
     # both would be reporting a fact about neither.
-    assert opened["record_dir"] == str(out.resolve() / ".vidkit" / "sessions")
+    assert opened["record_dir"] == str(out.resolve() / ".truedemo" / "sessions")
     assert opened["record_dir"] != opened["out_dir"]
-    assert (out / ".vidkit" / "sessions" / f"{opened['id']}.json").is_file()
+    assert (out / ".truedemo" / "sessions" / f"{opened['id']}.json").is_file()
     assert opened["spec"] == str((spec / "video.yaml").resolve())
 
     listing = m.tool_session_list(out=str(out))
-    assert listing["sessions_dir"] == str(out.resolve() / ".vidkit" / "sessions")
+    assert listing["sessions_dir"] == str(out.resolve() / ".truedemo" / "sessions")
     assert [s["id"] for s in listing["sessions"]] == [opened["id"]]
 
     m.set_project(out)
@@ -382,7 +382,7 @@ def test_session_resources_serve_the_same_answer_as_the_tools(tmp_path):
 
     async def go():
         return mcp_resource_text(await server.read_resource(
-            f"vidkit://sessions/{session_id}/status"))
+            f"truedemo://sessions/{session_id}/status"))
 
     served = json.loads(arun(go))
     direct = call(m.tool_session_status, session_id, str(out))
@@ -397,7 +397,7 @@ def test_server_tool_call_roundtrip():
     server = m.build_server()
 
     async def go():
-        out = await server.call_tool("vidkit_panel_kinds", {})
+        out = await server.call_tool("truedemo_panel_kinds", {})
         return mcp_tool_text(out)
 
     text = arun(go)
@@ -409,7 +409,7 @@ def test_server_tool_call_roundtrip():
 # --------------------------------------------------------------------------- #
 def test_run_tool_bounds_the_call_with_a_timeout(monkeypatch):
     """A tool call has no Ctrl-C, so an overrun must come back as a manifest."""
-    from vidkit import job
+    from truedemo import job
 
     def _everlasting(*a, **kw):
         time.sleep(5)
@@ -424,7 +424,7 @@ def test_run_tool_bounds_the_call_with_a_timeout(monkeypatch):
 
 
 def test_a_timeout_of_zero_means_no_ceiling(monkeypatch):
-    from vidkit import job
+    from truedemo import job
 
     monkeypatch.setattr(job, "run_job", lambda *a, **kw: {"ok": True})
     assert m.tool_run("plan", story="x", timeout=0)["ok"] is True
@@ -445,7 +445,7 @@ def test_run_tool_answers_a_refusal_without_raising():
 
 
 def test_run_tool_reaches_the_whole_vocabulary():
-    from vidkit.job import ACTIONS
+    from truedemo.job import ACTIONS
 
     listed = {row["action"] for row in m.tool_actions()["actions"]}
     assert listed == set(ACTIONS)
@@ -494,7 +494,7 @@ def test_run_resource_is_the_action_list():
     server = m.build_server()
 
     async def go():
-        return await server.read_resource("vidkit://actions")
+        return await server.read_resource("truedemo://actions")
 
     out = arun(go)
     text = mcp_resource_text(out)
@@ -508,7 +508,7 @@ def test_run_tool_is_callable_over_the_server():
     server = m.build_server()
 
     async def go():
-        out = await server.call_tool("vidkit_run", {"action": "doctor"})
+        out = await server.call_tool("truedemo_run", {"action": "doctor"})
         return mcp_tool_text(out)
 
     text = arun(go)
@@ -559,7 +559,7 @@ def test_every_registration_closure_awaits_exactly_what_it_wraps():
 
     This is the defect that put a JSON *string* — `'<coroutine object
     tool_browser_shot at 0x…>'` — on the wire, and then the same defect inverted, where
-    `vidkit://sessions/{s}/status` awaited the *sync* `tool_session_status` and FastMCP
+    `truedemo://sessions/{s}/status` awaited the *sync* `tool_session_status` and FastMCP
     answered `'dict' object can't be awaited`. Neither is visible to a normal test: the
     client gets a `str` either way. So the invariant is checked against the source.
     """

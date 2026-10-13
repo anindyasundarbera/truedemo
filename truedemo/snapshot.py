@@ -6,7 +6,7 @@ effect, without asking the provider for anything again. It is also exactly the
 kind of convenience that can quietly lie: re-render from a snapshot taken for a
 *different window and the video says "the last 90 days" over 30 days of data.
 
-So the snapshot is not just files in a folder. Beside them vidkit writes
+So the snapshot is not just files in a folder. Beside them truedemo writes
 ``data/_snapshot.json`` recording **what request produced them** — the provider,
 a hash of the provider's source, and the resolved window — together with a hash
 of each dataset. A stage that is about to reuse them compares its own request

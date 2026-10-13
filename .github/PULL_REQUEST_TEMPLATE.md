@@ -14,7 +14,7 @@ The exact commands and their results, per the evidence rule in `AGENTS.md`:
 
 ```bash
 python3 -m pytest tests -q        # or the targeted subset
-vidkit build examples/hello-world/video.yaml   # if the pipeline changed
+truedemo build examples/hello-world/video.yaml   # if the pipeline changed
 ```
 
 ## Docs

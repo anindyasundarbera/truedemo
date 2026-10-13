@@ -207,7 +207,7 @@ and the accepted spellings.
 
 ## `provider`
 
-Names a Python module in `ROOT` (with or without `.py`). If set, vidkit imports it and
+Names a Python module in `ROOT` (with or without `.py`). If set, truedemo imports it and
 calls, when present: `secrets()`, `register()`, `datasets(ctx)`, `panels()`, `stills(ctx)`.
 
 Two spellings are accepted. The short one is enough when the module needs no credentials:
@@ -216,7 +216,7 @@ Two spellings are accepted. The short one is enough when the module needs no cre
 provider: provider
 ```
 
-The long one declares what the provider reads from the environment, so `vidkit doctor` can
+The long one declares what the provider reads from the environment, so `truedemo doctor` can
 report a missing variable before a render starts:
 
 | Field | Type | Default | Meaning |
@@ -233,7 +233,7 @@ provider:
     ACME_REGION: false
 ```
 
-`write_back: true` is refused when the spec is loaded: vidkit is **read-only by contract**,
+`write_back: true` is refused when the spec is loaded: truedemo is **read-only by contract**,
 so a provider may read from a source system and report on it, and nothing else. Secret values
 are read from the environment only and are masked in everything the engine prints. When a
 source is unreachable a provider raises `SourceUnavailable` and returns a declared fallback,
@@ -261,14 +261,14 @@ See the [capture guide](../capture/capture-guide.md) for tactics and worked exam
 | `wait_until` | — | string | `"networkidle"` | Playwright load state |
 | `wait_after` | — | number | `0.0` | extra settle time after actions |
 | `full_page` | — | bool | `false` | full-page vs. viewport screenshot |
-| `storage_state` | — | path | — | a session recorded with `vidkit auth` |
+| `storage_state` | — | path | — | a session recorded with `truedemo auth` |
 | `allow_login` | — | bool | `false` | declare that filming a login form *is* the scene |
 | `deterministic` | — | bool | `true` | pin clock, locale, timezone, motion, randomness |
 | `take` | — | int | `1` | which take to record, and promote |
 
 **Exactly one** of `url:` / `artifact:` is required; they are mutually exclusive.
 
-**Load-time refusals.** All of these are reported by `vidkit plan` before a browser opens:
+**Load-time refusals.** All of these are reported by `truedemo plan` before a browser opens:
 two captures with the same name; `take < 1`; `artifact:` together with `url:`; neither
 `url:` nor `artifact:`; an `artifact:` that no `download` in the spec produces; a
 `storage_state:` file that does not exist; a `save_as:` containing a path separator; and a
@@ -481,7 +481,7 @@ scenes:
 
 A shot's `seconds:` wins over its share of the scene. The sum of a scene's shots may not
 exceed the scene's own length. `verify.json` reports which rule the clock used, as
-`facts.timing_source` — `"narration"` or `"spec"` — and `vidkit plan` computes its
+`facts.timing_source` — `"narration"` or `"spec"` — and `truedemo plan` computes its
 estimates with the renderer's own rule so the plan cannot disagree with the build.
 
 ### `shots[]`

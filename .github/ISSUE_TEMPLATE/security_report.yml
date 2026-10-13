@@ -1,6 +1,6 @@
 ---
 name: Security report
-about: A vulnerability in vidkit (do NOT use the public issue tracker — see SECURITY.md)
+about: A vulnerability in truedemo (do NOT use the public issue tracker — see SECURITY.md)
 title: "[security] "
 labels: security
 assignees: []

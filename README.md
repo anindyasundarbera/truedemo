@@ -1,6 +1,6 @@
-# vidkit
+# truedemo
 
-**vidkit creates narrated, captioned demo videos of software.** Point it at a real browser UI
+**truedemo creates narrated, captioned demo videos of software.** Point it at a real browser UI
 or a real terminal command, give it your own data, and describe the film in a small
 declarative spec — it drives the software, records what it does, draws your data onto charts,
 writes the narration, and assembles the result into an `.mp4` with an `.srt`. Then it
@@ -17,7 +17,7 @@ a script, record a voice-over, cut the takes together, and type the numbers onto
 It works, and it does not scale. Change the product and the video is stale; change the
 numbers and the video is a lie that nobody notices until a customer does.
 
-vidkit automates that whole loop from a declarative spec, and — the part that makes it worth
+truedemo automates that whole loop from a declarative spec, and — the part that makes it worth
 using — refuses to let the result be dishonest. Every frame comes from something real, and a
 report re-opens the render to check the claims actually held.
 
@@ -27,7 +27,7 @@ out of date, and for agents that must produce one without a human watching the s
 **It films software you can drive on screen** — a web UI in a real browser, a command in a
 real terminal, or a document the software produces. It does not capture a native desktop GUI,
 invent a UI, or act as a video editor: there is no timeline to drag and no keyframes to set.
-You declare shots, and vidkit builds the film and checks it.
+You declare shots, and truedemo builds the film and checks it.
 
 > New here? [**A tour: what happens when you build**](docs/guides/tour.md) is the orientation —
 > what a spec is, what the ten stages do, and what can be on screen.
@@ -38,13 +38,13 @@ Thirty seconds, with no browser, no network, and no voice model — every number
 example is counted from the files in this repository at the moment of the build:
 
 ```bash
-git clone https://github.com/anindyasundarbera/vidkit
-cd vidkit
+git clone https://github.com/anindyasundarbera/truedemo
+cd truedemo
 pip install -e ".[dev]"     # ffmpeg and rsvg-convert are required; see Install below
 
-vidkit doctor examples/hello-world/video.yaml   # is this machine ready?
-vidkit plan   examples/hello-world/video.yaml   # scenes, timings, guards — render nothing
-vidkit build  examples/hello-world/video.yaml   # → hello-world.mp4 + .srt + verify.json
+truedemo doctor examples/hello-world/video.yaml   # is this machine ready?
+truedemo plan   examples/hello-world/video.yaml   # scenes, timings, guards — render nothing
+truedemo build  examples/hello-world/video.yaml   # → hello-world.mp4 + .srt + verify.json
 ```
 
 `plan` is the cheap one: it prints the whole scene plan and the estimated runtime without
@@ -104,7 +104,7 @@ outputs, and failure conditions.
 pip install -e .              # the engine — YAML/JSON specs
 pip install -e ".[capture]"   # + Playwright, to film a real browser UI
 pip install -e ".[tts]"       # + Piper, for a local voice
-pip install -e ".[mcp]"       # + the MCP server (`vidkit-mcp`)
+pip install -e ".[mcp]"       # + the MCP server (`truedemo-mcp`)
 pip install -e ".[dev]"       # + pytest
 ```
 
@@ -113,7 +113,7 @@ Required external binaries are **`ffmpeg`** and **`rsvg-convert`** (Debian/Ubunt
 ffmpeg when absent), `pdftoppm`/`gs` (for filming PDFs), Chromium (Playwright), and a Piper
 voice model. The extras are additive and independent — the core suite needs none of them.
 
-`vidkit doctor` reports exactly which of these are present, and names the **missing rung**
+`truedemo doctor` reports exactly which of these are present, and names the **missing rung**
 rather than a bare "Docker: unavailable".
 
 ## The spec and your data
@@ -147,7 +147,7 @@ spec can run — all project-specific knowledge lives there, which is what keeps
 generic:
 
 ```python
-from vidkit import panels as panel_lib
+from truedemo import panels as panel_lib
 
 def register():     panel_lib.register("my_chart", my_chart_renderer)
 def datasets(ctx):  return {"trend": fetch_trend(), "totals": compute_totals()}
@@ -161,7 +161,7 @@ ship with the engine. See the [provider guide](docs/authoring/provider-guide.md)
 
 ## The studio — driving it from an agent
 
-`vidkit-mcp` runs **separately** from the consumer's repo: the story stays in your repo, the
+`truedemo-mcp` runs **separately** from the consumer's repo: the story stays in your repo, the
 tool stays a tool. It is session-oriented — an agent opens a sitting, pokes at a live
 environment, tries several takes, keeps the best, builds, and reads the report back:
 
@@ -182,7 +182,7 @@ is in the [MCP server](docs/operations/mcp-server.md) page.
 For a transport-independent integration, the same work is available as a job:
 
 ```bash
-vidkit --json run plan --story examples/hello-world     # {action, story, out} → one manifest
+truedemo --json run plan --story examples/hello-world     # {action, story, out} → one manifest
 ```
 
 ## Verification — the part that makes it worth using
@@ -240,7 +240,7 @@ graph, and the typed seams between them.
 
 Docs are modular and machine-routable. Start at [`docs/README.md`](docs/README.md), or read
 the route table in [`docs/modules.yaml`](docs/modules.yaml) — 26 routes across 7 modules.
-An agent can fetch any doc by bare name over MCP (`vidkit_docs name="tour"`).
+An agent can fetch any doc by bare name over MCP (`truedemo_docs name="tour"`).
 
 For the project's own record, see [`docs/plan/`](docs/plan/): [PLAN](docs/plan/PLAN.md) (now and
 next), [HISTORY](docs/plan/HISTORY.md) (what happened, with evidence),

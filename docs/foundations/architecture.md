@@ -1,14 +1,14 @@
 # Architecture
 
-This document is for someone **modifying vidkit** or adding an extension point. It maps the
+This document is for someone **modifying truedemo** or adding an extension point. It maps the
 modules, the data types, and the seams.
 
 ## Module map
 
 ```
-vidkit/
+truedemo/
   __init__.py     version + error re-exports
-  errors.py       VidkitError, SpecError, ToolError, ProviderError
+  errors.py       TruedemoError, SpecError, ToolError, ProviderError
   spec.py         Project, Voice, Narration, Shot, Scene, Assert, Action, Capture, Chart,
                   Guard, Spec; load_spec(); _validate()
   context.py      Context — paths, Shell, Ffmpeg, Rsvg, logging
@@ -106,7 +106,7 @@ the wrappers unit-testable). `Ffmpeg` and `Rsvg` build on it.
 3. **Captions are asserted faithful and readable.** `build_srt(strict=True)` must keep both
    assertions. A "fix" that disables them is a regression.
 4. **Captures assert before screenshotting.** The order in `capture_one` is load-bearing.
-5. **The provider is the only place with domain knowledge.** Keep vidkit's own modules
+5. **The provider is the only place with domain knowledge.** Keep truedemo's own modules
    domain-free.
 6. **No writes to source systems from the toolkit.** Read-only by contract.
 7. **`svg.text` escapes by default.** Do not reintroduce manual escaping.
@@ -120,8 +120,8 @@ the wrappers unit-testable). `Ffmpeg` and `Rsvg` build on it.
 
 ## Error discipline
 
-All errors derive from `VidkitError`. The CLI catches `VidkitError` and prints
-`vidkit: error: <msg>` with exit `1`. Unexpected exceptions are not caught — they surface as
+All errors derive from `TruedemoError`. The CLI catches `TruedemoError` and prints
+`truedemo: error: <msg>` with exit `1`. Unexpected exceptions are not caught — they surface as
 tracebacks (a bug, not a user error).
 
 ## Testing strategy
@@ -135,15 +135,15 @@ tracebacks (a bug, not a user error).
 To add a custom panel kind in a test:
 
 ```python
-from vidkit import panels
-from vidkit.svg import PanelDoc, text
+from truedemo import panels
+from truedemo.svg import PanelDoc, text
 panels.register("t", lambda d, o, doc: doc.add(text(1, 1, "x")))
 assert "t" in panels.kinds()
 ```
 
 ## Size and dependency budget
 
-Keep vidkit small and local: stdlib + optional `PyYAML`, `playwright`, `piper-tts`. No web
+Keep truedemo small and local: stdlib + optional `PyYAML`, `playwright`, `piper-tts`. No web
 framework, no ORM, no cloud SDK. If a change would add a heavy dependency, prefer putting it
 behind an optional import with a graceful fallback (as capture/TTS do).
 

@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Something vidkit does is wrong, or fails when it should not
+about: Something truedemo does is wrong, or fails when it should not
 title: "[bug] "
 labels: bug
 assignees: []
@@ -17,7 +17,7 @@ What should have happened instead.
 ## Reproduction
 
 The smallest spec, provider, and command that shows it. A `video.yaml`
-fragment plus the `vidkit` command line is ideal; a full story folder is
+fragment plus the `truedemo` command line is ideal; a full story folder is
 welcome if that is the minimum.
 
 ```yaml
@@ -25,7 +25,7 @@ welcome if that is the minimum.
 ```
 
 ```bash
-vidkit <verb> <spec>
+truedemo <verb> <spec>
 ```
 
 ## Evidence
@@ -36,7 +36,7 @@ the command and its output is.
 
 ## Environment
 
-- vidkit version (`vidkit --version`)
+- truedemo version (`truedemo --version`)
 - Python version
 - OS, and whether `ffmpeg` / `rsvg-convert` / `docker` / `bwrap` / Chromium
-  are present (`vidkit doctor` prints this)
+  are present (`truedemo doctor` prints this)

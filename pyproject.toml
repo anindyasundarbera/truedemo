@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "vidkit"
 dynamic = ["version"]
-description = "A demo video is a claim about a system. Declarative spec → narrated, captioned screencast, reopened and verified — drivable from a shell or an agent over MCP."
+description = "Create narrated, captioned demo videos of software — a real browser UI, a real terminal command, or a document it produces — from a declarative spec plus your own data; then reopen the .mp4 and verify every promise the spec made. Runs from a shell or an agent over MCP."
 readme = "README.md"
 requires-python = ">=3.10,<3.15"
 license = "Apache-2.0"

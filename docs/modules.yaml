@@ -66,6 +66,7 @@ modules:
       - {file: operations/cli-reference.md, title: CLI reference, summary: Commands, flags, exit codes.}
       - {file: operations/job-contract.md, title: Job contract, summary: The action/story/out call, the artifact manifest, refusals, exit codes, progress.}
       - {file: operations/mcp-server.md, title: MCP server, summary: Tools, resources, transports, client wiring.}
+      - {file: operations/studio-reference.md, title: The studio, summary: The session workflow — takes, selections, budgets, and how an agent drives a build.}
       - {file: operations/troubleshooting.md, title: Troubleshooting, summary: Error text to cause to fix.}
       - {file: operations/extracting-to-new-repo.md, title: Extracting to a new repo, summary: Standalone packaging checklist.}
 
@@ -75,6 +76,7 @@ modules:
     audience: both
     route: docs/guides/<doc>
     docs:
+      - {file: guides/tour.md, title: A tour, summary: What a build does, stage by stage — the newcomer's orientation to vidkit.}
       - {file: guides/first-video.md, title: Your first video, summary: Fresh clone to a verified mp4, by CLI and by MCP, using only the docs.}
       - {file: guides/recipes.md, title: Recipes, summary: Known-good patterns for common video tasks.}
 

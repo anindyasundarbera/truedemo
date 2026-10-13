@@ -1955,3 +1955,108 @@ ruff check vidkit tests               -> All checks passed!
 python3 -m pytest tests/test_studio.py::...photographed... -> 5/5 passed (was flaky)
 mypy vidkit                           -> 48 errors (advisory, non-blocking)
 ```
+
+---
+
+## 2026-10-13 — The front door, again: a landing-page README and a `docs/` split
+
+**Branch** `docs/readme-reframe` (PR #30), off `main` = `ece675e`.
+
+The 2026-10-08 pass gave the README an *argument*; this one gave it a *front door*. The
+feedback was that the README read as if written for someone who already knew the project:
+it opened on a thesis ("a demo video is a claim about a system…") and then went straight into
+a ten-stage table and the full spec schema. A newcomer met the vocabulary before the premise.
+
+### A landing page, not a manual
+
+`README.md` was reordered so the first screen answers *what is this / who is it for / show me
+it running*, and the deep reference material was pushed down or moved into `docs/`:
+
+| Surface | Before | After |
+|---|---|---|
+| Opening | A thesis about demo videos being unchecked claims. | A plain one-line description, then **What it is** (scenario, "it is for…", "it is not…"), then **See it run** moved up from the middle. |
+| The argument | `## The problem` + `## The idea`, led the file. | Merged into `## Why it is honest`, demoted to *after* the reader knows what the tool is. Failure-mode list and the "declaration is not a measurement" rule preserved verbatim. |
+| Pipeline | A 10-row stage table in the README. | A one-line stage list + the master-clock rule, pointing at the new tour and `foundations/pipeline.md`. |
+| Spec, captures, panels, provider | Four full sections with schemas and field tables. | One condensed **The spec and your data** section with the key list and a provider snippet, pointing at the spec reference, tour, and provider/panels docs. |
+| Studio | The full six-group tool table. | The session diagram, the counts, and the take/budget rule, pointing at the new studio reference. |
+| Verification | The full 20-check table. | A 7-row sample + the count, pointing at `verification.md`. |
+| Module map | A 29-line inline tree. | A pointer to `foundations/architecture.md`, which already carries the tree and the dependency graph. |
+
+Every fact removed from the README was verified to already exist **in richer form** in a
+`docs/` page before it was dropped — the spec schema in
+[spec-reference](../authoring/spec-reference.md), the artifact and sign-in rules in
+[capture-guide](../capture/capture-guide.md), the 20-check table in
+[verification](../verification/verification.md), the module map in
+[architecture](../foundations/architecture.md).
+
+### What moved, not just pointed at
+
+The README's deep material was **split**, so anything a newcomer still needs is reachable:
+
+| New doc | Why it exists |
+|---|---|
+| [`docs/guides/tour.md`](../guides/tour.md) | The orientation the README used to be: what a build does, the ten stages, what can be on screen, and where to go next. Registered in `guides/` and linked from the README's first screen and from `docs/README.md`'s "First contact (human)" line. |
+| [`docs/operations/studio-reference.md`](../operations/studio-reference.md) | The studio workflow the README carried (session lifecycle, six tool groups, takes, budgets) — none of which appeared in any `docs/` page. Registered in `operations/` and cross-linked with `mcp-server.md`. |
+
+The whole-spec `yaml` overview the README dropped was **added** to
+`spec-reference.md` as a new opening section, so the at-a-glance key list survives in the
+reference rather than only in the README. The route table grew from **24 to 26 routes**
+across the same seven modules; `AGENTS.md` §6 was updated to match.
+
+### `pyproject.toml` follows the About, and the scope claim is checked
+
+`project.description` still carried the 2026-10-08 thesis wording ("A demo video is a claim
+about a system…"). It was rewritten to match the README's opening, leading with the purpose
+rather than the mechanism, and then **three claims were verified against the code** before
+being kept:
+
+| Claim | Verdict | Evidence |
+|---|---|---|
+| 10 stages, 11 panel kinds, 34 tools, 7 resources, 14 spec keys | true | `assembler.STAGES`, `panels.kinds()`, AST scan of `mcp_server.py`, `_SPEC_KEYS` |
+| 29 engine modules | true | `vidkit/*.py` minus `__init__.py` (matches `AGENTS.md` §6 and the example's own measured stat) |
+| "a broken promise fails the build" | true | `job.py:506` `manifest["ok"] = report.ok`; `cli.py:282` returns exit **2** on a `verification` failure |
+| camera move is *measured*, not declared | true | `verify.py` `_measure_move` decodes real frames; an unmeasured move (`mae is None`) **fails** the check |
+| "of **any** software" | **false** | no desktop-GUI capture exists — `grep -rniE "pyautogui\|import mss\|Xlib\|xdotool"` finds nothing. vidkit films what it can *drive on screen*: a Playwright browser, a PTY command, or a produced file. |
+| "**twenty** checks" | true, but the first count was wrong | An AST scan of `verify.py` finds **20** distinct check kinds. A first `grep` missed the two parameterized f-string checks (`banned phrase absent: {}`, `required phrase present: {}`) and reported 18 — the corrected count is 20. A build still runs only a **subset** (13 / 14 / 11 / 11 across the four examples). |
+
+One false claim and one nuance were corrected. The copy now says "demo videos of software",
+names the three things it can film, and states the check count as *twenty kinds, of which a
+build runs the ones its spec can break*. The "twenty" figure that was in the README all along
+turned out to be right; the miscount was this session's, and it is left in the record because
+the rule is that a claim is verified, not recalled.
+
+> Create narrated, captioned demo videos of software — a real browser UI, a real terminal
+> command, or a document it produces — from a declarative spec plus your own data; then
+> reopen the `.mp4` and verify every promise the spec made. Runs from a shell or an agent
+> over MCP.
+
+The installed distribution metadata does not change until the next `pip install -e .`
+(the `Summary` field is generated at install time by setuptools), which is expected and
+harmless: `pyproject.toml` is the source of truth.
+
+### Evidence
+
+```
+python3 -m pytest tests/test_hygiene.py -q                         -> 66 passed
+python3 -m pytest tests/test_mcp.py -k docs -q                     -> 5 passed
+vidkit_docs_index() routes                                         -> 26 (was 24)
+every registered doc exists on disk                                -> none missing
+relative links in README.md, tour.md, studio-reference.md          -> none broken
+vidkit_docs("tour") / ("studio-reference")                         -> resolve by bare stem
+```
+
+The full suite was not re-run for this change: it is documentation-only (Markdown plus the
+`docs/modules.yaml` route entry and the `pyproject.toml` description), no Python changed, and
+the two suites that read the docs structure were run directly. A full run belongs to CI.
+
+### A defect in this entry, and the rule it broke
+
+The first draft of this entry claimed `**Branch** docs/readme-reframe (PR #16), off main =
+ddfac1c`. Every part of it was wrong: no `docs/readme-reframe` branch existed, and **PR #16 is
+the unrelated `docs/readme-history` from 2026-10-08**. The header was pattern-matched off the
+neighbouring entries instead of being read from git — which is exactly the "recollection, not
+verification" failure that §5.1 of [AGENTS.md](../../AGENTS.md) exists to prevent, committed
+in the same session whose subject was verifying claims. The header is corrected above
+(`PR #30`), and the number is read back from `gh` after the push rather than assumed in
+advance — which is the only way it was ever going to be right.
+

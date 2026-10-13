@@ -28,15 +28,15 @@ docs/
 | **[authoring/](authoring/)** | write or change a `video.yaml`, `provider.py`, panel, or script | [spec-reference](authoring/spec-reference.md) → [provider-guide](authoring/provider-guide.md) → [panels-reference](authoring/panels-reference.md) → [narration-and-captions](authoring/narration-and-captions.md) |
 | **[capture/](capture/)** | script a screen recording and assert the live state | [capture-guide](capture/capture-guide.md) |
 | **[verification/](verification/)** | understand the checks, `verify.json`, and `provenance.json` | [verification](verification/verification.md) → [provenance](verification/provenance.md) |
-| **[operations/](operations/)** | run, diagnose, expose, or extract the tool | [cli-reference](operations/cli-reference.md) → [job-contract](operations/job-contract.md) → [mcp-server](operations/mcp-server.md) → [troubleshooting](operations/troubleshooting.md) → [extracting-to-new-repo](operations/extracting-to-new-repo.md) |
-| **[guides/](guides/)** | build a first video, or copy a known-good pattern | [first-video](guides/first-video.md) → [recipes](guides/recipes.md) |
+| **[operations/](operations/)** | run, diagnose, expose, or extract the tool | [cli-reference](operations/cli-reference.md) → [job-contract](operations/job-contract.md) → [mcp-server](operations/mcp-server.md) → [studio-reference](operations/studio-reference.md) → [troubleshooting](operations/troubleshooting.md) → [extracting-to-new-repo](operations/extracting-to-new-repo.md) |
+| **[guides/](guides/)** | build a first video, or copy a known-good pattern | [tour](guides/tour.md) → [first-video](guides/first-video.md) → [recipes](guides/recipes.md) |
 | **[plan/](plan/)** | know where the project is going, what already happened, and why a choice was made | [PLAN](plan/PLAN.md) → [FEATURE-ROADMAP](plan/FEATURE-ROADMAP.md) → [HISTORY](plan/HISTORY.md) → [DECISIONS](plan/DECISIONS.md) → [OPENMONTAGE](plan/OPENMONTAGE.md) |
 
 ## Routing by task
 
 | I want to… | Module → doc |
 |---|---|
-| Understand what vidkit is | [foundations/concepts.md](foundations/concepts.md) |
+| Understand what vidkit is | [guides/tour.md](guides/tour.md) |
 | Know what each pipeline stage does | [foundations/pipeline.md](foundations/pipeline.md) |
 | Modify vidkit's internals or add an extension point | [foundations/architecture.md](foundations/architecture.md) |
 | Write or validate a spec | [authoring/spec-reference.md](authoring/spec-reference.md) |
@@ -49,6 +49,7 @@ docs/
 | Go from an empty clone to a verified video | [guides/first-video.md](guides/first-video.md) |
 | Run it from a shell | [operations/cli-reference.md](operations/cli-reference.md) |
 | Drive it from an IDE/agent (MCP) | [operations/mcp-server.md](operations/mcp-server.md) |
+| Run an agent session (takes, budgets) | [operations/studio-reference.md](operations/studio-reference.md) |
 | Drive it from a script or an agent, whichever | [operations/job-contract.md](operations/job-contract.md) |
 | Fix an error message | [operations/troubleshooting.md](operations/troubleshooting.md) |
 | Lift vidkit into its own repo | [operations/extracting-to-new-repo.md](operations/extracting-to-new-repo.md) |
@@ -57,7 +58,7 @@ docs/
 
 ## Suggested reading order
 
-- **First contact (human):** [guides/first-video](guides/first-video.md) → [foundations](foundations/) → [authoring](authoring/).
+- **First contact (human):** [guides/tour](guides/tour.md) → [guides/first-video](guides/first-video.md) → [foundations](foundations/) → [authoring](authoring/).
 - **First contact (agent):** `foundations/concepts` → `authoring/spec-reference` →
   `operations/mcp-server`, then the module for the task.
 

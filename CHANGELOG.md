@@ -310,6 +310,34 @@ report:
   unreachable: a vaguer error was raised first. The actionable message is now the one an
   author sees.
 
+### Documentation
+
+- **The README is now a landing page, not a manual.** It opens on *what vidkit is / who it
+  is for / see it running*, with the argument (the failure modes it prevents) demoted below
+  the premise, and the deep reference material — the pipeline table, the spec schema, the
+  capture/panel/provider details, the full studio tool table, and the 20-check verification
+  table — moved into `docs/` or condensed to a pointer. Every fact removed was verified to
+  already exist in richer form in a `docs/` page.
+- **`docs/guides/tour.md` (new)** — the newcomer's orientation: what `vidkit build` does, the
+  ten stages, what can be on screen, and where to read next. Linked from the README and from
+  the docs router's first-contact path.
+- **`docs/operations/studio-reference.md` (new)** — the session workflow the README carried
+  but no `docs/` page documented: the session lifecycle, the six tool groups, and the
+  take-selection and budget rules.
+- **`docs/authoring/spec-reference.md`** gained an at-a-glance section listing all fourteen
+  legal top-level keys (moved from the README), and now opens by stating the key count.
+- The doc route table grew **24 → 26 routes** (same seven modules); `AGENTS.md` §6 and the
+  docs router were updated to match.
+- **`pyproject.toml`'s `project.description` matches the README and the GitHub About.** It
+  still carried the earlier thesis wording; it now leads with the purpose — *create demo
+  videos of software* — before the mechanism, so the package summary, the README opening,
+  and the repository About are one sentence.
+- **The scope claim was corrected after verification.** "Any software" was over-broad — vidkit
+  films what it can *drive on screen* (a browser, a PTY command, a produced document), not a
+  native desktop GUI, and the copy now says so. The check count was left at **twenty** (the
+  correct figure): a build runs only those check kinds its spec can break (13 / 14 / 11 / 11
+  across the four example builds).
+
 ## [1.0.0] - 2026-10-07
 
 ### Added

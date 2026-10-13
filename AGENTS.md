@@ -457,7 +457,7 @@ Use exactly these, so they are greppable:
   prevent (defect G).
 - **Engine:** host-free. **10 stages** (`data, panels, stills, capture, exec, narration,
   clips, concat, render, verify`), **29 modules**, 11 panel kinds, **34 MCP tools**,
-  **7 resources**, docs routed across 7 modules (24 routes). M8 added a backend and a
+  **7 resources**, docs routed across 7 modules (26 routes). M8 added a backend and a
   resource lifecycle, M9 a whole movie mode, and M10 a session layer over both, **without
   adding a stage** — if a future phase needs an eleventh, that is the signal to rethink the
   design, not to append (P5).

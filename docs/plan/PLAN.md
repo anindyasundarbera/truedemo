@@ -4,7 +4,7 @@
 > For the phase-wise plan see [FEATURE-ROADMAP.md](FEATURE-ROADMAP.md). For what already
 > happened see [HISTORY.md](HISTORY.md). For why, see [DECISIONS.md](DECISIONS.md).
 >
-> Last updated: **2026-10-08** (front door rewritten).
+> Last updated: **2026-10-13** (README reframed as a landing page; docs split).
 
 ## Where we are
 
@@ -27,6 +27,15 @@ line, and the repository carries ten discoverable topics. Writing it from the co
 four false claims the docs would otherwise have repeated (tool names, the `score.src` key, a
 `session_browser` tool that does not exist, and the probe count). Recorded in
 [HISTORY.md](HISTORY.md).
+
+The **front door was then reframed** (2026-10-13, PR #30): feedback was that the README still
+read as if written for someone who already knew the project. It now opens on *what it is /
+who it is for / see it run*, with the argument demoted below the premise and the deep
+reference material moved into `docs/`. Two new docs carry the material the README had nowhere
+else to put it — [`guides/tour.md`](../guides/tour.md) (the build, stage by stage) and
+[`operations/studio-reference.md`](../operations/studio-reference.md) (the session workflow) —
+the route table grew 24 → 26, and `spec-reference.md` gained the at-a-glance key list.
+Recorded in [HISTORY.md](HISTORY.md).
 
 ## Next
 
